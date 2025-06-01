@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostalgia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/tailwind-config.js"></script>
+    <link href="/src/css/main.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Widget Container -->
+    <div id="widgetContainer" class="relative w-full h-screen">
+        <!-- Widgets will be dynamically inserted here -->
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+        <div class="flex gap-4">
+            <button id="prevBtn" class="nav-button">
+                ←
+            </button>
+            <button id="nextBtn" class="nav-button">
+                →
+            </button>
+        </div>
+    </nav>
+        <!-- Widgets will be dynamically inserted here -->
+    </div>
+
+    <script type="module" src="/src/js/main.js"></script>
+</body>
+</html>

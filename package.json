@@ -1,0 +1,27 @@
+{
+  "name": "nostalgia",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taralucieleeee/Nostalgia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/taralucieleeee/Nostalgia/issues"
+  },
+  "homepage": "https://github.com/taralucieleeee/Nostalgia#readme",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
