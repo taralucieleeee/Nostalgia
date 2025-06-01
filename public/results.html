@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Nostalgia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/tailwind-config.js"></script>
+    <link href="/src/css/main.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    
+    <!-- Local Font -->
+    <style>
+        @font-face {
+            font-family: 'HALTimezone';
+            src: url('/static/fonts/HALTimezone-Regular.ttf') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        /* Apply the font to the entire page */
+        body {
+            font-family: 'HALTimezone';
+            font-weight: 300;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Ensure HAL Timezone uses exact weight without browser bolding */
+        .hal-timezone {
+            font-family: 'HALTimezone', sans-serif;
+            font-weight: 300 !important;
+            font-synthesis: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Results button styling */
+        .results-btn {
+            border-top: 2px solid white !important;
+            border-bottom: 2px solid white !important;
+            border-left: none !important;
+            border-right: none !important;
+            background-color: transparent !important;
+            color: white !important;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Winner state */
+        .results-btn.winner {
+            background-color: white !important;
+            color: #A06C45 !important;
+        }
+        
+        /* Button content container */
+        .btn-content {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: radial-gradient(ellipse at center, rgba(56, 25, 0, 0.5) 0%, rgba(59, 27, 0, 0) 80%);
+            padding: 32px 48px;
+            border-radius: 9999px;
+        }
+        
+        /* Winner button content gets white gradient */
+        .winner .btn-content {
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 80%);
+        }
+        
+        /* Dot grid container */
+        .dot-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%; /* Will be set by JavaScript based on percentage */
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 24px);
+            grid-auto-rows: 28px;
+            gap: 6px;
+            padding: 20px;
+            align-content: center;
+            justify-content: start;
+            z-index: 5;
+        }
+        
+        /* Individual dots */
+        .dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+        
+        /* Dots in winner section */
+        .winner .dot {
+            background-color: rgba(160, 108, 69, 0.6);
+        }
+        
+        /* Percentage display */
+        .percentage {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 48px;
+            font-weight: 400;
+            z-index: 25;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            border: 2px solid white;
+            backdrop-filter: none;
+        }
+        
+        .winner .percentage {
+            color: #ffffff;
+            background-color: rgba(160, 108, 69);
+            backdrop-filter: blur(10px);
+            border: none;
+        }
+        
+        /* Fixed canvas size with responsive fallback */
+        .container {
+            width: 1920px;
+            height: 1080px;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+    </style>
+</head>
+<body
+    style="background-image: url('/static/images/plain_vote1.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+    <div class="flex flex-col w-screen h-screen">
+        <!-- Header Section -->
+        <div class="flex-shrink-0 px-8 py-12">
+            <div id="questionContainer" class="text-start">
+                <p id="questionText" class="hal-timezone text-white text-8xl mt-16 font-normal leading-[88px]">
+                  The world used to be </br> a much better place.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Main Results Section - Full Height -->
+        <div class="h-full flex items-center justify-center">
+            <div class="flex w-full flex-col gap-0 h-full">
+                <div id="agreeBtn" class="results-btn w-full h-full transition-all duration-300 text-8xl">
+                    <div class="btn-content">
+                        <span>agree</span>
+                        <img id="upIcon" src="/static/icons/up.svg" alt="Up" class="w-18 h-18">
+                    </div>
+                    <div id="agreeDots" class="dot-grid"></div>
+                    <div id="agreePercent" class="percentage">0%</div>
+                </div>
+                <div id="disagreeBtn" class="results-btn w-full h-full transition-all duration-300 text-8xl">
+                    <div class="btn-content">
+                        <span>disagree</span>
+                        <img id="downIcon" src="/static/icons/down.svg" alt="Down" class="w-18 h-18">
+                    </div>
+                    <div id="disagreeDots" class="dot-grid"></div>
+                    <div id="disagreePercent" class="percentage">0%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer Section -->
+        <div class="flex-shrink-0 flex flex-row justify-between w-full px-8 py-12">
+            <a href="/index.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
+                ← up
+            </a>
+            <a href="/Vote.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
+                ↻ choose
+            </a>
+            <a href="/results.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
+                down →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Results display functionality
+        const agreeBtn = document.getElementById('agreeBtn');
+        const disagreeBtn = document.getElementById('disagreeBtn');
+        const upIcon = document.getElementById('upIcon');
+        const downIcon = document.getElementById('downIcon');
+        const agreeDots = document.getElementById('agreeDots');
+        const disagreeDots = document.getElementById('disagreeDots');
+        const agreePercent = document.getElementById('agreePercent');
+        const disagreePercent = document.getElementById('disagreePercent');
+
+        function createDots(container, percentage) {
+            container.innerHTML = '';
+            
+            // Set minimum width to ensure we can fit multiple columns
+            const minWidthPx = 120; // minimum 120px to fit multiple columns
+            const parentWidth = container.parentElement.offsetWidth;
+            const calculatedWidth = (parentWidth * percentage) / 100;
+            const actualWidth = Math.max(minWidthPx, calculatedWidth);
+            
+            // Set the width of the dot grid - use calculated percentage but with minimum
+            container.style.width = `${actualWidth}px`;
+            
+            console.log(`Setting width to ${actualWidth}px (${percentage}% of ${parentWidth}px, min: ${minWidthPx}px)`);
+            
+            // Wait for the width to be applied, then calculate dots
+            setTimeout(() => {
+                // Get the parent button element for height calculation
+                const parentButton = container.parentElement;
+                const containerHeight = parentButton.offsetHeight;
+                const containerWidth = container.offsetWidth;
+                
+                console.log(`After timeout - Container is now: ${containerWidth}px wide`);
+                
+                // Grid settings
+                const dotSize = 22;
+                const gap = 6;
+                const padding = 20;
+                const colWidth = 24; // smaller column width to fit more columns
+                const rowHeight = 28; // grid-auto-rows value
+                
+                // Calculate available space
+                const availableHeight = containerHeight - (2 * padding);
+                const availableWidth = containerWidth - (2 * padding);
+                
+                console.log(`DEBUG: Container ${containerWidth}px wide, available width: ${availableWidth}px`);
+                console.log(`DEBUG: Column calculation: (${availableWidth} + ${gap}) / (${colWidth} + ${gap}) = ${(availableWidth + gap) / (colWidth + gap)}`);
+                
+                // Calculate how many columns and rows we can fit
+                const maxCols = Math.max(1, Math.floor((availableWidth + gap) / (colWidth + gap)));
+                
+                // For rows, we need to account for gaps between rows
+                // Total height needed = (rows * rowHeight) + ((rows - 1) * gap)
+                // Solving: availableHeight = (rows * rowHeight) + ((rows - 1) * gap)
+                // availableHeight = rows * (rowHeight + gap) - gap
+                // rows = (availableHeight + gap) / (rowHeight + gap)
+                const maxRows = Math.max(1, Math.floor((availableHeight + gap) / (rowHeight + gap)));
+                
+                // Create dots to fill the entire grid
+                const totalDots = maxRows * maxCols;
+                
+                console.log(`Creating ${totalDots} dots (${maxRows} rows × ${maxCols} cols) for ${percentage}%`);
+                console.log(`Available space: ${availableWidth}px × ${availableHeight}px`);
+                console.log(`Container: ${containerWidth}px × ${containerHeight}px`);
+                
+                // Set explicit grid template to ensure proper layout
+                container.style.gridTemplateColumns = `repeat(${maxCols}, 24px)`;
+                container.style.gridTemplateRows = `repeat(${maxRows}, 28px)`;
+                
+                for (let i = 0; i < totalDots; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    container.appendChild(dot);
+                }
+            }, 10); // Minimal timeout just to ensure DOM update
+        }
+
+        function calculatePercentage(votes, total) {
+            if (total === 0) return 0;
+            return Math.round((votes / total) * 100);
+        }
+
+        function displayResults(upvotes, downvotes) {
+            const total = upvotes + downvotes;
+            
+            // Calculate percentages
+            const agreePercentage = calculatePercentage(upvotes, total);
+            const disagreePercentage = calculatePercentage(downvotes, total);
+            
+            // Update percentage displays
+            agreePercent.textContent = `${agreePercentage}%`;
+            disagreePercent.textContent = `${disagreePercentage}%`;
+            
+            // Create dots with percentage-based width relative to full width
+            // Each section gets width proportional to its vote percentage
+            createDots(agreeDots, agreePercentage);
+            createDots(disagreeDots, disagreePercentage);
+
+            // Get the user's vote from localStorage and highlight their choice
+            const userVote = localStorage.getItem('userVote');
+            if (userVote === 'yes') {
+                agreeBtn.classList.add('winner');
+                upIcon.src = '/static/icons/upfilled.svg';
+            } else if (userVote === 'no') {
+                disagreeBtn.classList.add('winner');
+                downIcon.src = '/static/icons/downfilled.svg';
+            }
+            // If no userVote found, show no winner styling
+
+            console.log(`Results: ${upvotes} agree (${agreePercentage}%), ${downvotes} disagree (${disagreePercentage}%), User voted: ${userVote || 'unknown'}`);
+        }
+
+        // Load results when page loads
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/results');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Fetched data:', data);
+                    // API returns {question, upvotes, downvotes} directly
+                    if (data.upvotes !== undefined && data.downvotes !== undefined) {
+                        displayResults(data.upvotes, data.downvotes);
+                    } else {
+                        console.log('No results found');
+                        displayResults(0, 0);
+                    }
+                } else {
+                    console.error('Failed to fetch results');
+                    displayResults(0, 0);
+                }
+            } catch (error) {
+                console.error('Error loading results:', error);
+                displayResults(0, 0);
+            }
+        });
+    </script>
+</body>
+</html>
