@@ -10,11 +10,8 @@ export class Widget {
         const widget = document.createElement('div');
         widget.className = 'widget-container';
         widget.dataset.widget = this.id;
-        if (this.id === 1) {
-            widget.classList.add('widget-active');
-        } else {
-            widget.classList.add('widget-inactive');
-        }
+        // Don't set active/inactive here - let WidgetManager handle it
+        widget.classList.add('widget-inactive');
         return widget;
     }
 

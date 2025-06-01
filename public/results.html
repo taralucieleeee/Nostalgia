@@ -98,11 +98,12 @@
         
         /* Individual dots */
         .dot {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.6);
-        }
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.6);
+    filter: blur(2px);
+}
         
         /* Dots in winner section */
         .winner .dot {
@@ -145,9 +146,30 @@
         <!-- Header Section -->
         <div class="flex-shrink-0 px-8 py-12">
             <div id="questionContainer" class="text-start">
-                <p id="questionText" class="hal-timezone text-white text-8xl mt-16 font-normal leading-[88px]">
-                  The world used to be </br> a much better place.
-                </p>
+                <div>
+                    <div class="absolute top-14 left-8 z-30">
+                        <div class="relative flex items-center justify-center w-48 h-12">
+                            <!-- Blurred background rectangle -->
+                            <div class="absolute w-48 h-12 origin-center bg-white rounded-[35px] blur"></div>
+                            <!-- Text on top -->
+                            <span class="hal-timezone text-3xl z-10 relative" style="color: #A06C45;">Interactive</span>
+                        </div>
+                    </div>
+                    <div class="absolute top-14 right-8 z-30">
+                        <div class="relative flex items-center justify-center w-72 h-12">
+                            <!-- Blurred background rectangle -->
+                            <div class="absolute w-72 h-12 origin-center bg-white rounded-[35px] blur"></div>
+                            <!-- Text on top -->
+                            <span class="hal-timezone text-3xl z-10 relative" style="color: #A06C45;">Total answers: <span id="totalCount">0</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="inline-block mt-16">
+                    <p id="questionText" class="hal-timezone text-8xl pt-6 text-white font-normal leading-[88px]">
+                        The world used to be <br> a much better place.
+                    </p>
+                </div>
             </div>
         </div>
         
@@ -157,7 +179,6 @@
                 <div id="agreeBtn" class="results-btn w-full h-full transition-all duration-300 text-8xl">
                     <div class="btn-content">
                         <span>agree</span>
-                        <img id="upIcon" src="/static/icons/up.svg" alt="Up" class="w-18 h-18">
                     </div>
                     <div id="agreeDots" class="dot-grid"></div>
                     <div id="agreePercent" class="percentage">0%</div>
@@ -165,7 +186,6 @@
                 <div id="disagreeBtn" class="results-btn w-full h-full transition-all duration-300 text-8xl">
                     <div class="btn-content">
                         <span>disagree</span>
-                        <img id="downIcon" src="/static/icons/down.svg" alt="Down" class="w-18 h-18">
                     </div>
                     <div id="disagreeDots" class="dot-grid"></div>
                     <div id="disagreePercent" class="percentage">0%</div>
@@ -174,16 +194,17 @@
         </div>
         
         <!-- Footer Section -->
-        <div class="flex-shrink-0 flex flex-row justify-between w-full px-8 py-12">
-            <a href="/index.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
-                ← up
-            </a>
-            <a href="/Vote.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
-                ↻ choose
-            </a>
-            <a href="/results.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
-                down →
-            </a>
+        <div class="flex-shrink-0 flex flex-row justify-center w-full px-8 py-12" style="background-color: #FFDCDC;">
+            <div class="flex items-center justify-between w-full max-w-6xl">
+                <a href="/index.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                    <img id="backIcon" src="/static/icons/back.svg" alt="Back" class="h-8 w-8">
+                    BACK
+                </a>
+                <a href="/results.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                    NEXT
+                    <img id="nextIcon" src="/static/icons/next.svg" alt="Next" class="h-8 w-8">
+                </a>
+            </div>
         </div>
     </div>
 
@@ -191,8 +212,6 @@
         // Results display functionality
         const agreeBtn = document.getElementById('agreeBtn');
         const disagreeBtn = document.getElementById('disagreeBtn');
-        const upIcon = document.getElementById('upIcon');
-        const downIcon = document.getElementById('downIcon');
         const agreeDots = document.getElementById('agreeDots');
         const disagreeDots = document.getElementById('disagreeDots');
         const agreePercent = document.getElementById('agreePercent');
@@ -272,6 +291,12 @@
         function displayResults(upvotes, downvotes) {
             const total = upvotes + downvotes;
             
+            // Update total count display
+            const totalCountElement = document.getElementById('totalCount');
+            if (totalCountElement) {
+                totalCountElement.textContent = total;
+            }
+            
             // Calculate percentages
             const agreePercentage = calculatePercentage(upvotes, total);
             const disagreePercentage = calculatePercentage(downvotes, total);
@@ -289,14 +314,12 @@
             const userVote = localStorage.getItem('userVote');
             if (userVote === 'yes') {
                 agreeBtn.classList.add('winner');
-                upIcon.src = '/static/icons/upfilled.svg';
             } else if (userVote === 'no') {
                 disagreeBtn.classList.add('winner');
-                downIcon.src = '/static/icons/downfilled.svg';
             }
             // If no userVote found, show no winner styling
 
-            console.log(`Results: ${upvotes} agree (${agreePercentage}%), ${downvotes} disagree (${disagreePercentage}%), User voted: ${userVote || 'unknown'}`);
+            console.log(`Results: ${upvotes} agree (${agreePercentage}%), ${downvotes} disagree (${disagreePercentage}%), Total: ${total}, User voted: ${userVote || 'unknown'}`);
         }
 
         // Load results when page loads
@@ -320,6 +343,31 @@
             } catch (error) {
                 console.error('Error loading results:', error);
                 displayResults(0, 0);
+            }
+        });
+
+        // Keyboard navigation functionality
+        document.addEventListener('keydown', (event) => {
+            const key = event.key.toLowerCase();
+            const backIcon = document.getElementById('backIcon');
+            const nextIcon = document.getElementById('nextIcon');
+            
+            if (key === 'a' && backIcon) {
+                // Change back icon to filled version
+                backIcon.src = '/static/icons/backfilled.svg';
+                
+                // Wait 2 seconds then redirect
+                setTimeout(() => {
+                    window.location.href = '/vote.html';
+                }, 2000);
+            } else if (key === 'd' && nextIcon) {
+                // Change next icon to filled version  
+                nextIcon.src = '/static/icons/nextfilled.svg';
+                
+                // Wait 2 seconds then redirect to EighthWidget
+                setTimeout(() => {
+                    window.location.href = '/index.html?widget=8';
+                }, 2000);
             }
         });
     </script>

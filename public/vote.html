@@ -73,11 +73,22 @@
         <!-- Header Section -->
         <div class="flex-shrink-0 px-8 py-12">
             <div id="questionContainer" class="text-start">
-                <p id="questionText" class="hal-timezone text-white text-8xl mt-16 font-normal leading-[88px]">
-                  The world used to be </br> a much better place.
-                </p>
+                <div>
+                    <div class="absolute top-14 left-8 z-30">
+                        <div class="relative flex items-center justify-center w-48 h-12">
+                            <!-- Blurred background rectangle -->
+                            <div class="absolute w-48 h-12 origin-center bg-white rounded-[35px] blur"></div>
+                            <!-- Text on top -->
+                            <span class="hal-timezone text-3xl z-10 relative" style="color: #A06C45;">Interactive</span>
+                        </div>
+                    </div>
+                </div>
                 
-                </p>
+                <div class="inline-block mt-16">
+                    <p id="questionText" class="hal-timezone text-8xl pt-6 text-white font-normal leading-[88px]">
+                        The world used to be <br> a much better place.
+                    </p>
+                </div>
             </div>
         </div>
         
@@ -97,16 +108,12 @@
         </div>
         
         <!-- Footer Section -->
-        <div class="flex-shrink-0 flex flex-row justify-between w-full px-8 py-12">
-            <a href="/index.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
-                ← up
+        <div class="flex-shrink-0 flex flex-row justify-center w-full px-8 py-12" style="background-color: #FFDCDC;">
+            <a href="/vote.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                <img id="footerIcon" src="/static/icons/choosesmall.svg" alt="Choose" class="h-8 w-8">
+                ENTER
             </a>
-            <a href="/Vote.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
-                ↻ choose
-            </a>
-            <a href="/results.html" class="inline-block text-3xl text-white hover:text-white transition-colors">
-                down →
-            </a>
+
         </div>
     </div>
 
@@ -117,6 +124,7 @@
         const noBtn = document.getElementById('noBtn');
         const upIcon = document.getElementById('upIcon');
         const downIcon = document.getElementById('downIcon');
+        const footerIcon = document.getElementById('footerIcon');
 
         let isWPressed = false;
         let isSPressed = false;
@@ -156,6 +164,37 @@
             }
         }
 
+        async function submitVoteAndRedirect(choice) {
+            try {
+                // Store user's choice in localStorage
+                localStorage.setItem('userVote', choice);
+                
+                const response = await fetch('/api/vote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: "The world used to be a much better place.",
+                        vote: choice
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('Vote submitted successfully');
+                } else {
+                    console.error('Failed to submit vote');
+                }
+            } catch (error) {
+                console.error('Error submitting vote:', error);
+            }
+            
+            // Wait 2 seconds before redirecting to results
+            setTimeout(() => {
+                window.location.href = '/results.html';
+            }, 2000);
+        }
+
         document.addEventListener('keydown', (event) => {
             const key = event.key.toLowerCase();
             
@@ -167,12 +206,20 @@
                 stageVote('no');
             } else if (key === 'f' && stagedVote) {
                 event.preventDefault();
-                // Submit the staged vote
+                
+                // Change footer icon to filled version
+                footerIcon.src = '/static/icons/choosesmallfilled.svg';
+                
+                // DON'T clear the button state - keep it filled
+                // Change icon to "chosen" version
                 if (stagedVote === 'yes') {
-                    yesBtn.click();
+                    upIcon.src = '/static/icons/upfilledchosen.svg';
                 } else if (stagedVote === 'no') {
-                    noBtn.click();
+                    downIcon.src = '/static/icons/downfilledchosen.svg';
                 }
+                
+                // Submit vote and redirect immediately
+                submitVoteAndRedirect(stagedVote);
             }
         });
 

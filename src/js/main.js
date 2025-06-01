@@ -5,16 +5,30 @@ import { FourthWidget } from './widgets/FourthWidget.js';
 import { FifthWidget } from './widgets/FifthWidget.js';
 import { SixthWidget } from './widgets/SixthWidget.js';
 import { SeventhWidget } from './widgets/SeventhWidget.js';
+import { EighthWidget } from './widgets/EighthWidget.js';
 
 class WidgetManager {
     constructor() {
         this.widgetContainer = document.getElementById('widgetContainer');
-        this.currentWidget = 1;
+        this.currentWidget = this.getInitialWidget();
         this.widgets = [];
         this.backgroundMusic = document.getElementById('bgMusic');
         this.backgroundMusic.loop = true;
         this.setupAudioContext();
         this.init();
+    }
+
+    getInitialWidget() {
+        // Check URL parameters for starting widget
+        const urlParams = new URLSearchParams(window.location.search);
+        const widgetParam = urlParams.get('widget');
+        if (widgetParam) {
+            const widgetNum = parseInt(widgetParam);
+            if (widgetNum >= 1 && widgetNum <= 8) {
+                return widgetNum;
+            }
+        }
+        return 1; // Default to first widget
     }
 
     setupAudioContext() {
@@ -45,11 +59,16 @@ class WidgetManager {
             new FourthWidget(this.widgetContainer, 4),
             new FifthWidget(this.widgetContainer, 5),
             new SixthWidget(this.widgetContainer, 6),
-            new SeventhWidget(this.widgetContainer, 7)
+            new SeventhWidget(this.widgetContainer, 7),
+            new EighthWidget(this.widgetContainer, 8)
         ];
 
         // Mount all widgets
         this.widgets.forEach(widget => widget.mount());
+        
+        // Set initial widget positions based on currentWidget
+        this.updateWidgetPositions();
+        this.updateNavigationButtons();
         
         // Set up navigation
         this.setupNavigation();
@@ -81,7 +100,12 @@ class WidgetManager {
             } else if (key === 'a') {
                 this.navigateToWidget(-1);
             } else if (key === 'd') {
-                this.navigateToWidget(1);
+                // Special case: if on widget 7, redirect to vote.html
+                if (this.currentWidget === 7) {
+                    window.location.href = '/vote.html';
+                } else {
+                    this.navigateToWidget(1);
+                }
             } else if (key === 'r') {
                 // Reset to first widget
                 this.currentWidget = 1;
