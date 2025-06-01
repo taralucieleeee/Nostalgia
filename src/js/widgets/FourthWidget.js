@@ -7,5 +7,6 @@ export class FourthWidget extends Widget {
                 <img src="static/images/fourth.png" alt="Fourth Image" class="max-w-full max-h-full object-contain">
             </div>
         `;
+
     }
 }

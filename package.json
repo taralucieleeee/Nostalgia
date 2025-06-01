@@ -19,9 +19,13 @@
   },
   "homepage": "https://github.com/taralucieleeee/Nostalgia#readme",
   "devDependencies": {
-    "live-server": "^1.2.2"
+    "autoprefixer": "^10.4.21",
+    "live-server": "^1.2.2",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.1.8"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.8",
     "express": "^5.1.0"
   }
 }

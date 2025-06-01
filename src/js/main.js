@@ -2,13 +2,35 @@ import { FirstWidget } from './widgets/FirstWidget.js';
 import { SecondWidget } from './widgets/SecondWidget.js';
 import { ThirdWidget } from './widgets/ThirdWidget.js';
 import { FourthWidget } from './widgets/FourthWidget.js';
+import { FifthWidget } from './widgets/FifthWidget.js';
+import { SixthWidget } from './widgets/SixthWidget.js';
+import { SeventhWidget } from './widgets/SeventhWidget.js';
 
 class WidgetManager {
     constructor() {
         this.widgetContainer = document.getElementById('widgetContainer');
         this.currentWidget = 1;
         this.widgets = [];
+        this.backgroundMusic = document.getElementById('bgMusic');
+        this.backgroundMusic.loop = true;
+        this.setupAudioContext();
         this.init();
+    }
+
+    setupAudioContext() {
+        // Create audio context on user interaction
+        const handleFirstInteraction = () => {
+            if (this.currentWidget <= 2) {
+                this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            }
+            // Remove the event listeners once audio is playing
+            document.removeEventListener('click', handleFirstInteraction);
+            document.removeEventListener('keydown', handleFirstInteraction);
+        };
+
+        // Add event listeners for first interaction
+        document.addEventListener('click', handleFirstInteraction);
+        document.addEventListener('keydown', handleFirstInteraction);
     }
 
     init() {
@@ -20,7 +42,10 @@ class WidgetManager {
             new FirstWidget(this.widgetContainer, 1),
             new SecondWidget(this.widgetContainer, 2),
             new ThirdWidget(this.widgetContainer, 3),
-            new FourthWidget(this.widgetContainer, 4)
+            new FourthWidget(this.widgetContainer, 4),
+            new FifthWidget(this.widgetContainer, 5),
+            new SixthWidget(this.widgetContainer, 6),
+            new SeventhWidget(this.widgetContainer, 7)
         ];
 
         // Mount all widgets
@@ -28,6 +53,8 @@ class WidgetManager {
         
         // Set up navigation
         this.setupNavigation();
+
+        // Music will start playing on first user interaction
     }
 
     setupNavigation() {
@@ -40,10 +67,26 @@ class WidgetManager {
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
-            if (key === 'a') {
+            if (key === 'f') {
+                // Toggle between first and second widget
+                if (this.currentWidget === 1) {
+                    this.currentWidget = 2;
+                    this.updateWidgetPositions();
+                    this.updateNavigationButtons();
+                } else if (this.currentWidget === 2) {
+                    this.currentWidget = 1;
+                    this.updateWidgetPositions();
+                    this.updateNavigationButtons();
+                }
+            } else if (key === 'a') {
                 this.navigateToWidget(-1);
             } else if (key === 'd') {
                 this.navigateToWidget(1);
+            } else if (key === 'r') {
+                // Reset to first widget
+                this.currentWidget = 1;
+                this.updateWidgetPositions();
+                this.updateNavigationButtons();
             }
         });
 
@@ -57,17 +100,27 @@ class WidgetManager {
         this.currentWidget = newWidget;
         this.updateWidgetPositions();
         this.updateNavigationButtons();
+        
+        // Handle background music based on current widget
+        if (this.currentWidget <= 2) {
+            if (this.backgroundMusic.paused) {
+                this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            }
+        } else {
+            this.backgroundMusic.pause();
+            this.backgroundMusic.currentTime = 0;
+        }
     }
 
     updateWidgetPositions() {
         this.widgets.forEach(widget => {
             const widgetNum = parseInt(widget.element.dataset.widget);
-            if (widgetNum < this.currentWidget) {
-                widget.element.style.transform = 'translateX(-100%)';
-            } else if (widgetNum > this.currentWidget) {
-                widget.element.style.transform = 'translateX(100%)';
+            if (widgetNum === this.currentWidget) {
+                widget.element.classList.add('widget-active');
+                widget.element.classList.remove('widget-inactive');
             } else {
-                widget.element.style.transform = 'translateX(0)';
+                widget.element.classList.remove('widget-active');
+                widget.element.classList.add('widget-inactive');
             }
         });
     }
