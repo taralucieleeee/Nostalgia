@@ -55,7 +55,7 @@
         /* Keyboard pressed state */
         .voting-btn.keyboard-pressed {
             background-color: white !important;
-            color: #A06C45 !important;
+            color: #958F71 !important;
         }
         
         /* Fixed canvas size with responsive fallback */
@@ -79,7 +79,7 @@
                             <!-- Blurred background rectangle -->
                             <div class="absolute w-48 h-12 origin-center bg-white rounded-[35px] blur"></div>
                             <!-- Text on top -->
-                            <span class="hal-timezone text-3xl z-10 relative" style="color: #A06C45;">Interactive</span>
+                            <span class="hal-timezone text-3xl z-10 relative" style="color: #958F71;">Interactive</span>
                         </div>
                     </div>
                 </div>
@@ -133,7 +133,7 @@
         function applyKeyboardPressedState(button, icon, iconSrc) {
             button.classList.add('keyboard-pressed');
             button.style.setProperty('background-color', 'white', 'important');
-            button.style.setProperty('color', '#A06C45', 'important');
+            button.style.setProperty('color', '#958F71', 'important');
             icon.src = iconSrc;
         }
 
@@ -158,9 +158,9 @@
             stagedVote = voteType;
             
             if (voteType === 'yes') {
-                applyKeyboardPressedState(yesBtn, upIcon, '/static/icons/upfilled.svg');
+                applyKeyboardPressedState(yesBtn, upIcon, '/static/icons/upfilled_2.svg');
             } else if (voteType === 'no') {
-                applyKeyboardPressedState(noBtn, downIcon, '/static/icons/downfilled.svg');
+                applyKeyboardPressedState(noBtn, downIcon, '/static/icons/downfilled_2.svg');
             }
         }
 
@@ -213,9 +213,9 @@
                 // DON'T clear the button state - keep it filled
                 // Change icon to "chosen" version
                 if (stagedVote === 'yes') {
-                    upIcon.src = '/static/icons/upfilledchosen.svg';
+                    upIcon.src = '/static/icons/upfilledchosen_2.svg';
                 } else if (stagedVote === 'no') {
-                    downIcon.src = '/static/icons/downfilledchosen.svg';
+                    downIcon.src = '/static/icons/downfilledchosen_2.svg';
                 }
                 
                 // Submit vote and redirect immediately
