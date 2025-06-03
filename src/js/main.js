@@ -1,10 +1,6 @@
 import { FirstWidget } from './widgets/FirstWidget.js';
 import { SecondWidget } from './widgets/SecondWidget.js';
-import { ThirdWidget } from './widgets/ThirdWidget.js';
-import { FourthWidget } from './widgets/FourthWidget.js';
-import { FifthWidget } from './widgets/FifthWidget.js';
-import { SixthWidget } from './widgets/SixthWidget.js';
-import { SeventhWidget } from './widgets/SeventhWidget.js';
+import { VideoWidget } from './widgets/VideoWidget.js';
 import { EighthWidget } from './widgets/EighthWidget.js';
 
 class WidgetManager {
@@ -24,7 +20,7 @@ class WidgetManager {
         const widgetParam = urlParams.get('widget');
         if (widgetParam) {
             const widgetNum = parseInt(widgetParam);
-            if (widgetNum >= 1 && widgetNum <= 8) {
+            if (widgetNum >= 1 && widgetNum <= 4) {
                 return widgetNum;
             }
         }
@@ -55,12 +51,8 @@ class WidgetManager {
         this.widgets = [
             new FirstWidget(this.widgetContainer, 1),
             new SecondWidget(this.widgetContainer, 2),
-            new ThirdWidget(this.widgetContainer, 3),
-            new FourthWidget(this.widgetContainer, 4),
-            new FifthWidget(this.widgetContainer, 5),
-            new SixthWidget(this.widgetContainer, 6),
-            new SeventhWidget(this.widgetContainer, 7),
-            new EighthWidget(this.widgetContainer, 8)
+            new VideoWidget(this.widgetContainer, 3),
+            new EighthWidget(this.widgetContainer, 4)
         ];
 
         // Mount all widgets
@@ -81,7 +73,14 @@ class WidgetManager {
         const nextBtn = document.getElementById('nextBtn');
 
         prevBtn.addEventListener('click', () => this.navigateToWidget(-1));
-        nextBtn.addEventListener('click', () => this.navigateToWidget(1));
+        nextBtn.addEventListener('click', () => {
+            // If on VideoWidget (widget 3), redirect to vote.html
+            if (this.currentWidget === 3) {
+                window.location.href = '/vote.html';
+            } else {
+                this.navigateToWidget(1);
+            }
+        });
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
@@ -100,8 +99,8 @@ class WidgetManager {
             } else if (key === 'a') {
                 this.navigateToWidget(-1);
             } else if (key === 'd') {
-                // Special case: if on widget 7, redirect to vote.html
-                if (this.currentWidget === 7) {
+                // Special case: if on widget 3 (VideoWidget), redirect to vote.html
+                if (this.currentWidget === 3) {
                     window.location.href = '/vote.html';
                 } else {
                     this.navigateToWidget(1);
