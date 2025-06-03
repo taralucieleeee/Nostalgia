@@ -1,7 +1,8 @@
 import { FirstWidget } from './widgets/FirstWidget.js';
 import { SecondWidget } from './widgets/SecondWidget.js';
 import { VideoWidget } from './widgets/VideoWidget.js';
-import { EighthWidget } from './widgets/EighthWidget.js';
+import { VideoWidget2 } from './widgets/VideoWidget2.js';
+import { VideoWidget3 } from './widgets/VideoWidget3.js';
 
 class WidgetManager {
     constructor() {
@@ -20,7 +21,7 @@ class WidgetManager {
         const widgetParam = urlParams.get('widget');
         if (widgetParam) {
             const widgetNum = parseInt(widgetParam);
-            if (widgetNum >= 1 && widgetNum <= 4) {
+            if (widgetNum >= 1 && widgetNum <= 5) {
                 return widgetNum;
             }
         }
@@ -52,7 +53,8 @@ class WidgetManager {
             new FirstWidget(this.widgetContainer, 1),
             new SecondWidget(this.widgetContainer, 2),
             new VideoWidget(this.widgetContainer, 3),
-            new EighthWidget(this.widgetContainer, 4)
+            new VideoWidget2(this.widgetContainer, 4),
+            new VideoWidget3(this.widgetContainer, 5)
         ];
 
         // Mount all widgets

@@ -57,16 +57,33 @@ export class VideoWidget extends Widget {
 
     startVideoWithDelay() {
         if (this.video) {
-            // Wait 2 seconds before starting video with audio
-            setTimeout(() => {
-                this.video.muted = false; // Enable audio
-                this.video.play().catch(e => {
-                    console.log('Video autoplay with audio failed:', e);
-                    // Fallback: try playing muted if audio fails
-                    this.video.muted = true;
-                    this.video.play().catch(e2 => console.log('Video autoplay failed completely:', e2));
-                });
-            }, 2000);
+            // Set up buffering and playback
+            this.video.muted = false; // Enable audio from the start
+            
+            // Start loading the video data
+            this.video.load();
+            
+            // Check if video has enough data to start playing
+            const checkBuffer = () => {
+                // Wait until video has enough data buffered (readyState 3 = HAVE_FUTURE_DATA or 4 = HAVE_ENOUGH_DATA)
+                if (this.video.readyState >= 3) {
+                    // Start video and audio simultaneously after buffer period
+                    setTimeout(() => {
+                        this.video.play().catch(e => {
+                            console.log('Video autoplay with audio failed:', e);
+                            // Fallback: try playing muted if audio fails
+                            this.video.muted = true;
+                            this.video.play().catch(e2 => console.log('Video autoplay failed completely:', e2));
+                        });
+                    }, 2000);
+                } else {
+                    // Check again in 100ms
+                    setTimeout(checkBuffer, 100);
+                }
+            };
+            
+            // Start buffer check
+            checkBuffer();
         }
     }
 }

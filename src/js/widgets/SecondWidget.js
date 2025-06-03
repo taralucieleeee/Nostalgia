@@ -1,4 +1,3 @@
-// filepath: /Users/taralucielee/Documents/GitHub/Nostalgia/src/js/widgets/SecondWidget.js
 import { Widget } from './Widget.js';
 
 export class SecondWidget extends Widget {

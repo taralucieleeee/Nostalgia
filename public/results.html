@@ -196,11 +196,11 @@
         <!-- Footer Section -->
         <div class="flex-shrink-0 flex flex-row justify-center w-full px-8 py-12" style="background-color: #FFDCDC;">
             <div class="flex items-center justify-between w-full max-w-6xl">
-                <a href="/index.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                <a href="/vote.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
                     <img id="backIcon" src="/static/icons/back.svg" alt="Back" class="h-8 w-8">
                     BACK
                 </a>
-                <a href="/results.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                <a href="/?widget=5" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
                     NEXT
                     <img id="nextIcon" src="/static/icons/next.svg" alt="Next" class="h-8 w-8">
                 </a>
@@ -364,9 +364,9 @@
                 // Change next icon to filled version  
                 nextIcon.src = '/static/icons/nextfilled.svg';
                 
-                // Wait 2 seconds then redirect to EighthWidget
+                // Wait 2 seconds then redirect to VideoWidget2
                 setTimeout(() => {
-                    window.location.href = '/index.html?widget=4';
+                    window.location.href = '/?widget=4';
                 }, 2000);
             }
         });
