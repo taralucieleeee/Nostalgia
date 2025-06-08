@@ -119,6 +119,18 @@
 
     <script src="/src/js/voting2.js"></script>
     <script>
+        // Reset all icons when page loads
+        window.addEventListener('load', function() {
+            // Reset voting icons
+            const upIcon = document.getElementById('upIcon');
+            const downIcon = document.getElementById('downIcon');
+            const footerIcon = document.getElementById('footerIcon');
+            
+            if (upIcon) upIcon.src = '/static/icons/up.svg';
+            if (downIcon) downIcon.src = '/static/icons/down.svg';
+            if (footerIcon) footerIcon.src = '/static/icons/choosesmall.svg';
+        });
+        
         // Keyboard functionality only - no mouse hover effects
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');

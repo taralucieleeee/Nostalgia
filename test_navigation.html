@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .test-result { margin: 5px 0; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Nostalgia Navigation Test</h1>
+    
+    <div class="test-section">
+        <h2>Core Navigation Flow Test</h2>
+        <div id="test-results"></div>
+        <button onclick="runTests()">Run Tests</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Manual Test Instructions</h2>
+        <ol>
+            <li><strong>Load Application:</strong> Go to <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+            <li><strong>Test F Key:</strong> Press 'F' to toggle between FirstWidget ↔ SecondWidget</li>
+            <li><strong>Test D Key:</strong> From SecondWidget, press 'D' to go to VideoWidget (should play firstpart.mp4)</li>
+            <li><strong>Test Video Playback:</strong> Ensure keyboard is disabled during video playback</li>
+            <li><strong>Test Auto-redirect:</strong> After video ends, should auto-redirect to vote.html</li>
+            <li><strong>Test Visual Feedback:</strong> All navigation should have 1-second visual feedback</li>
+        </ol>
+    </div>
+
+    <script>
+        function runTests() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '';
+            
+            // Test 1: Check if main files exist
+            addTestResult('Checking main application files...', 'info');
+            
+            fetch('http://localhost:3000/src/js/main.js')
+                .then(response => {
+                    if (response.ok) {
+                        addTestResult('✓ main.js loaded successfully', 'success');
+                        return fetch('http://localhost:3000/src/css/main.css');
+                    } else {
+                        throw new Error('main.js not found');
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        addTestResult('✓ main.css loaded successfully', 'success');
+                        return fetch('http://localhost:3000/static/videos/firstpart.mp4');
+                    } else {
+                        throw new Error('main.css not found');
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        addTestResult('✓ firstpart.mp4 video file accessible', 'success');
+                    } else {
+                        throw new Error('firstpart.mp4 not found');
+                    }
+                })
+                .catch(error => {
+                    addTestResult('✗ ' + error.message, 'error');
+                });
+                
+            // Test 2: Check widget files
+            const widgetFiles = [
+                'FirstWidget.js',
+                'SecondWidget.js', 
+                'VideoWidget.js',
+                'VideoWidget2.js',
+                'VideoWidget3.js'
+            ];
+            
+            addTestResult('Checking widget files...', 'info');
+            widgetFiles.forEach(file => {
+                fetch(`http://localhost:3000/src/js/widgets/${file}`)
+                    .then(response => {
+                        if (response.ok) {
+                            addTestResult(`✓ ${file} loaded successfully`, 'success');
+                        } else {
+                            addTestResult(`✗ ${file} not found`, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        addTestResult(`✗ Error loading ${file}: ${error.message}`, 'error');
+                    });
+            });
+        }
+        
+        function addTestResult(message, type) {
+            const resultsDiv = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+    </script>
+</body>
+</html>

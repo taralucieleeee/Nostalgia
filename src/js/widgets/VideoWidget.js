@@ -12,7 +12,7 @@ export class VideoWidget extends Widget {
             <div class="widget relative w-full h-full bg-black">
                 <video id="mainVideo" 
                        class="absolute inset-0 w-full h-full object-contain z-0"
-                       preload="auto"
+                       preload="none"
                        muted
                        playsinline>
                     <source src="/static/videos/firstpart.mp4" type="video/mp4">
@@ -26,6 +26,19 @@ export class VideoWidget extends Widget {
         // Set up video end handler
         if (this.video) {
             this.video.addEventListener('ended', () => {
+                console.log('Video playback completed, navigating to vote.html after 1 second');
+                
+                // Re-enable keyboard navigation
+                this.enableKeyboardNavigation();
+                
+                // Prevent any other widgets from being shown during transition
+                document.body.style.pointerEvents = 'none';
+                
+                // Stop video playback immediately
+                this.video.pause();
+                this.video.src = ''; // Clear source to prevent any further loading
+                
+                // Wait 1 second then navigate
                 setTimeout(() => {
                     window.location.href = '/vote.html';
                 }, 1000);
@@ -53,6 +66,27 @@ export class VideoWidget extends Widget {
             attributes: true,
             attributeFilter: ['class']
         });
+        
+        // Store observer for cleanup
+        this.observer = observer;
+    }
+
+    deactivate() {
+        // Clean up video to prevent audio bleeding
+        if (this.video) {
+            this.video.pause();
+            this.video.currentTime = 0;
+            this.video.src = '';
+            this.video.load();
+        }
+        
+        // Re-enable keyboard navigation
+        this.enableKeyboardNavigation();
+        
+        // Disconnect observer
+        if (this.observer) {
+            this.observer.disconnect();
+        }
     }
 
     startVideoWithDelay() {
@@ -62,6 +96,9 @@ export class VideoWidget extends Widget {
             
             // Start loading the video data
             this.video.load();
+            
+            // Disable keyboard navigation during video playback
+            this.disableKeyboardNavigation();
             
             // Check if video has enough data to start playing
             const checkBuffer = () => {
@@ -84,6 +121,30 @@ export class VideoWidget extends Widget {
             
             // Start buffer check
             checkBuffer();
+        }
+    }
+
+    disableKeyboardNavigation() {
+        // Prevent keyboard navigation during video playback, except for reset key
+        this.keyboardHandler = (e) => {
+            const key = e.key.toLowerCase();
+            // Allow 'r' key for reset functionality
+            if (key === 'r') {
+                console.log("VideoWidget: Allowing reset key during video playback");
+                return; // Let the key pass through to main.js
+            }
+            // Block all other keys
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        document.addEventListener('keydown', this.keyboardHandler, true);
+    }
+
+    enableKeyboardNavigation() {
+        // Re-enable keyboard navigation
+        if (this.keyboardHandler) {
+            document.removeEventListener('keydown', this.keyboardHandler, true);
+            this.keyboardHandler = null;
         }
     }
 }

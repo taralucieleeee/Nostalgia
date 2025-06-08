@@ -200,7 +200,7 @@
                     <img id="backIcon" src="/static/icons/back.svg" alt="Back" class="h-8 w-8">
                     BACK
                 </a>
-                <a href="/?widget=5" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                <a href="/?widget=4" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
                     NEXT
                     <img id="nextIcon" src="/static/icons/next.svg" alt="Next" class="h-8 w-8">
                 </a>
@@ -324,6 +324,12 @@
 
         // Load results when page loads
         window.addEventListener('load', async () => {
+            // Reset navigation button icons to default state
+            const backIcon = document.getElementById('backIcon');
+            const nextIcon = document.getElementById('nextIcon');
+            if (backIcon) backIcon.src = '/static/icons/back.svg';
+            if (nextIcon) nextIcon.src = '/static/icons/next.svg';
+            
             try {
                 const response = await fetch('/api/results');
                 if (response.ok) {
@@ -356,18 +362,24 @@
                 // Change back icon to filled version
                 backIcon.src = '/static/icons/backfilled.svg';
                 
-                // Wait 2 seconds then redirect
+                // Prevent any other interactions during navigation
+                document.body.style.pointerEvents = 'none';
+                
+                // Wait 1 second showing the filled icon, then navigate
                 setTimeout(() => {
                     window.location.href = '/vote.html';
-                }, 2000);
+                }, 1000);
             } else if (key === 'd' && nextIcon) {
                 // Change next icon to filled version  
                 nextIcon.src = '/static/icons/nextfilled.svg';
                 
-                // Wait 2 seconds then redirect to VideoWidget2
+                // Prevent any other interactions during navigation
+                document.body.style.pointerEvents = 'none';
+                
+                // Wait 1 second showing the filled icon, then navigate
                 setTimeout(() => {
                     window.location.href = '/?widget=4';
-                }, 2000);
+                }, 1000);
             }
         });
     </script>

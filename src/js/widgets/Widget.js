@@ -27,4 +27,15 @@ export class Widget {
         this.container.appendChild(this.element);
         this.render();
     }
+    
+    // Helper method to reset all icon states in a widget
+    resetIcons() {
+        // Check for navigation icons within the widget
+        const nextIcon = this.element.querySelector('#nextIcon');
+        const backIcon = this.element.querySelector('#backIcon');
+        
+        // Reset icon states if they exist
+        if (nextIcon) nextIcon.src = '/static/icons/next.svg';
+        if (backIcon) backIcon.src = '/static/icons/back.svg';
+    }
 }

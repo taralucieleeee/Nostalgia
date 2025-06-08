@@ -3,6 +3,11 @@ import { SecondWidget } from './widgets/SecondWidget.js';
 import { VideoWidget } from './widgets/VideoWidget.js';
 import { VideoWidget2 } from './widgets/VideoWidget2.js';
 import { VideoWidget3 } from './widgets/VideoWidget3.js';
+import { VideoWidget4 } from './widgets/VideoWidget4.js';
+import { VideoWidget5 } from './widgets/VideoWidget5.js';
+import { VideoWidget6 } from './widgets/VideoWidget6.js';
+import { VideoWidget7 } from './widgets/VideoWidget7.js';
+import { VideoWidget8 } from './widgets/VideoWidget8.js';
 
 class WidgetManager {
     constructor() {
@@ -21,7 +26,7 @@ class WidgetManager {
         const widgetParam = urlParams.get('widget');
         if (widgetParam) {
             const widgetNum = parseInt(widgetParam);
-            if (widgetNum >= 1 && widgetNum <= 5) {
+            if (widgetNum >= 1 && widgetNum <= 10) {
                 return widgetNum;
             }
         }
@@ -54,7 +59,12 @@ class WidgetManager {
             new SecondWidget(this.widgetContainer, 2),
             new VideoWidget(this.widgetContainer, 3),
             new VideoWidget2(this.widgetContainer, 4),
-            new VideoWidget3(this.widgetContainer, 5)
+            new VideoWidget3(this.widgetContainer, 5),
+            new VideoWidget4(this.widgetContainer, 6),
+            new VideoWidget5(this.widgetContainer, 7),
+            new VideoWidget6(this.widgetContainer, 8),
+            new VideoWidget7(this.widgetContainer, 9),
+            new VideoWidget8(this.widgetContainer, 10)
         ];
 
         // Mount all widgets
@@ -74,13 +84,19 @@ class WidgetManager {
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
 
-        prevBtn.addEventListener('click', () => this.navigateToWidget(-1));
+        prevBtn.addEventListener('click', () => {
+            this.applyVisualFeedbackAndNavigate(() => {
+                this.navigateToWidget(-1);
+            });
+        });
         nextBtn.addEventListener('click', () => {
-            // If on VideoWidget (widget 3), redirect to vote.html
+            // If on VideoWidget (widget 3), redirect to vote.html immediately
             if (this.currentWidget === 3) {
-                window.location.href = '/vote.html';
+                this.applyVisualFeedbackAndRedirect('/vote.html');
             } else {
-                this.navigateToWidget(1);
+                this.applyVisualFeedbackAndNavigate(() => {
+                    this.navigateToWidget(1);
+                });
             }
         });
 
@@ -88,39 +104,138 @@ class WidgetManager {
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'f') {
-                // Toggle between first and second widget
+                // Toggle between first and second widget with visual feedback
                 if (this.currentWidget === 1) {
-                    this.currentWidget = 2;
-                    this.updateWidgetPositions();
-                    this.updateNavigationButtons();
+                    this.applyVisualFeedbackAndNavigate(() => {
+                        this.currentWidget = 2;
+                        this.updateWidgetPositions();
+                        this.updateNavigationButtons();
+                    });
                 } else if (this.currentWidget === 2) {
+                    this.applyVisualFeedbackAndNavigate(() => {
+                        this.currentWidget = 1;
+                        this.updateWidgetPositions();
+                        this.updateNavigationButtons();
+                    });
+                }
+            } else if (key === 'a') {
+                // Special case: if on widget 4 (VideoWidget2), let it handle its own navigation
+                if (this.currentWidget === 4) {
+                    // VideoWidget2 handles this itself - do nothing here
+                    return;
+                } else if (this.currentWidget === 5) {
+                    // VideoWidget3 handles this itself - do nothing here
+                    return;
+                } else if (this.currentWidget === 6) {
+                    // VideoWidget4 handles this itself - do nothing here
+                    return;
+                } else if (this.currentWidget === 7) {
+                    // VideoWidget5 handles this itself - do nothing here
+                    return;
+                }
+                this.applyVisualFeedbackAndNavigate(() => {
+                    this.navigateToWidget(-1);
+                });
+            } else if (key === 'd') {
+                // Special case: if on widget 3 (VideoWidget), redirect to vote.html immediately
+                if (this.currentWidget === 3) {
+                    this.applyVisualFeedbackAndRedirect('/vote.html');
+                } else if (this.currentWidget === 4) {
+                    // VideoWidget2 handles this itself - do nothing here
+                    return;
+                } else if (this.currentWidget === 5) {
+                    // VideoWidget3 handles this itself - do nothing here
+                    return;
+                } else if (this.currentWidget === 6) {
+                    // VideoWidget4 handles this itself - do nothing here
+                    return;
+                } else if (this.currentWidget === 7) {
+                    // VideoWidget5 handles this itself - do nothing here
+                    return;
+                } else {
+                    // Navigate to next widget (e.g., SecondWidget -> VideoWidget)
+                    this.applyVisualFeedbackAndNavigate(() => {
+                        this.navigateToWidget(1);
+                    });
+                }
+            } else if (key === 'r') {
+                // Reset to first widget - works for all widgets
+                this.applyVisualFeedbackAndNavigate(() => {
                     this.currentWidget = 1;
                     this.updateWidgetPositions();
                     this.updateNavigationButtons();
-                }
-            } else if (key === 'a') {
-                this.navigateToWidget(-1);
-            } else if (key === 'd') {
-                // Special case: if on widget 3 (VideoWidget), redirect to vote.html
-                if (this.currentWidget === 3) {
-                    window.location.href = '/vote.html';
-                } else {
-                    this.navigateToWidget(1);
-                }
-            } else if (key === 'r') {
-                // Reset to first widget
-                this.currentWidget = 1;
-                this.updateWidgetPositions();
-                this.updateNavigationButtons();
+                });
             }
         });
 
         this.updateNavigationButtons();
     }
 
+    applyVisualFeedbackAndNavigate(navigationFunction) {
+        // Prevent interactions during transition
+        document.body.style.pointerEvents = 'none';
+        
+        // Clean up any potential audio bleeding first
+        this.cleanupCurrentWidget();
+        
+        // Apply visual feedback (could be icon changes, etc.)
+        this.showNavigationFeedback();
+        
+        // Execute navigation after 1 second
+        setTimeout(() => {
+            navigationFunction();
+            // Re-enable interactions
+            document.body.style.pointerEvents = 'auto';
+        }, 1000);
+    }
+
+    applyVisualFeedbackAndRedirect(url) {
+        // Prevent interactions during transition
+        document.body.style.pointerEvents = 'none';
+        
+        // Clean up current widget
+        this.cleanupCurrentWidget();
+        
+        // Apply visual feedback
+        this.showNavigationFeedback();
+        
+        // Redirect after 1 second
+        setTimeout(() => {
+            window.location.href = url;
+        }, 1000);
+    }
+
+    showNavigationFeedback() {
+        // Visual feedback could include icon changes, flash effects, etc.
+        // For now, we'll just ensure any navigation icons show feedback
+        const nextIcon = document.getElementById('nextIcon');
+        const backIcon = document.getElementById('backIcon');
+        
+        // Temporarily change icons to show interaction
+        if (nextIcon && nextIcon.src.includes('next.svg')) {
+            nextIcon.src = '/static/icons/nextfilled.svg';
+            setTimeout(() => {
+                nextIcon.src = '/static/icons/next.svg';
+            }, 1000);
+        }
+        
+        if (backIcon && backIcon.src.includes('back.svg')) {
+            backIcon.src = '/static/icons/backfilled.svg';
+            setTimeout(() => {
+                backIcon.src = '/static/icons/back.svg';
+            }, 1000);
+        }
+    }
+
     navigateToWidget(direction) {
         const newWidget = this.currentWidget + direction;
         if (newWidget < 1 || newWidget > this.widgets.length) return;
+        
+        // Clean up current widget before navigation
+        this.cleanupCurrentWidget();
+        
+        // Reset icon states before changing widget
+        this.resetNavigationIcons();
         
         this.currentWidget = newWidget;
         this.updateWidgetPositions();
@@ -135,6 +250,65 @@ class WidgetManager {
             this.backgroundMusic.pause();
             this.backgroundMusic.currentTime = 0;
         }
+        
+        // Extra safety: ensure no presentmoods video is playing when not on VideoWidget3
+        if (this.currentWidget !== 5) {
+            this.preventPresentmoodsAudioBleeding();
+        }
+    }
+
+    preventPresentmoodsAudioBleeding() {
+        // Find VideoWidget3's video element and ensure it's not playing presentmoods
+        const videoWidget3Element = document.querySelector('[data-widget="5"] video');
+        if (videoWidget3Element) {
+            const source = videoWidget3Element.querySelector('source');
+            if (source && source.src.includes('presentmoods.mp4')) {
+                console.log('Preventing presentmoods audio bleeding - resetting VideoWidget3');
+                videoWidget3Element.pause();
+                videoWidget3Element.currentTime = 0;
+                source.src = '/static/videos/archbridge_agree.mp4';
+                videoWidget3Element.load();
+            }
+        }
+    }
+
+    cleanupCurrentWidget() {
+        console.log('Cleaning up current widget to prevent audio bleeding');
+        
+        // Stop any playing videos and clear their sources to prevent audio bleeding
+        const allVideos = document.querySelectorAll('video');
+        allVideos.forEach((video, index) => {
+            if (!video.paused) {
+                console.log(`Stopping video ${index + 1}: ${video.src}`);
+                video.pause();
+                video.currentTime = 0;
+            }
+            // Clear source and reload to stop any background loading
+            const currentSrc = video.src;
+            if (currentSrc) {
+                video.src = '';
+                video.load();
+            }
+        });
+        
+        // Specifically target any presentmoods video that might be preloading
+        const videoWidget3 = document.getElementById('mainVideo3');
+        if (videoWidget3) {
+            const source = videoWidget3.querySelector('source');
+            if (source && source.src.includes('presentmoods.mp4')) {
+                console.log('⚠️ FOUND PRESENTMOODS VIDEO - Cleaning up to prevent audio bleeding');
+                videoWidget3.pause();
+                videoWidget3.currentTime = 0;
+                source.src = '/static/videos/archbridge_agree.mp4'; // Reset to default
+                videoWidget3.load();
+            }
+        }
+        
+        // Call deactivate on current widget if it has the method
+        const currentWidgetObj = this.widgets[this.currentWidget - 1];
+        if (currentWidgetObj && typeof currentWidgetObj.deactivate === 'function') {
+            currentWidgetObj.deactivate();
+        }
     }
 
     updateWidgetPositions() {
@@ -148,6 +322,17 @@ class WidgetManager {
                 widget.element.classList.add('widget-inactive');
             }
         });
+        
+        // Reset navigation button icons when changing widgets
+        this.resetNavigationIcons();
+    }
+    
+    resetNavigationIcons() {
+        // Reset navigation button icons to default state
+        const backIcon = document.getElementById('backIcon');
+        const nextIcon = document.getElementById('nextIcon');
+        if (backIcon) backIcon.src = '/static/icons/back.svg';
+        if (nextIcon) nextIcon.src = '/static/icons/next.svg';
     }
 
     updateNavigationButtons() {

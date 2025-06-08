@@ -58,7 +58,7 @@
         /* Winner state */
         .results-btn.winner {
             background-color: white !important;
-            color: #958F71 !important;
+            color: #958f71 !important;
         }
         
         /* Button content container */
@@ -69,7 +69,7 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            background: radial-gradient(ellipse at center, rgba(149, 143, 13, 0.5) 0%, rgba(59, 27, 0, 0) 80%);
+            background: radial-gradient(ellipse at center, #676354 0%, rgba(59, 27, 0, 0) 80%);
             padding: 32px 48px;
             border-radius: 9999px;
         }
@@ -200,7 +200,7 @@
                     <img id="backIcon" src="/static/icons/back.svg" alt="Back" class="h-8 w-8">
                     BACK
                 </a>
-                <a href="/index.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                <a href="/?widget=5" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
                     NEXT
                     <img id="nextIcon" src="/static/icons/next.svg" alt="Next" class="h-8 w-8">
                 </a>
@@ -324,6 +324,12 @@
 
         // Load results when page loads
         window.addEventListener('load', async () => {
+            // Reset navigation button icons to default state
+            const backIcon = document.getElementById('backIcon');
+            const nextIcon = document.getElementById('nextIcon');
+            if (backIcon) backIcon.src = '/static/icons/back.svg';
+            if (nextIcon) nextIcon.src = '/static/icons/next.svg';
+            
             try {
                 const response = await fetch('/api/results2');
                 if (response.ok) {
@@ -356,18 +362,24 @@
                 // Change back icon to filled version
                 backIcon.src = '/static/icons/backfilled.svg';
                 
-                // Wait 2 seconds then redirect
+                // Prevent any other interactions during navigation
+                document.body.style.pointerEvents = 'none';
+                
+                // Wait 1 second showing the filled icon, then navigate
                 setTimeout(() => {
                     window.location.href = '/vote2.html';
-                }, 2000);
+                }, 1000);
             } else if (key === 'd' && nextIcon) {
                 // Change next icon to filled version  
                 nextIcon.src = '/static/icons/nextfilled.svg';
                 
-                // Wait 2 seconds then redirect to VideoWidget3
+                // Prevent any other interactions during navigation
+                document.body.style.pointerEvents = 'none';
+                
+                // Wait 1 second showing the filled icon, then navigate
                 setTimeout(() => {
                     window.location.href = '/?widget=5';
-                }, 2000);
+                }, 1000);
             }
         });
     </script>

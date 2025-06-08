@@ -11,4 +11,9 @@ export class FirstWidget extends Widget {
             </div>
         `;
     }
+
+    deactivate() {
+        // Clean up any resources if needed
+        // FirstWidget doesn't have videos or audio, so minimal cleanup
+    }
 }

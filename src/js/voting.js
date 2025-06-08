@@ -48,10 +48,16 @@ class VotingSystem {
                 this.showVoteResult(choice, result.upvotes, result.downvotes);
                 this.disableVotingButtons();
                 
-                // Redirect to results page after 2 seconds
+                // Redirect to results page after 1 second of visual feedback
+                console.log('Vote registered, navigating to results.html after 1 second');
+                
+                // Prevent any other interactions during navigation
+                document.body.style.pointerEvents = 'none';
+                
+                // Wait 1 second then navigate
                 setTimeout(() => {
                     window.location.href = '/results.html';
-                }, 2000);
+                }, 1000);
             } else {
                 throw new Error('Failed to save vote');
             }

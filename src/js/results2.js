@@ -64,28 +64,30 @@ document.addEventListener('keydown', (event) => {
         // Highlight A key
         leftIcon.style.backgroundColor = '#A06C45';
         
-        // Reset after brief highlight
+        // Prevent any other interactions during navigation
+        document.body.style.pointerEvents = 'none';
+        
+        // Wait 1 second showing the filled icon, then navigate
         setTimeout(() => {
             leftIcon.style.backgroundColor = '#666';
             // Navigate back to vote page
             window.location.href = '/vote2.html';
-        }, 200);
+        }, 1000);
         
     } else if (key === 'd') {
         event.preventDefault();
         // Highlight D key
         rightIcon.style.backgroundColor = '#A06C45';
         
-        // Reset after brief highlight and redirect to next widget with delay
+        // Prevent any other interactions during navigation
+        document.body.style.pointerEvents = 'none';
+        
+        // Wait 1 second showing the filled icon, then navigate
         setTimeout(() => {
             rightIcon.style.backgroundColor = '#666';
-        }, 200);
-        
-        // Add 2-second delay before redirecting
-        setTimeout(() => {
             // Navigate back to main widgets (or end of flow)
             window.location.href = '/index.html?widget=1';
-        }, 2000);
+        }, 1000);
     }
 });
 
