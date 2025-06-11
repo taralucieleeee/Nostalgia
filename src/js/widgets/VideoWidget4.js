@@ -48,11 +48,11 @@ export class VideoWidget4 extends Widget {
             console.log("Current video source that ended:", currentSrc);
             
             if (currentSrc.includes('politics_1.mp4')) {
-                console.log('Politics_1 video ended, navigating to Widget 7 (law_1 image)');
+                console.log('Politics_1 video ended, navigating to Widget 10 (politics_2 video)');
                 
-                // Navigate to Widget 7 (VideoWidget5) to show law_1 image
+                // Navigate to Widget 10 (VideoWidget8) to play politics_2.mp4
                 setTimeout(() => {
-                    window.location.href = '/?widget=7';
+                    window.location.href = '/?widget=10';
                 }, 1000);
             }
         });

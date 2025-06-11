@@ -51,15 +51,18 @@ export class VideoWidget5 extends Widget {
     }
 
     setupFooterListeners() {
-        // Up button - for future functionality
+        // Up button - navigate to VideoWidget7 (law_3) - Widget 9
         this.upBtn.addEventListener('click', (e) => {
             e.preventDefault();
             
             // Change icon to provide visual feedback
             this.upIcon.src = '/static/icons/upfilled_brown.svg';
-            console.log("Up button clicked on VideoWidget5");
+            console.log("Up button clicked on VideoWidget5 - navigating to VideoWidget7 (law_3)");
             
-            // Add future navigation logic here
+            // Navigate to VideoWidget7 (Widget 9)
+            setTimeout(() => {
+                window.location.href = '/?widget=9';
+            }, 200);
         });
 
         // Down button - navigate to VideoWidget6 (law_2)  
@@ -76,13 +79,17 @@ export class VideoWidget5 extends Widget {
             }, 200);
         });
 
-        // Next button - for future functionality
+        // Next button - navigate to VideoWidget10 (rising.mp4)
         this.nextBtn.addEventListener('click', (e) => {
             e.preventDefault();
             this.nextIcon.src = '/static/icons/nextfilled.svg';
             
-            console.log("Next button clicked on VideoWidget5");
-            // Add future navigation logic here
+            console.log("Next button clicked on VideoWidget5 - navigating to VideoWidget10 (rising.mp4)");
+            
+            // Navigate to VideoWidget10 (Widget 12)
+            setTimeout(() => {
+                window.location.href = '/?widget=12';
+            }, 200);
         });
 
         // Keyboard navigation
@@ -101,21 +108,19 @@ export class VideoWidget5 extends Widget {
         console.log("VideoWidget5: Key pressed:", key);
         
         if (key === 'w' || key === 'arrowup') {
-            // UP button functionality
+            // UP button functionality - navigate to VideoWidget7 (law_3)
             event.preventDefault();
             event.stopPropagation();
             
             // Change up icon to filled version
             this.upIcon.src = '/static/icons/upfilled_brown.svg';
             
-            console.log("VideoWidget5: UP key pressed");
+            console.log("VideoWidget5: UP key pressed - navigating to VideoWidget7 (law_3)");
             
-            // Reset icon after visual feedback
+            // Navigate to VideoWidget7 (Widget 9)
             setTimeout(() => {
-                this.upIcon.src = '/static/icons/up_brown.svg';
+                window.location.href = '/?widget=9';
             }, 200);
-            
-            // Add future UP navigation logic here
         } else if (key === 's' || key === 'arrowdown') {
             // DOWN button functionality - navigate to VideoWidget6
             event.preventDefault();
@@ -131,21 +136,19 @@ export class VideoWidget5 extends Widget {
                 window.location.href = '/?widget=8';
             }, 200);
         } else if (key === 'd') {
-            // NEXT button functionality
+            // NEXT button functionality - navigate to VideoWidget10
             event.preventDefault();
             event.stopPropagation();
             
             // Change next icon to filled version  
             this.nextIcon.src = '/static/icons/nextfilled.svg';
             
-            console.log("VideoWidget5: NEXT key pressed");
+            console.log("VideoWidget5: NEXT key pressed - navigating to VideoWidget10 (rising.mp4)");
             
-            // Reset icon after visual feedback
+            // Navigate to VideoWidget10 (Widget 12)
             setTimeout(() => {
-                this.nextIcon.src = '/static/icons/next.svg';
+                window.location.href = '/?widget=12';
             }, 200);
-            
-            // Add future NEXT navigation logic here
         } else if (key === 'r') {
             // Allow reset functionality - let main.js handle it
             console.log("VideoWidget5: Reset key pressed - allowing main.js to handle");

@@ -8,6 +8,8 @@ import { VideoWidget5 } from './widgets/VideoWidget5.js';
 import { VideoWidget6 } from './widgets/VideoWidget6.js';
 import { VideoWidget7 } from './widgets/VideoWidget7.js';
 import { VideoWidget8 } from './widgets/VideoWidget8.js';
+import { VideoWidget9 } from './widgets/VideoWidget9.js';
+import { VideoWidget10 } from './widgets/VideoWidget10.js';
 
 class WidgetManager {
     constructor() {
@@ -26,7 +28,7 @@ class WidgetManager {
         const widgetParam = urlParams.get('widget');
         if (widgetParam) {
             const widgetNum = parseInt(widgetParam);
-            if (widgetNum >= 1 && widgetNum <= 10) {
+            if (widgetNum >= 1 && widgetNum <= 12) {
                 return widgetNum;
             }
         }
@@ -64,7 +66,9 @@ class WidgetManager {
             new VideoWidget5(this.widgetContainer, 7),
             new VideoWidget6(this.widgetContainer, 8),
             new VideoWidget7(this.widgetContainer, 9),
-            new VideoWidget8(this.widgetContainer, 10)
+            new VideoWidget8(this.widgetContainer, 10),
+            new VideoWidget9(this.widgetContainer, 11),
+            new VideoWidget10(this.widgetContainer, 12)
         ];
 
         // Mount all widgets
@@ -166,6 +170,16 @@ class WidgetManager {
                     this.updateNavigationButtons();
                 });
             }
+        });
+
+        // Listen for custom navigation events from widgets
+        document.addEventListener('navigateToWidget', (event) => {
+            const targetWidget = event.detail.targetWidget;
+            console.log(`Custom navigation event: moving to widget ${targetWidget}`);
+            
+            this.currentWidget = targetWidget;
+            this.updateWidgetPositions();
+            this.updateNavigationButtons();
         });
 
         this.updateNavigationButtons();

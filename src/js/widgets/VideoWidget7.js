@@ -65,27 +65,30 @@ export class VideoWidget7 extends Widget {
             }, 200);
         });
 
-        // Down button - for future functionality  
+        // Down button - navigate back to VideoWidget5 (law_1) - circular navigation  
         this.downBtn.addEventListener('click', (e) => {
             e.preventDefault();
             
             // Change icon to provide visual feedback
             this.downIcon.src = '/static/icons/downfilled_brown.svg';
-            console.log("Down button clicked on VideoWidget7");
+            console.log("Down button clicked on VideoWidget7 - navigating back to VideoWidget5 (law_1)");
             
-            // Add future navigation logic here
+            // Navigate back to VideoWidget5 (Widget 7)
+            setTimeout(() => {
+                window.location.href = '/?widget=7';
+            }, 200);
         });
 
-        // Next button - navigate to VideoWidget8 (politics_2 video)
+        // Next button - navigate to VideoWidget10 (rising.mp4)
         this.nextBtn.addEventListener('click', (e) => {
             e.preventDefault();
             this.nextIcon.src = '/static/icons/nextfilled.svg';
             
-            console.log("Next button clicked on VideoWidget7 - navigating to VideoWidget8 (politics_2)");
+            console.log("Next button clicked on VideoWidget7 - navigating to VideoWidget10 (rising.mp4)");
             
-            // Navigate to VideoWidget8 (Widget 10)
+            // Navigate to VideoWidget10 (Widget 12)
             setTimeout(() => {
-                window.location.href = '/?widget=10';
+                window.location.href = '/?widget=12';
             }, 200);
         });
 
@@ -119,34 +122,32 @@ export class VideoWidget7 extends Widget {
                 window.location.href = '/?widget=8';
             }, 200);
         } else if (key === 's' || key === 'arrowdown') {
-            // DOWN button functionality
+            // DOWN button functionality - navigate back to VideoWidget5 (law_1)
             event.preventDefault();
             event.stopPropagation();
             
             // Change down icon to filled version
             this.downIcon.src = '/static/icons/downfilled_brown.svg';
             
-            console.log("VideoWidget7: DOWN key pressed");
+            console.log("VideoWidget7: DOWN key pressed - navigating back to VideoWidget5 (law_1)");
             
-            // Reset icon after visual feedback
+            // Navigate back to VideoWidget5 (Widget 7)
             setTimeout(() => {
-                this.downIcon.src = '/static/icons/down_brown.svg';
+                window.location.href = '/?widget=7';
             }, 200);
-            
-            // Add future DOWN navigation logic here
         } else if (key === 'd') {
-            // NEXT button functionality - navigate to VideoWidget8
+            // NEXT button functionality - navigate to VideoWidget10
             event.preventDefault();
             event.stopPropagation();
             
             // Change next icon to filled version  
             this.nextIcon.src = '/static/icons/nextfilled.svg';
             
-            console.log("VideoWidget7: NEXT key pressed - navigating to VideoWidget8 (politics_2)");
+            console.log("VideoWidget7: NEXT key pressed - navigating to VideoWidget10 (rising.mp4)");
             
-            // Navigate to VideoWidget8 (Widget 10)
+            // Navigate to VideoWidget10 (Widget 12)
             setTimeout(() => {
-                window.location.href = '/?widget=10';
+                window.location.href = '/?widget=12';
             }, 200);
         } else if (key === 'r') {
             // Allow reset functionality - let main.js handle it
