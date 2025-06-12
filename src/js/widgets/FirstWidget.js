@@ -68,6 +68,11 @@ export class FirstWidget extends Widget {
     }
 
     deactivate() {
+        // Reset start icon to unfilled state
+        if (this.startIcon) {
+            this.startIcon.src = '/static/icons/start.svg';
+        }
+        
         // Clean up keyboard event listener
         document.removeEventListener('keydown', this.handleKeyDown);
         

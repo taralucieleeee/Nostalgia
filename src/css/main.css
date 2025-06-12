@@ -73,6 +73,47 @@ img {
     object-fit: contain;
 }
 
+/* Enhanced fade transitions for law image widgets */
+.law-widget {
+    transition: opacity 0.8s ease-in-out;
+}
+
+.law-widget.fade-out {
+    opacity: 0;
+}
+
+.law-widget.fade-in {
+    opacity: 1;
+}
+
+/* Smooth transitions for law images */
+.law-image {
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.law-image.transitioning-out {
+    opacity: 0;
+    transform: scale(0.98);
+}
+
+.law-image.transitioning-in {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Smooth video transitions */
+.video-transition {
+    transition: opacity 0.8s ease-in-out;
+}
+
+.video-fade-out {
+    opacity: 0;
+}
+
+.video-fade-in {
+    opacity: 1;
+}
+
 @layer utilities {
     .gif-play-once {
         animation-iteration-count: 1;

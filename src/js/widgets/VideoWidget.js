@@ -106,11 +106,21 @@ export class VideoWidget extends Widget {
                 if (this.video.readyState >= 3) {
                     // Start video and audio simultaneously after buffer period
                     setTimeout(() => {
-                        this.video.play().catch(e => {
+                        this.video.play().then(() => {
+                            console.log("FirstPart video started playing with audio");
+                        }).catch(e => {
                             console.log('Video autoplay with audio failed:', e);
-                            // Fallback: try playing muted if audio fails
+                            // Fallback: try playing muted first, then unmute
                             this.video.muted = true;
-                            this.video.play().catch(e2 => console.log('Video autoplay failed completely:', e2));
+                            this.video.play().then(() => {
+                                console.log("Muted firstpart video started, unmuting after delay");
+                                setTimeout(() => {
+                                    this.video.muted = false;
+                                    console.log("FirstPart video unmuted");
+                                }, 1000);
+                            }).catch(e2 => {
+                                console.log('Video autoplay failed completely:', e2);
+                            });
                         });
                     }, 2000);
                 } else {

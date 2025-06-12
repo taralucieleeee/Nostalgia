@@ -10,7 +10,7 @@ export class VideoWidget4 extends Widget {
     render() {
         this.element.innerHTML = `
             <div class="widget relative w-full h-full">
-                <video id="mainVideo4" class="w-full h-full object-cover" preload="none" muted playsinline>
+                <video id="mainVideo4" class="w-full h-full object-cover video-transition video-fade-in" preload="none" muted playsinline>
                     <source id="videoSource" src="/static/videos/politics_1.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
@@ -48,11 +48,21 @@ export class VideoWidget4 extends Widget {
             console.log("Current video source that ended:", currentSrc);
             
             if (currentSrc.includes('politics_1.mp4')) {
-                console.log('Politics_1 video ended, navigating to Widget 10 (politics_2 video)');
+                console.log('Politics_1 video ended, smoothly transitioning to politics_2.mp4');
                 
-                // Navigate to Widget 10 (VideoWidget8) to play politics_2.mp4
+                // Smooth transition to politics_2.mp4 within the same widget
                 setTimeout(() => {
-                    window.location.href = '/?widget=10';
+                    this.smoothTransitionToPolitics2();
+                }, 1000);
+            } else if (currentSrc.includes('politics_2.mp4')) {
+                console.log('Politics_2 video ended, navigating to Widget 10 (VideoWidget8 politics_3)');
+                
+                // Navigate to Widget 10 (VideoWidget8) to continue with politics_3
+                setTimeout(() => {
+                    const navigationEvent = new CustomEvent('navigateToWidget', {
+                        detail: { targetWidget: 10 }
+                    });
+                    document.dispatchEvent(navigationEvent);
                 }, 1000);
             }
         });
@@ -278,5 +288,65 @@ export class VideoWidget4 extends Widget {
                 console.log("Politics_1 video confirmed playing after 1s");
             }
         }, 1000);
+    }
+    
+    // Method to smoothly transition from politics_1 to politics_2
+    smoothTransitionToPolitics2() {
+        console.log("Starting smooth transition from politics_1 to politics_2");
+        
+        // Step 1: Fade out current video
+        this.video.classList.add('video-fade-out');
+        
+        // Step 2: After fade out completes, switch video source
+        setTimeout(() => {
+            // Pause current video
+            this.video.pause();
+            
+            console.log("Switching to politics_2.mp4");
+            
+            // Update the video source
+            const videoSource = this.element.querySelector('#videoSource');
+            console.log("Current source before change:", videoSource.src);
+            videoSource.src = '/static/videos/politics_2.mp4';
+            console.log("New source after change:", videoSource.src);
+            
+            // Update the video element settings
+            this.video.autoplay = true;
+            this.video.controls = false;
+            this.video.muted = false;
+            
+            // Load the new source
+            console.log("Loading politics_2 video source");
+            this.video.load();
+            
+            // Reset playback state
+            this.hasPlayed = false;
+            
+            // Step 3: When new video is ready, fade it back in
+            this.video.onloadeddata = () => {
+                console.log("Politics_2 video data loaded, fading in and starting playback");
+                
+                // Remove fade-out and add fade-in
+                this.video.classList.remove('video-fade-out');
+                this.video.classList.add('video-fade-in');
+                
+                // Start playing the new video
+                this.video.play()
+                    .then(() => console.log("Politics_2 video started playing successfully with fade-in"))
+                    .catch(err => console.error("Error starting politics_2 video:", err));
+            };
+            
+            // Add error handler
+            this.video.onerror = () => {
+                console.error("Error loading politics_2.mp4:", this.video.error);
+                // If error, still fade back in to show something
+                this.video.classList.remove('video-fade-out');
+                this.video.classList.add('video-fade-in');
+            };
+            
+            // Fallback: Start video with forcedStartVideo method
+            this.forcedStartVideo();
+            
+        }, 800); // Wait for fade-out transition to complete (matching CSS duration)
     }
 }

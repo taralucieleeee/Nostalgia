@@ -12,11 +12,11 @@ export class VideoWidget8 extends Widget {
         this.element.innerHTML = `
             <div class="widget relative w-full h-full bg-black">
                 <video id="mainVideo" 
-                       class="absolute inset-0 w-full h-full object-contain z-0"
+                       class="absolute inset-0 w-full h-full object-contain z-0 video-transition video-fade-in"
                        preload="none"
                        muted
                        playsinline>
-                    <source src="/static/videos/politics_2.mp4" type="video/mp4">
+                    <source src="/static/videos/politics_3.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -38,19 +38,11 @@ export class VideoWidget8 extends Widget {
                 const currentSrc = videoSource.src;
                 console.log("Current video source that ended:", currentSrc);
                 
-                if (currentSrc.includes('politics_2.mp4')) {
-                    console.log('Politics_2 video ended, switching to politics_3.mp4');
-                    // Switch to politics_3.mp4
-                    this.switchToPolitics3Video();
-                } else if (currentSrc.includes('politics_3.mp4')) {
-                    console.log('Politics_3 video ended, switching to retrolaws.mp4');
-                    // Switch to retrolaws.mp4
-                    this.switchToRetrolawsVideo();
-                } else if (currentSrc.includes('retrolaws.mp4')) {
-                    console.log('Retrolaws video ended, navigating to VideoWidget5 (law_1.png)');
-                    // Navigate to VideoWidget5 (Widget 7) - law images sequence
+                if (currentSrc.includes('politics_3.mp4')) {
+                    console.log('Politics_3 video ended, smoothly transitioning to VideoWidget5 (law_1.png)');
+                    // Directly transition to VideoWidget5 (Widget 7) with smooth fade
                     setTimeout(() => {
-                        window.location.href = '/?widget=7';
+                        this.smoothTransitionToLawWidgets();
                     }, 1000);
                 }
             });
@@ -141,118 +133,28 @@ export class VideoWidget8 extends Widget {
         this.observer.observe(this.element, { attributes: true });
     }
 
-    // Method to switch from politics_2.mp4 to politics_3.mp4
-    switchToPolitics3Video() {
-        // Pause current video
-        this.video.pause();
+    // Method to smoothly transition to VideoWidget5 (law_1.png)
+    smoothTransitionToLawWidgets() {
+        console.log("Starting smooth transition from politics_3 to VideoWidget5 (law_1.png)");
         
-        console.log("Switching from politics_2.mp4 to politics_3.mp4");
+        // Step 1: Fade out current video
+        this.video.classList.add('video-fade-out');
         
-        // Update the video source
-        const videoSource = this.video.querySelector('source');
-        console.log("Current source before change:", videoSource.src);
-        videoSource.src = '/static/videos/politics_3.mp4';
-        console.log("New source after change:", videoSource.src);
-        
-        // Update the video element to ensure autoplay
-        this.video.autoplay = true;
-        this.video.controls = false;
-        this.video.muted = false; // Ensure it's not muted
-        
-        // Load the new source
-        console.log("Loading politics_3 video source");
-        this.video.load();
-        
-        // Reset playback state
-        this.hasPlayed = false;
-        
-        // Ensure the video plays immediately after loading
-        this.video.onloadeddata = () => {
-            console.log("Politics_3 video data loaded, starting playback immediately");
-            this.video.play()
-                .then(() => console.log("Politics_3 video started playing successfully"))
-                .catch(err => console.error("Error starting politics_3 video:", err));
-        };
-        
-        // Add error handler for the new video
-        this.video.onerror = () => {
-            console.error("Error loading politics_3.mp4:", this.video.error);
-        };
-        
-        // Start video with immediate play attempt
+        // Step 2: After fade out completes, navigate to VideoWidget5
         setTimeout(() => {
-            this.video.play().catch(e => {
-                console.warn("Immediate politics_3 playback failed, trying fallback:", e);
-                // Fallback: try muted first then unmute quickly
-                this.video.muted = true;
-                this.video.play().then(() => {
-                    console.log("Muted politics_3 video started, unmuting after delay");
-                    setTimeout(() => {
-                        this.video.muted = false;
-                        console.log("Politics_3 video unmuted");
-                    }, 1000);
-                }).catch(err => {
-                    console.error("Failed to play politics_3 even with muted workaround:", err);
-                });
+            // Pause current video
+            this.video.pause();
+            this.video.currentTime = 0;
+            
+            console.log("Navigating to VideoWidget5 (law_1.png)");
+            
+            // Dispatch custom navigation event to VideoWidget5 (Widget 7)
+            const navigationEvent = new CustomEvent('navigateToWidget', {
+                detail: { targetWidget: 7 }
             });
-        }, 500);
-    }
-
-    // Method to switch from politics_3.mp4 to retrolaws.mp4
-    switchToRetrolawsVideo() {
-        // Pause current video
-        this.video.pause();
-        
-        console.log("Switching from politics_3.mp4 to retrolaws.mp4");
-        
-        // Update the video source
-        const videoSource = this.video.querySelector('source');
-        console.log("Current source before change:", videoSource.src);
-        videoSource.src = '/static/videos/retrolaws.mp4';
-        console.log("New source after change:", videoSource.src);
-        
-        // Update the video element to ensure autoplay
-        this.video.autoplay = true;
-        this.video.controls = false;
-        this.video.muted = false; // Ensure it's not muted
-        
-        // Load the new source
-        console.log("Loading retrolaws video source");
-        this.video.load();
-        
-        // Reset playback state
-        this.hasPlayed = false;
-        
-        // Ensure the video plays immediately after loading
-        this.video.onloadeddata = () => {
-            console.log("Retrolaws video data loaded, starting playback immediately");
-            this.video.play()
-                .then(() => console.log("Retrolaws video started playing successfully"))
-                .catch(err => console.error("Error starting retrolaws video:", err));
-        };
-        
-        // Add error handler for the new video
-        this.video.onerror = () => {
-            console.error("Error loading retrolaws.mp4:", this.video.error);
-        };
-        
-        // Start video with immediate play attempt
-        setTimeout(() => {
-            this.video.play().catch(e => {
-                console.warn("Immediate retrolaws playback failed, trying fallback:", e);
-                // Fallback: try muted first then unmute quickly
-                this.video.muted = true;
-                this.video.play().then(() => {
-                    console.log("Muted retrolaws video started, unmuting after delay");
-                    setTimeout(() => {
-                        this.video.muted = false;
-                        console.log("Retrolaws video unmuted");
-                    }, 1000);
-                }).catch(err => {
-                    console.error("Failed to play retrolaws even with muted workaround:", err);
-                });
-            });
-        }, 500);
+            document.dispatchEvent(navigationEvent);
+            
+        }, 800); // Wait for fade-out transition to complete
     }
 
     deactivate() {
@@ -265,9 +167,7 @@ export class VideoWidget8 extends Widget {
             this.video.currentTime = 0;
         }
 
-        if (this.upIcon) this.upIcon.src = '/static/icons/up_brown.svg';
-        if (this.downIcon) this.downIcon.src = '/static/icons/down_brown.svg';
-        if (this.nextIcon) this.nextIcon.src = '/static/icons/next.svg';
+        // VideoWidget8 doesn't have footer buttons/icons to reset
 
         document.removeEventListener('keydown', this.handleKeyDown);
         

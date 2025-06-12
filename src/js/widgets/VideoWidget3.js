@@ -10,7 +10,7 @@ export class VideoWidget3 extends Widget {
     render() {
         this.element.innerHTML = `
             <div class="widget relative w-full h-full">
-                <video id="mainVideo3" class="w-full h-full object-cover" preload="none" muted playsinline>
+                <video id="mainVideo3" class="w-full h-full object-cover video-transition video-fade-in" preload="none" muted playsinline>
                     <source id="videoSource" src="/static/videos/archbridge_agree.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
@@ -61,16 +61,10 @@ export class VideoWidget3 extends Widget {
             if (currentSrc.includes('archbridge_agree.mp4')) {
                 console.log('Archbridge video ended, no automatic action');
             } else if (currentSrc.includes('secondpart.mp4')) {
-                console.log('Secondpart video ended, automatically switching to presentmoods.mp4');
-                // Automatically switch to presentmoods.mp4 after secondpart.mp4 ends
+                console.log('Secondpart video ended, smoothly transitioning to politics_1 (VideoWidget4)');
+                // Directly transition to VideoWidget4 (politics_1.mp4) after secondpart.mp4 ends
                 setTimeout(() => {
-                    this.switchToThirdVideo();
-                }, 1000);
-            } else if (currentSrc.includes('presentmoods.mp4')) {
-                console.log('Presentmoods video ended, automatically navigating to VideoWidget4');
-                // Navigate to VideoWidget4 (Widget 6) after presentmoods.mp4 ends
-                setTimeout(() => {
-                    window.location.href = '/?widget=6';
+                    this.smoothTransitionToNextWidget();
                 }, 1000);
             }
         });
@@ -141,120 +135,95 @@ export class VideoWidget3 extends Widget {
         document.addEventListener('keydown', this.handleKeyDown);
     }
     
-    // Method to switch to the second video
+    // Method to switch to the second video with smooth transition
     switchToSecondVideo() {
-        // Pause current video
-        this.video.pause();
+        console.log("Starting smooth transition to secondpart.mp4");
         
-        console.log("Switching to secondpart.mp4");
+        // Step 1: Fade out current video
+        this.video.classList.add('video-fade-out');
         
-        // Update the video source
-        const videoSource = this.element.querySelector('#videoSource');
-        console.log("Current source before change:", videoSource.src);
-        videoSource.src = '/static/videos/secondpart.mp4'; // Changed to secondpart.mp4
-        console.log("New source after change:", videoSource.src);
-        
-        // Hide the footer for secondpart video
-        const footer = this.element.querySelector('.absolute.bottom-0');
-        if (footer) {
-            console.log("Hiding footer for secondpart video");
-            footer.style.display = 'none';
-        }
-        
-        // Update the video element to ensure autoplay
-        this.video.autoplay = true;
-        this.video.controls = false;
-        this.video.muted = false; // Ensure it's not muted
-        
-        // Load the new source
-        console.log("Loading new video source");
-        this.video.load();
-        
-        // Reset playback state
-        this.hasPlayed = false;
-        
-        // Ensure the video plays immediately after loading
-        this.video.onloadeddata = () => {
-            console.log("Secondpart video data loaded, starting playback immediately");
-            this.video.play()
-                .then(() => console.log("Secondpart video started playing successfully"))
-                .catch(err => console.error("Error starting secondpart video:", err));
-        };
-        
-        // Add error handler for the new video
-        this.video.onerror = () => {
-            console.error("Error loading secondpart.mp4:", this.video.error);
-        };
-        
-        // Start video with forcedStartVideo method
-        this.forcedStartVideo();
-        
-        // Double-check video source was applied correctly
+        // Step 2: After fade out completes, switch video source
         setTimeout(() => {
-            const currentSource = this.element.querySelector('#videoSource').src;
-            console.log("Current video source after 500ms:", currentSource);
-            console.log("Video readyState:", this.video.readyState);
-            console.log("Video paused:", this.video.paused);
-            console.log("Video duration:", this.video.duration);
-        }, 500);
+            // Pause current video
+            this.video.pause();
+            
+            console.log("Switching to secondpart.mp4");
+            
+            // Update the video source
+            const videoSource = this.element.querySelector('#videoSource');
+            console.log("Current source before change:", videoSource.src);
+            videoSource.src = '/static/videos/secondpart.mp4';
+            console.log("New source after change:", videoSource.src);
+            
+            // Hide the footer for secondpart video
+            const footer = this.element.querySelector('.absolute.bottom-0');
+            if (footer) {
+                console.log("Hiding footer for secondpart video");
+                footer.style.display = 'none';
+            }
+            
+            // Update the video element settings
+            this.video.autoplay = true;
+            this.video.controls = false;
+            this.video.muted = false;
+            
+            // Load the new source
+            console.log("Loading new video source");
+            this.video.load();
+            
+            // Reset playback state
+            this.hasPlayed = false;
+            
+            // Step 3: When new video is ready, fade it back in
+            this.video.onloadeddata = () => {
+                console.log("Secondpart video data loaded, fading in and starting playback");
+                
+                // Remove fade-out and add fade-in
+                this.video.classList.remove('video-fade-out');
+                this.video.classList.add('video-fade-in');
+                
+                // Start playing the new video
+                this.video.play()
+                    .then(() => console.log("Secondpart video started playing successfully with fade-in"))
+                    .catch(err => console.error("Error starting secondpart video:", err));
+            };
+            
+            // Add error handler
+            this.video.onerror = () => {
+                console.error("Error loading secondpart.mp4:", this.video.error);
+                // If error, still fade back in to show something
+                this.video.classList.remove('video-fade-out');
+                this.video.classList.add('video-fade-in');
+            };
+            
+            // Fallback: Start video with forcedStartVideo method
+            this.forcedStartVideo();
+            
+        }, 800); // Wait for fade-out transition to complete (matching CSS duration)
     }
 
-    // Method to switch to the third video (presentmoods.mp4)
-    switchToThirdVideo() {
-        // Pause current video
-        this.video.pause();
+    // Method to smoothly transition to VideoWidget4 (politics_1.mp4)
+    smoothTransitionToNextWidget() {
+        console.log("Starting smooth transition from secondpart to VideoWidget4 (politics_1)");
         
-        console.log("Switching to presentmoods.mp4");
+        // Step 1: Fade out current video
+        this.video.classList.add('video-fade-out');
         
-        // Update the video source
-        const videoSource = this.element.querySelector('#videoSource');
-        console.log("Current source before change:", videoSource.src);
-        videoSource.src = '/static/videos/presentmoods.mp4';
-        console.log("New source after change:", videoSource.src);
-        
-        // Keep the footer hidden for presentmoods video
-        const footer = this.element.querySelector('.absolute.bottom-0');
-        if (footer) {
-            console.log("Keeping footer hidden for presentmoods video");
-            footer.style.display = 'none';
-        }
-        
-        // Update the video element to ensure autoplay
-        this.video.autoplay = true;
-        this.video.controls = false;
-        this.video.muted = false; // Ensure it's not muted
-        
-        // Load the new source
-        console.log("Loading presentmoods video source");
-        this.video.load();
-        
-        // Reset playback state
-        this.hasPlayed = false;
-        
-        // Ensure the video plays immediately after loading
-        this.video.onloadeddata = () => {
-            console.log("Presentmoods video data loaded, starting playback immediately");
-            this.video.play()
-                .then(() => console.log("Presentmoods video started playing successfully"))
-                .catch(err => console.error("Error starting presentmoods video:", err));
-        };
-        
-        // Add error handler for the new video
-        this.video.onerror = () => {
-            console.error("Error loading presentmoods.mp4:", this.video.error);
-        };
-        
-        // Start video with forcedStartVideo method
-        this.forcedStartVideo();
-        
-        // Double-check video source was applied correctly
+        // Step 2: After fade out completes, navigate to VideoWidget4
         setTimeout(() => {
-            const currentSource = this.element.querySelector('#videoSource').src;
-            console.log("Current video source after 500ms:", currentSource);
-            console.log("Video readyState:", this.video.readyState);
-            console.log("Video paused:", this.video.paused);
-            console.log("Video duration:", this.video.duration);
-        }, 500);
+            // Pause current video
+            this.video.pause();
+            this.video.currentTime = 0;
+            
+            console.log("Navigating to VideoWidget4 (politics_1.mp4)");
+            
+            // Dispatch custom navigation event to VideoWidget4 (Widget 6)
+            const navigationEvent = new CustomEvent('navigateToWidget', {
+                detail: { targetWidget: 6 }
+            });
+            document.dispatchEvent(navigationEvent);
+            
+        }, 800); // Wait for fade-out transition to complete
     }
 
     handleKeyDown = (event) => {

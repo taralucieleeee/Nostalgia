@@ -8,9 +8,9 @@ export class VideoWidget5 extends Widget {
 
     render() {
         this.element.innerHTML = `
-            <div class="widget relative w-full h-full">
+            <div class="widget relative w-full h-full law-widget">
                 <img src="static/images/law_1.png" alt="Law 1 Image" 
-                    class="absolute inset-0 w-full h-full object-contain z-0">
+                    class="absolute inset-0 w-full h-full object-contain z-0 law-image transitioning-in">
                 
                 <!-- Footer Overlay with UP/DOWN buttons -->
                 <div class="absolute bottom-0 left-0 right-0 flex-shrink-0 flex flex-row justify-center w-full px-8 py-12" style="background-color: #FFDCDC;">
@@ -59,10 +59,10 @@ export class VideoWidget5 extends Widget {
             this.upIcon.src = '/static/icons/upfilled_brown.svg';
             console.log("Up button clicked on VideoWidget5 - navigating to VideoWidget7 (law_3)");
             
-            // Navigate to VideoWidget7 (Widget 9)
-            setTimeout(() => {
-                window.location.href = '/?widget=9';
-            }, 200);
+            // Add fade transition before navigation
+            this.startFadeTransition(() => {
+                this.navigateToWidget(9);
+            });
         });
 
         // Down button - navigate to VideoWidget6 (law_2)  
@@ -73,10 +73,10 @@ export class VideoWidget5 extends Widget {
             this.downIcon.src = '/static/icons/downfilled_brown.svg';
             console.log("Down button clicked on VideoWidget5 - navigating to VideoWidget6 (law_2)");
             
-            // Navigate to VideoWidget6 (Widget 8)
-            setTimeout(() => {
-                window.location.href = '/?widget=8';
-            }, 200);
+            // Add fade transition before navigation
+            this.startFadeTransition(() => {
+                this.navigateToWidget(8);
+            });
         });
 
         // Next button - navigate to VideoWidget10 (rising.mp4)
@@ -86,9 +86,9 @@ export class VideoWidget5 extends Widget {
             
             console.log("Next button clicked on VideoWidget5 - navigating to VideoWidget10 (rising.mp4)");
             
-            // Navigate to VideoWidget10 (Widget 12)
+            // Navigate to VideoWidget10 (Widget 12) - no fade transition for non-law widgets
             setTimeout(() => {
-                window.location.href = '/?widget=12';
+                this.navigateToWidget(12);
             }, 200);
         });
 
@@ -117,10 +117,10 @@ export class VideoWidget5 extends Widget {
             
             console.log("VideoWidget5: UP key pressed - navigating to VideoWidget7 (law_3)");
             
-            // Navigate to VideoWidget7 (Widget 9)
-            setTimeout(() => {
-                window.location.href = '/?widget=9';
-            }, 200);
+            // Add fade transition before navigation
+            this.startFadeTransition(() => {
+                this.navigateToWidget(9);
+            });
         } else if (key === 's' || key === 'arrowdown') {
             // DOWN button functionality - navigate to VideoWidget6
             event.preventDefault();
@@ -131,10 +131,10 @@ export class VideoWidget5 extends Widget {
             
             console.log("VideoWidget5: DOWN key pressed - navigating to VideoWidget6 (law_2)");
             
-            // Navigate to VideoWidget6 (Widget 8)
-            setTimeout(() => {
-                window.location.href = '/?widget=8';
-            }, 200);
+            // Add fade transition before navigation
+            this.startFadeTransition(() => {
+                this.navigateToWidget(8);
+            });
         } else if (key === 'd') {
             // NEXT button functionality - navigate to VideoWidget10
             event.preventDefault();
@@ -145,9 +145,9 @@ export class VideoWidget5 extends Widget {
             
             console.log("VideoWidget5: NEXT key pressed - navigating to VideoWidget10 (rising.mp4)");
             
-            // Navigate to VideoWidget10 (Widget 12)
+            // Navigate to VideoWidget10 (Widget 12) - no fade for non-law widgets
             setTimeout(() => {
-                window.location.href = '/?widget=12';
+                this.navigateToWidget(12);
             }, 200);
         } else if (key === 'r') {
             // Allow reset functionality - let main.js handle it
@@ -179,18 +179,39 @@ export class VideoWidget5 extends Widget {
     }
 
     deactivate() {
-        if (this.observer) {
-            this.observer.disconnect();
-        }
-
-        // Reset button icons to default state
+        // Reset all icons to their default unfilled state
         if (this.upIcon) this.upIcon.src = '/static/icons/up_brown.svg';
         if (this.downIcon) this.downIcon.src = '/static/icons/down_brown.svg';
         if (this.nextIcon) this.nextIcon.src = '/static/icons/next.svg';
+        
+        if (this.observer) {
+            this.observer.disconnect();
+        }
 
         // Remove keyboard event listener
         document.removeEventListener('keydown', this.handleKeyDown);
         
         console.log('VideoWidget5 deactivated');
+    }
+
+    startFadeTransition(navigationCallback) {
+        // Add fade-out class to current widget
+        const lawImage = this.element.querySelector('img[src*="law_"]');
+        if (lawImage) {
+            lawImage.classList.add('law-image', 'transitioning-out');
+        }
+        
+        // Execute navigation after fade-out completes
+        setTimeout(() => {
+            navigationCallback();
+        }, 600); // Match CSS transition duration
+    }
+    
+    navigateToWidget(targetWidget) {
+        // Dispatch custom navigation event
+        const navigationEvent = new CustomEvent('navigateToWidget', {
+            detail: { targetWidget: targetWidget }
+        });
+        document.dispatchEvent(navigationEvent);
     }
 }

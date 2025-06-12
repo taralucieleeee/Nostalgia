@@ -17,8 +17,9 @@ class WidgetManager {
         this.currentWidget = this.getInitialWidget();
         this.widgets = [];
         this.backgroundMusic = document.getElementById('bgMusic');
-        this.backgroundMusic.loop = true;
+        this.backgroundMusic.loop = true; // Enable continuous looping
         this.setupAudioContext();
+        this.setupCrossPageAudio();
         this.init();
     }
 
@@ -39,6 +40,12 @@ class WidgetManager {
         // Create audio context on user interaction
         const handleFirstInteraction = () => {
             if (this.currentWidget <= 2) {
+                // Full volume for FirstWidget and SecondWidget
+                this.backgroundMusic.volume = 1.0;
+                this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            } else if (this.currentWidget <= 5) {
+                // Subtle volume for VideoWidget, VideoWidget2, VideoWidget3 (until politics_1 video)
+                this.backgroundMusic.volume = 0.15;
                 this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
             }
             // Remove the event listeners once audio is playing
@@ -49,6 +56,29 @@ class WidgetManager {
         // Add event listeners for first interaction
         document.addEventListener('click', handleFirstInteraction);
         document.addEventListener('keydown', handleFirstInteraction);
+    }
+
+    setupCrossPageAudio() {
+        // Save audio state when leaving page (for vote.html/results.html navigation)
+        window.addEventListener('beforeunload', () => {
+            const audioState = {
+                isPlaying: !this.backgroundMusic.paused,
+                currentTime: this.backgroundMusic.currentTime
+            };
+            localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
+        });
+        
+        // Try to restore audio state from previous page (if returning from vote/results)
+        const audioState = localStorage.getItem('nostalgiaAudioState');
+        if (audioState) {
+            const state = JSON.parse(audioState);
+            if (state.isPlaying && state.currentTime !== undefined) {
+                // Set the time but don't auto-play yet (will start on user interaction)
+                this.backgroundMusic.currentTime = state.currentTime;
+            }
+            // Clear the stored state since we've restored it
+            localStorage.removeItem('nostalgiaAudioState');
+        }
     }
 
     init() {
@@ -111,15 +141,11 @@ class WidgetManager {
                 // Toggle between first and second widget with visual feedback
                 if (this.currentWidget === 1) {
                     this.applyVisualFeedbackAndNavigate(() => {
-                        this.currentWidget = 2;
-                        this.updateWidgetPositions();
-                        this.updateNavigationButtons();
+                        this.navigateToWidget(1);
                     });
                 } else if (this.currentWidget === 2) {
                     this.applyVisualFeedbackAndNavigate(() => {
-                        this.currentWidget = 1;
-                        this.updateWidgetPositions();
-                        this.updateNavigationButtons();
+                        this.navigateToWidget(-1);
                     });
                 }
             } else if (key === 'a') {
@@ -165,9 +191,7 @@ class WidgetManager {
             } else if (key === 'r') {
                 // Reset to first widget - works for all widgets
                 this.applyVisualFeedbackAndNavigate(() => {
-                    this.currentWidget = 1;
-                    this.updateWidgetPositions();
-                    this.updateNavigationButtons();
+                    this.navigateToWidget(1 - this.currentWidget);
                 });
             }
         });
@@ -177,9 +201,31 @@ class WidgetManager {
             const targetWidget = event.detail.targetWidget;
             console.log(`Custom navigation event: moving to widget ${targetWidget}`);
             
+            // Clean up current widget before navigation
+            this.cleanupCurrentWidget();
+            
             this.currentWidget = targetWidget;
             this.updateWidgetPositions();
             this.updateNavigationButtons();
+            
+            // Handle background music based on current widget
+            if (this.currentWidget <= 2) {
+                // Full volume for FirstWidget and SecondWidget
+                this.backgroundMusic.volume = 1.0;
+                if (this.backgroundMusic.paused) {
+                    this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+                }
+            } else if (this.currentWidget <= 5) {
+                // Subtle volume for VideoWidget, VideoWidget2, VideoWidget3 (until politics_1 video)
+                this.backgroundMusic.volume = 0.15;
+                if (this.backgroundMusic.paused) {
+                    this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+                }
+            } else {
+                // Stop completely from VideoWidget4 (politics_1 video) onwards
+                this.backgroundMusic.pause();
+                this.backgroundMusic.currentTime = 0;
+            }
         });
 
         this.updateNavigationButtons();
@@ -206,6 +252,13 @@ class WidgetManager {
     applyVisualFeedbackAndRedirect(url) {
         // Prevent interactions during transition
         document.body.style.pointerEvents = 'none';
+        
+        // Save audio state before redirect
+        const audioState = {
+            isPlaying: !this.backgroundMusic.paused,
+            currentTime: this.backgroundMusic.currentTime
+        };
+        localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
         
         // Clean up current widget
         this.cleanupCurrentWidget();
@@ -257,27 +310,36 @@ class WidgetManager {
         
         // Handle background music based on current widget
         if (this.currentWidget <= 2) {
+            // Full volume for FirstWidget and SecondWidget
+            this.backgroundMusic.volume = 1.0;
+            if (this.backgroundMusic.paused) {
+                this.backgroundMusic.play().catch(e => console.log('Audio playbook failed:', e));
+            }
+        } else if (this.currentWidget <= 5) {
+            // Subtle volume for VideoWidget, VideoWidget2, VideoWidget3 (until politics_1 video)
+            this.backgroundMusic.volume = 0.15;
             if (this.backgroundMusic.paused) {
                 this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
             }
         } else {
+            // Stop completely from VideoWidget4 (politics_1 video) onwards
             this.backgroundMusic.pause();
             this.backgroundMusic.currentTime = 0;
         }
         
-        // Extra safety: ensure no presentmoods video is playing when not on VideoWidget3
+        // Extra safety: ensure video cleanup when not on VideoWidget3
         if (this.currentWidget !== 5) {
-            this.preventPresentmoodsAudioBleeding();
+            this.preventVideoAudioBleeding();
         }
     }
 
-    preventPresentmoodsAudioBleeding() {
-        // Find VideoWidget3's video element and ensure it's not playing presentmoods
+    preventVideoAudioBleeding() {
+        // Find VideoWidget3's video element and ensure it's not playing any videos
         const videoWidget3Element = document.querySelector('[data-widget="5"] video');
         if (videoWidget3Element) {
             const source = videoWidget3Element.querySelector('source');
-            if (source && source.src.includes('presentmoods.mp4')) {
-                console.log('Preventing presentmoods audio bleeding - resetting VideoWidget3');
+            if (source && (source.src.includes('secondpart.mp4') || source.src.includes('presentmoods.mp4'))) {
+                console.log('Preventing video audio bleeding - resetting VideoWidget3');
                 videoWidget3Element.pause();
                 videoWidget3Element.currentTime = 0;
                 source.src = '/static/videos/archbridge_agree.mp4';
@@ -305,12 +367,12 @@ class WidgetManager {
             }
         });
         
-        // Specifically target any presentmoods video that might be preloading
+        // Specifically target any videos that might be preloading
         const videoWidget3 = document.getElementById('mainVideo3');
         if (videoWidget3) {
             const source = videoWidget3.querySelector('source');
-            if (source && source.src.includes('presentmoods.mp4')) {
-                console.log('⚠️ FOUND PRESENTMOODS VIDEO - Cleaning up to prevent audio bleeding');
+            if (source && (source.src.includes('secondpart.mp4') || source.src.includes('presentmoods.mp4'))) {
+                console.log('⚠️ FOUND PLAYING VIDEO - Cleaning up to prevent audio bleeding');
                 videoWidget3.pause();
                 videoWidget3.currentTime = 0;
                 source.src = '/static/videos/archbridge_agree.mp4'; // Reset to default

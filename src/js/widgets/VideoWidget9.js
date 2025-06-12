@@ -130,6 +130,21 @@ export class VideoWidget9 extends Widget {
         });
     }
 
+    deactivate() {
+        // Reset reset icon to unfilled state
+        if (this.resetIcon) {
+            this.resetIcon.src = '/static/icons/resetbutton.svg';
+        }
+        
+        if (this.observer) {
+            this.observer.disconnect();
+        }
+        
+        document.removeEventListener('keydown', this.handleKeyDown);
+        
+        console.log('VideoWidget9 deactivated');
+    }
+
     destroy() {
         if (this.observer) {
             this.observer.disconnect();
