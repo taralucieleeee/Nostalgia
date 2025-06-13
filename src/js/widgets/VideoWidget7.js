@@ -10,7 +10,7 @@ export class VideoWidget7 extends Widget {
         this.element.innerHTML = `
             <div class="widget relative w-full h-full law-widget">
                 <img src="static/images/law_3.png" alt="Law 3 Image" 
-                    class="absolute inset-0 w-full h-full object-contain z-0 law-image transitioning-in">
+                    class="absolute inset-0 w-full h-full object-contain z-0">
                 
                 <!-- Footer Overlay with UP/DOWN buttons -->
                 <div class="absolute bottom-0 left-0 right-0 flex-shrink-0 flex flex-row justify-center w-full px-8 py-12" style="background-color: #FFDCDC;">
@@ -37,182 +37,87 @@ export class VideoWidget7 extends Widget {
             </div>
         `;
 
-        // Get references to elements
-        this.upBtn = this.element.querySelector('#upBtn');
-        this.downBtn = this.element.querySelector('#downBtn');
-        this.nextBtn = this.element.querySelector('#nextBtn');
-        this.upIcon = this.element.querySelector('#upIcon');
-        this.downIcon = this.element.querySelector('#downIcon');
-        this.nextIcon = this.element.querySelector('#nextIcon');
-
-        // Set up event listeners
-        this.setupFooterListeners();
+        this.setupEventListeners();
         this.setupMutationObserver();
     }
 
-    setupFooterListeners() {
-        // Up button - navigate back to VideoWidget6 (Widget 8)
-        this.upBtn.addEventListener('click', (e) => {
+    setupEventListeners() {
+        // Button clicks - IMMEDIATE navigation with visual feedback
+        this.element.querySelector('#upBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Change icon to provide visual feedback
-            this.upIcon.src = '/static/icons/upfilled_brown.svg';
-            console.log("Up button clicked on VideoWidget7 - navigating back to Widget 8");
-            
-            // Add fade transition before navigation
-            this.startFadeTransition(() => {
-                this.navigateToWidget(8);
-            });
+            this.navigateWithFeedback('up', 8); // law_2
         });
 
-        // Down button - navigate back to VideoWidget5 (law_1) - circular navigation  
-        this.downBtn.addEventListener('click', (e) => {
+        this.element.querySelector('#downBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Change icon to provide visual feedback
-            this.downIcon.src = '/static/icons/downfilled_brown.svg';
-            console.log("Down button clicked on VideoWidget7 - navigating back to VideoWidget5 (law_1)");
-            
-            // Add fade transition before navigation
-            this.startFadeTransition(() => {
-                this.navigateToWidget(7);
-            });
+            this.navigateWithFeedback('down', 7); // law_1 (completes the circle!)
         });
 
-        // Next button - navigate to VideoWidget10 (rising.mp4)
-        this.nextBtn.addEventListener('click', (e) => {
+        this.element.querySelector('#nextBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            this.nextIcon.src = '/static/icons/nextfilled.svg';
-            
-            console.log("Next button clicked on VideoWidget7 - navigating to VideoWidget10 (rising.mp4)");
-            
-            // Navigate to VideoWidget10 (Widget 12)
-            setTimeout(() => {
-                window.location.href = '/?widget=12';
-            }, 200);
+            this.navigateWithFeedback('next', 12); // rising.mp4
         });
 
-        // Keyboard navigation
+        // Keyboard - IMMEDIATE navigation with visual feedback
         document.addEventListener('keydown', this.handleKeyDown);
     }
 
     handleKeyDown = (event) => {
+        if (!this.element.classList.contains('widget-active')) return;
+        
         const key = event.key.toLowerCase();
         
-        // Only handle keys when this widget is active
-        if (!this.element.classList.contains('widget-active')) {
-            console.log("VideoWidget7: Not active, ignoring key press");
-            return;
-        }
-        
-        console.log("VideoWidget7: Key pressed:", key);
-        
         if (key === 'w' || key === 'arrowup') {
-            // UP button functionality - navigate back to Widget 8
             event.preventDefault();
             event.stopPropagation();
-            
-            // Change up icon to filled version
-            this.upIcon.src = '/static/icons/upfilled_brown.svg';
-            
-            console.log("VideoWidget7: UP key pressed - navigating back to Widget 8");
-            
-            // Navigate back to Widget 8
-            // Add fade transition before navigation
-            this.startFadeTransition(() => {
-                this.navigateToWidget(8);
-            });
+            this.navigateWithFeedback('up', 8);
         } else if (key === 's' || key === 'arrowdown') {
-            // DOWN button functionality - navigate back to VideoWidget5 (law_1)
             event.preventDefault();
             event.stopPropagation();
-            
-            // Change down icon to filled version
-            this.downIcon.src = '/static/icons/downfilled_brown.svg';
-            
-            console.log("VideoWidget7: DOWN key pressed - navigating back to VideoWidget5 (law_1)");
-            
-            // Add fade transition before navigation
-            this.startFadeTransition(() => {
-                this.navigateToWidget(7);
-            });
+            this.navigateWithFeedback('down', 7);
         } else if (key === 'd') {
-            // NEXT button functionality - navigate to VideoWidget10
             event.preventDefault();
             event.stopPropagation();
-            
-            // Change next icon to filled version  
-            this.nextIcon.src = '/static/icons/nextfilled.svg';
-            
-            console.log("VideoWidget7: NEXT key pressed - navigating to VideoWidget10 (rising.mp4)");
-            
-            // Navigate to VideoWidget10 (Widget 12)
-            setTimeout(() => {
-                window.location.href = '/?widget=12';
-            }, 200);
-        } else if (key === 'r') {
-            // Allow reset functionality - let main.js handle it
-            console.log("VideoWidget7: Reset key pressed - allowing main.js to handle");
-            return;
+            this.navigateWithFeedback('next', 12);
         }
     }
 
+    // HYBRID: Visual feedback + immediate navigation
+    navigateWithFeedback(direction, targetWidget) {
+        // Show visual feedback immediately
+        const iconMap = {
+            'up': { element: this.element.querySelector('#upIcon'), filled: '/static/icons/upfilled_brown.svg' },
+            'down': { element: this.element.querySelector('#downIcon'), filled: '/static/icons/downfilled_brown.svg' },
+            'next': { element: this.element.querySelector('#nextIcon'), filled: '/static/icons/nextfilled.svg' }
+        };
+        
+        const icon = iconMap[direction];
+        if (icon?.element) {
+            icon.element.src = icon.filled;
+        }
+        
+        console.log(`VideoWidget7 (law_3): ${direction.toUpperCase()} → Widget ${targetWidget}`);
+        
+        // Navigate immediately (no delay!)
+        window.location.href = `/?widget=${targetWidget}`;
+    }
+
     setupMutationObserver() {
-        // Watch for when this widget becomes active
         this.observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'attributes' && 
-                    mutation.attributeName === 'class') {
-                    
-                    if (this.element.classList.contains('widget-active')) {
-                        // Reset all buttons to default state
-                        if (this.upIcon) this.upIcon.src = '/static/icons/up_brown.svg';
-                        if (this.downIcon) this.downIcon.src = '/static/icons/down_brown.svg';
-                        if (this.nextIcon) this.nextIcon.src = '/static/icons/next.svg';
-                        
-                        console.log("VideoWidget7 activated - showing law_3 image");
-                    }
+                    mutation.attributeName === 'class' &&
+                    this.element.classList.contains('widget-active')) {
+                    console.log("VideoWidget7 (law_3) activated");
                 }
             });
         });
-
         this.observer.observe(this.element, { attributes: true });
     }
 
     deactivate() {
-        // Reset all icons to their default unfilled state
-        if (this.upIcon) this.upIcon.src = '/static/icons/up_brown.svg';
-        if (this.downIcon) this.downIcon.src = '/static/icons/down_brown.svg';
-        if (this.nextIcon) this.nextIcon.src = '/static/icons/next.svg';
-        
-        if (this.observer) {
-            this.observer.disconnect();
-        }
-
-        // Remove keyboard event listener
+        if (this.observer) this.observer.disconnect();
         document.removeEventListener('keydown', this.handleKeyDown);
-        
-        console.log('VideoWidget7 deactivated');
-    }
-
-    startFadeTransition(navigationCallback) {
-        // Add fade-out class to current widget
-        const lawImage = this.element.querySelector('img[src*="law_"]');
-        if (lawImage) {
-            lawImage.classList.add('law-image', 'transitioning-out');
-        }
-        
-        // Execute navigation after fade-out completes
-        setTimeout(() => {
-            navigationCallback();
-        }, 600); // Match CSS transition duration
-    }
-    
-    navigateToWidget(targetWidget) {
-        // Dispatch custom navigation event
-        const navigationEvent = new CustomEvent('navigateToWidget', {
-            detail: { targetWidget: targetWidget }
-        });
-        document.dispatchEvent(navigationEvent);
+        console.log('VideoWidget7 (law_3) deactivated');
     }
 }
