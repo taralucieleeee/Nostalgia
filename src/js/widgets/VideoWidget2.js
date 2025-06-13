@@ -10,8 +10,9 @@ export class VideoWidget2 extends Widget {
     render() {
         this.element.innerHTML = `
             <div class="widget relative w-full h-full">
-                <video id="mainVideo" class="w-full h-full object-cover" preload="metadata" muted playsinline autoplay>
-                    <source id="videoSource" src="/static/videos/bertelmannstiftung_agree.mp4" type="video/mp4">
+                <img id="mainImage" src="/static/images/results_1.png" alt="Results 1" class="w-full h-full object-contain">
+                <video id="mainVideo" class="w-full h-full object-cover" preload="metadata" muted playsinline autoplay style="display: none;">
+                    <source id="videoSource" src="/static/videos/transititonvote2.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 
@@ -32,11 +33,14 @@ export class VideoWidget2 extends Widget {
         `;
 
         // Get references to elements
+        this.image = this.element.querySelector('#mainImage');
         this.video = this.element.querySelector('#mainVideo');
+        this.footer = this.element.querySelector('.absolute.bottom-0');
         this.backBtn = this.element.querySelector('#backBtn');
         this.nextBtn = this.element.querySelector('#nextBtn');
         this.backIcon = this.element.querySelector('#backIcon');
         this.nextIcon = this.element.querySelector('#nextIcon');
+        this.isShowingImage = true; // Track whether we're showing image or video
 
         // Set up event listeners
         this.setupVideoListeners();
@@ -45,20 +49,23 @@ export class VideoWidget2 extends Widget {
     }
 
     setupVideoListeners() {
-        // Add an 'ended' event listener for tracking when the video finishes
+        // Add an 'ended' event listener for when the transition video finishes
         this.video.addEventListener('ended', () => {
             console.log('Video playback completed');
+            
+            // Always show footer when video ends
+            if (this.footer) {
+                this.footer.style.display = 'block';
+                console.log('VideoWidget2: Video ended, showing footer');
+            }
             
             // Get the current source
             const videoSource = this.element.querySelector('#videoSource');
             const currentSrc = videoSource.src;
             console.log("Current video source:", currentSrc);
             
-            if (currentSrc.includes('bertelmannstiftung_agree.mp4')) {
-                console.log('First video (bertelmannstiftung_agree.mp4) ended - waiting for user action');
-                // Do not automatically switch - wait for user to press 'D' or click Next
-            } else if (currentSrc.includes('transititonvote2.mp4')) {
-                console.log('Second video ended, redirecting to vote2.html');
+            if (currentSrc.includes('transititonvote2.mp4')) {
+                console.log('Transition video ended, redirecting to vote2.html');
                 // Redirect to vote2.html after the transititonvote2.mp4 video ends
                 setTimeout(() => {
                     window.location.href = '/vote2.html';
@@ -66,7 +73,7 @@ export class VideoWidget2 extends Widget {
             }
         });
         
-        // Add listeners for debugging video loading
+        // Add listeners for debugging video loading (only needed for transition video)
         this.video.addEventListener('loadstart', () => console.log('Video: loadstart'));
         this.video.addEventListener('durationchange', () => console.log('Video: durationchange'));
         this.video.addEventListener('loadedmetadata', () => console.log('Video: loadedmetadata'));
@@ -75,7 +82,16 @@ export class VideoWidget2 extends Widget {
         this.video.addEventListener('canplaythrough', () => console.log('Video: canplaythrough'));
         this.video.addEventListener('stalled', () => console.warn('Video: stalled'));
         this.video.addEventListener('suspend', () => console.log('Video: suspend'));
-        this.video.addEventListener('play', () => console.log('Video: play started'));
+        this.video.addEventListener('play', () => {
+            console.log('Video: play started');
+            // Hide footer during transition video playback
+            if (this.video.src.includes('transititonvote2.mp4')) {
+                console.log('VideoWidget2: Transition video detected, hiding footer');
+                if (this.footer) {
+                    this.footer.style.display = 'none';
+                }
+            }
+        });
         this.video.addEventListener('playing', () => console.log('Video: now playing'));
         this.video.addEventListener('waiting', () => console.warn('Video: waiting for more data'));
         this.video.addEventListener('error', (e) => {
@@ -121,34 +137,38 @@ export class VideoWidget2 extends Widget {
         document.addEventListener('keydown', this.handleKeyDown, true);
     }
 
-    // Method to switch to the second video
+    // Method to switch from image to transition video
     switchToSecondVideo() {
-        // Pause current video
-        this.video.pause();
+        console.log("Switching from results_1.png image to transititonvote2.mp4 video");
         
-        console.log("Switching to transititonvote2.mp4 video");
+        // Hide the image
+        this.image.style.display = 'none';
         
-        // Update the video source with correct path
-        const videoSource = this.element.querySelector('#videoSource');
-        console.log("Current source before change:", videoSource.src);
-        videoSource.src = '/static/videos/transititonvote2.mp4';  // Added leading slash
-        console.log("New source after change:", videoSource.src);
+        // Show the video element
+        this.video.style.display = 'block';
         
         // Update the video element to ensure autoplay
         this.video.autoplay = true;
         this.video.controls = false;
         this.video.muted = false; // Ensure it's not muted
         
-        // Load the new source
-        console.log("Loading new video source");
+        // Load the video source (already set to transititonvote2.mp4 in render)
+        console.log("Loading transition video source");
         this.video.load();
         
         // Reset playback state
         this.hasPlayed = false;
+        this.isShowingImage = false;
         
         // Ensure the video plays immediately after loading
         this.video.onloadeddata = () => {
             console.log("Video data loaded, starting playback immediately");
+            // Hide footer when transition video is about to start
+            if (this.footer) {
+                this.footer.style.display = 'none';
+                console.log('VideoWidget2: Hiding footer for transition video');
+            }
+            
             this.video.play()
                 .then(() => console.log("Video started playing successfully"))
                 .catch(err => console.error("Error starting video:", err));
@@ -184,8 +204,8 @@ export class VideoWidget2 extends Widget {
             // Prevent any other widgets from being shown
             document.body.style.pointerEvents = 'none';
             
-            // Stop video playback immediately
-            if (this.video) {
+            // Stop any current video playback
+            if (this.video && !this.video.paused) {
                 this.video.pause();
                 this.video.src = ''; // Clear source to prevent any further loading
             }
@@ -202,17 +222,22 @@ export class VideoWidget2 extends Widget {
             // Change next icon to filled version  
             this.nextIcon.src = '/static/icons/nextfilled.svg';
             
-            console.log("VideoWidget2: Switching to transititonvote2.mp4 video");
-            
-            // Switch to the second video
-            this.switchToSecondVideo();
-        } else if (key === ' ') {
-            // Space bar toggles play/pause
-            event.preventDefault();
-            if (this.video.paused) {
-                this.video.play();
+            if (this.isShowingImage) {
+                console.log("VideoWidget2: Switching from image to transititonvote2.mp4 video");
+                // Switch from image to transition video
+                this.switchToSecondVideo();
             } else {
-                this.video.pause();
+                console.log("VideoWidget2: Already showing video");
+            }
+        } else if (key === ' ') {
+            // Space bar toggles play/pause (only works when video is visible)
+            event.preventDefault();
+            if (!this.isShowingImage && this.video) {
+                if (this.video.paused) {
+                    this.video.play();
+                } else {
+                    this.video.pause();
+                }
             }
         }
     }
@@ -229,10 +254,16 @@ export class VideoWidget2 extends Widget {
                         if (this.nextIcon) this.nextIcon.src = '/static/icons/next.svg';
                         if (this.backIcon) this.backIcon.src = '/static/icons/back.svg';
                         
-                        // Start video if it hasn't played yet
-                        if (!this.hasPlayed) {
-                            this.startVideoWithDelay();
-                            this.hasPlayed = true;
+                        // Show footer when widget becomes active (unless transition video is playing)
+                        if (this.footer && this.isShowingImage) {
+                            this.footer.style.display = 'block';
+                        }
+                        
+                        // Ensure we're showing the image initially
+                        if (this.isShowingImage) {
+                            this.image.style.display = 'block';
+                            this.video.style.display = 'none';
+                            console.log("VideoWidget2: Showing results_1.png image");
                         }
                     }
                 }
@@ -242,96 +273,17 @@ export class VideoWidget2 extends Widget {
         this.observer.observe(this.element, { attributes: true });
     }
 
-    startVideoWithDelay() {
-        // Reset video
-        this.video.currentTime = 0;
-        this.video.muted = true;
-        
-        console.log(`Starting video with 1 second delay: ${this.video.querySelector('source').src}`);
-        console.log(`Initial readyState: ${this.video.readyState}`);
-        
-        // Add error event listener to catch loading issues
-        this.video.addEventListener('error', (e) => {
-            console.error("Video error:", e);
-            console.error("Video error code:", this.video.error ? this.video.error.code : 'unknown');
-        }, { once: true });
-        
-        // Add event listeners for debugging
-        this.video.addEventListener('loadstart', () => console.log('Video: loadstart'));
-        this.video.addEventListener('loadeddata', () => console.log('Video: loadeddata'));
-        this.video.addEventListener('canplay', () => console.log('Video: canplay'));
-        this.video.addEventListener('canplaythrough', () => console.log('Video: canplaythrough'));
-        this.video.addEventListener('suspend', () => console.log('Video: suspend'));
-        this.video.addEventListener('stalled', () => console.log('Video: stalled'));
-        this.video.addEventListener('waiting', () => console.log('Video: waiting'));
-        
-        // Start loading the video
-        this.video.load();
-        
-        // Wait 1 second before attempting to play
-        setTimeout(() => {
-            console.log("1 second delay completed, now attempting to play with audio");
-            
-            const attemptPlay = () => {
-                console.log(`Attempting play, readyState: ${this.video.readyState}`);
-                
-                if (this.video.readyState >= 2) {  // HAVE_CURRENT_DATA or higher
-                    console.log("Video has enough data to start, beginning playback with audio");
-                    
-                    // Start with audio immediately (not muted)
-                    this.video.muted = false;
-                    this.video.play().then(() => {
-                        console.log("Video with audio started successfully");
-                    }).catch(e => {
-                        console.error('Video playback with audio failed:', e);
-                        console.log("Trying fallback: starting muted then unmuting");
-                        
-                        // Fallback: start muted then unmute quickly
-                        this.video.muted = true;
-                        this.video.play().then(() => {
-                            console.log("Muted video started, unmuting immediately");
-                            // Unmute very quickly
-                            setTimeout(() => {
-                                this.video.muted = false;
-                                console.log("Video unmuted");
-                            }, 100);
-                        }).catch(mutedError => {
-                            console.error("Even muted playback failed:", mutedError);
-                        });
-                    });
-                } else if (this.video.readyState === 1) {
-                    // HAVE_METADATA - we can at least try to start
-                    console.log("Have metadata, attempting to play with audio");
-                    this.video.muted = false;
-                    this.video.play().catch(e => {
-                        console.log("Play with audio failed with metadata only, will retry when more data loads");
-                        setTimeout(attemptPlay, 100);
-                    });
-                } else {
-                    // Not enough data yet, but don't wait forever
-                    console.log("Not enough data buffered yet, checking again in 100ms");
-                    setTimeout(attemptPlay, 100);
-                }
-            };
-            
-            // Start the attempt immediately after the 1-second delay
-            attemptPlay();
-        }, 1000);
-        
-        // Also listen for canplay event as a backup
-        this.video.addEventListener('canplay', () => {
-            if (this.video.paused) {
-                console.log("canplay event fired, attempting to start paused video with audio");
-                this.video.muted = false;
-                this.video.play().catch(e => console.log("canplay play attempt failed:", e));
-            }
-        }, { once: true });
-    }
-
     deactivate() {
+        // Stop any video that might be playing
         if (this.video) {
             this.video.pause();
+            this.video.currentTime = 0;
         }
+        
+        // Reset to image state
+        this.isShowingImage = true;
+        if (this.image) this.image.style.display = 'block';
+        if (this.video) this.video.style.display = 'none';
         
         if (this.observer) {
             this.observer.disconnect();

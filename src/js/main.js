@@ -21,6 +21,7 @@ class WidgetManager {
         this.setupAudioContext();
         this.setupCrossPageAudio();
         this.init();
+        this.initializeResetMonitoring();
     }
 
     getInitialWidget() {
@@ -40,8 +41,8 @@ class WidgetManager {
         // Create audio context on user interaction
         const handleFirstInteraction = () => {
             if (this.currentWidget <= 2) {
-                // Full volume for FirstWidget and SecondWidget
-                this.backgroundMusic.volume = 1.0;
+                // 50% volume for FirstWidget and SecondWidget
+                this.backgroundMusic.volume = 0.5;
                 this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
             } else if (this.currentWidget <= 5) {
                 // Subtle volume for VideoWidget, VideoWidget2, VideoWidget3 (until politics_1 video)
@@ -138,12 +139,12 @@ class WidgetManager {
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'f') {
-                // Toggle between first and second widget with visual feedback
+                // For Widget 1 (FirstWidget), let it handle its own navigation
                 if (this.currentWidget === 1) {
-                    this.applyVisualFeedbackAndNavigate(() => {
-                        this.navigateToWidget(1);
-                    });
+                    // FirstWidget handles this itself - do nothing here
+                    return;
                 } else if (this.currentWidget === 2) {
+                    // Toggle back to first widget with visual feedback
                     this.applyVisualFeedbackAndNavigate(() => {
                         this.navigateToWidget(-1);
                     });
@@ -189,10 +190,9 @@ class WidgetManager {
                     });
                 }
             } else if (key === 'r') {
-                // Reset to first widget - works for all widgets
-                this.applyVisualFeedbackAndNavigate(() => {
-                    this.navigateToWidget(1 - this.currentWidget);
-                });
+                // Enhanced reset functionality with debugging and fallbacks
+                console.log('🔄 RESET TRIGGERED - Starting comprehensive reset process');
+                this.performComprehensiveReset();
             }
         });
 
@@ -210,8 +210,8 @@ class WidgetManager {
             
             // Handle background music based on current widget
             if (this.currentWidget <= 2) {
-                // Full volume for FirstWidget and SecondWidget
-                this.backgroundMusic.volume = 1.0;
+                // 50% volume for FirstWidget and SecondWidget
+                this.backgroundMusic.volume = 0.5;
                 if (this.backgroundMusic.paused) {
                     this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
                 }
@@ -226,6 +226,12 @@ class WidgetManager {
                 this.backgroundMusic.pause();
                 this.backgroundMusic.currentTime = 0;
             }
+        });
+
+        // Listen for comprehensive reset events from widgets
+        document.addEventListener('comprehensiveReset', (event) => {
+            console.log(`🔄 Comprehensive reset triggered by: ${event.detail.source}`);
+            this.performComprehensiveReset();
         });
 
         this.updateNavigationButtons();
@@ -274,24 +280,20 @@ class WidgetManager {
 
     showNavigationFeedback() {
         // Visual feedback could include icon changes, flash effects, etc.
-        // For now, we'll just ensure any navigation icons show feedback
+        // Set navigation icons to filled state during transition
         const nextIcon = document.getElementById('nextIcon');
         const backIcon = document.getElementById('backIcon');
         
-        // Temporarily change icons to show interaction
+        // Change icons to filled state and keep them filled during navigation
         if (nextIcon && nextIcon.src.includes('next.svg')) {
             nextIcon.src = '/static/icons/nextfilled.svg';
-            setTimeout(() => {
-                nextIcon.src = '/static/icons/next.svg';
-            }, 1000);
         }
         
         if (backIcon && backIcon.src.includes('back.svg')) {
             backIcon.src = '/static/icons/backfilled.svg';
-            setTimeout(() => {
-                backIcon.src = '/static/icons/back.svg';
-            }, 1000);
         }
+        
+        // Icons will be reset when updateWidgetPositions() is called after navigation
     }
 
     navigateToWidget(direction) {
@@ -301,17 +303,14 @@ class WidgetManager {
         // Clean up current widget before navigation
         this.cleanupCurrentWidget();
         
-        // Reset icon states before changing widget
-        this.resetNavigationIcons();
-        
         this.currentWidget = newWidget;
         this.updateWidgetPositions();
         this.updateNavigationButtons();
         
         // Handle background music based on current widget
         if (this.currentWidget <= 2) {
-            // Full volume for FirstWidget and SecondWidget
-            this.backgroundMusic.volume = 1.0;
+            // 50% volume for FirstWidget and SecondWidget
+            this.backgroundMusic.volume = 0.5;
             if (this.backgroundMusic.paused) {
                 this.backgroundMusic.play().catch(e => console.log('Audio playbook failed:', e));
             }
@@ -342,7 +341,8 @@ class WidgetManager {
                 console.log('Preventing video audio bleeding - resetting VideoWidget3');
                 videoWidget3Element.pause();
                 videoWidget3Element.currentTime = 0;
-                source.src = '/static/videos/archbridge_agree.mp4';
+                // VideoWidget3 now shows an image by default, so we reset to secondpart.mp4 but keep it hidden
+                source.src = '/static/videos/secondpart.mp4';
                 videoWidget3Element.load();
             }
         }
@@ -375,7 +375,8 @@ class WidgetManager {
                 console.log('⚠️ FOUND PLAYING VIDEO - Cleaning up to prevent audio bleeding');
                 videoWidget3.pause();
                 videoWidget3.currentTime = 0;
-                source.src = '/static/videos/archbridge_agree.mp4'; // Reset to default
+                // VideoWidget3 now shows an image by default, so we reset to secondpart.mp4 but keep it hidden
+                source.src = '/static/videos/secondpart.mp4';
                 videoWidget3.load();
             }
         }
@@ -393,14 +394,21 @@ class WidgetManager {
             if (widgetNum === this.currentWidget) {
                 widget.element.classList.add('widget-active');
                 widget.element.classList.remove('widget-inactive');
+                
+                // Call activate method if widget has one (for reset functionality)
+                if (typeof widget.activate === 'function') {
+                    widget.activate();
+                }
             } else {
                 widget.element.classList.remove('widget-active');
                 widget.element.classList.add('widget-inactive');
             }
         });
         
-        // Reset navigation button icons when changing widgets
-        this.resetNavigationIcons();
+        // Reset navigation button icons when changing widgets (after navigation is complete)
+        setTimeout(() => {
+            this.resetNavigationIcons();
+        }, 50); // Small delay to ensure navigation is complete
     }
     
     resetNavigationIcons() {
@@ -416,6 +424,398 @@ class WidgetManager {
         const nextBtn = document.getElementById('nextBtn');
         prevBtn.disabled = this.currentWidget === 1;
         nextBtn.disabled = this.currentWidget === this.widgets.length;
+    }
+
+    performComprehensiveReset() {
+        this.resetAttempts++;
+        this.lastResetTime = Date.now();
+        this.updateDebugPanel('Starting Reset...');
+        
+        console.log(`🔄 COMPREHENSIVE RESET #${this.resetAttempts} - Phase 1: Preparation`);
+        
+        try {
+            // Prevent interactions during reset
+            document.body.style.pointerEvents = 'none';
+            
+            // Preserve voting data before reset
+            this.preserveVotingData();
+            
+            // Phase 1: Clean up current state
+            this.resetCurrentState();
+            
+            // Phase 2: Reset all widgets to initial state
+            this.resetAllWidgets();
+            
+            // Phase 3: Reset audio system
+            this.resetAudioSystem();
+            
+            // Phase 4: Reset navigation and UI
+            this.resetNavigationSystem();
+            
+            // Phase 5: Navigate to initial widget
+            this.navigateToInitialState();
+            
+            this.updateDebugPanel('Reset Complete');
+            console.log(`✅ COMPREHENSIVE RESET #${this.resetAttempts} - All phases completed successfully`);
+            
+        } catch (error) {
+            console.error(`❌ RESET ERROR #${this.resetAttempts} - Attempting fallback reset:`, error);
+            this.updateDebugPanel('Reset Failed - Using Fallback');
+            this.fallbackReset();
+        }
+    }
+
+    preserveVotingData() {
+        console.log('💾 RESET - Preserving voting data');
+        
+        try {
+            // Preserve existing voting data
+            const existingVote1 = localStorage.getItem('userVote');
+            const existingVote2 = localStorage.getItem('userVote2');
+            const audioState = localStorage.getItem('nostalgiaAudioState');
+            
+            // Create backup of important data
+            const backupData = {
+                vote1: existingVote1,
+                vote2: existingVote2,
+                audioState: audioState,
+                timestamp: Date.now(),
+                resetReason: 'comprehensive_reset'
+            };
+            
+            localStorage.setItem('nostalgiaDataBackup', JSON.stringify(backupData));
+            console.log('💾 RESET - Voting data preserved successfully');
+            
+        } catch (error) {
+            console.error('❌ RESET - Failed to preserve voting data:', error);
+        }
+    }
+
+    resetCurrentState() {
+        console.log('🧹 RESET - Phase 1: Cleaning current state');
+        
+        try {
+            // Stop and clean up all videos
+            const allVideos = document.querySelectorAll('video');
+            allVideos.forEach((video, index) => {
+                try {
+                    if (!video.paused) {
+                        console.log(`🎬 RESET - Stopping video ${index + 1}`);
+                        video.pause();
+                        video.currentTime = 0;
+                    }
+                    video.src = '';
+                    video.load();
+                } catch (videoError) {
+                    console.warn(`⚠️ RESET - Could not reset video ${index + 1}:`, videoError);
+                }
+            });
+            
+            // Clear any running timers/intervals
+            this.clearAllTimers();
+            
+            console.log('✅ RESET - Current state cleaned');
+            
+        } catch (error) {
+            console.error('❌ RESET - Failed to clean current state:', error);
+        }
+    }
+
+    resetAllWidgets() {
+        console.log('🔧 RESET - Phase 2: Resetting all widgets');
+        
+        try {
+            this.widgets.forEach((widget, index) => {
+                try {
+                    const widgetNum = index + 1;
+                    console.log(`🔧 RESET - Resetting Widget ${widgetNum}`);
+                    
+                    // Call deactivate method if available
+                    if (typeof widget.deactivate === 'function') {
+                        widget.deactivate();
+                    }
+                    
+                    // Reset widget classes
+                    if (widget.element) {
+                        widget.element.classList.remove('widget-active');
+                        widget.element.classList.add('widget-inactive');
+                    }
+                    
+                    // Special reset logic for specific widgets
+                    this.resetSpecificWidget(widget, widgetNum);
+                    
+                } catch (widgetError) {
+                    console.warn(`⚠️ RESET - Could not reset widget ${index + 1}:`, widgetError);
+                }
+            });
+            
+            console.log('✅ RESET - All widgets reset');
+            
+        } catch (error) {
+            console.error('❌ RESET - Failed to reset widgets:', error);
+        }
+    }
+
+    resetSpecificWidget(widget, widgetNum) {
+        try {
+            // Reset specific widget states
+            switch (widgetNum) {
+                case 2: // SecondWidget
+                    if (widget.countdownTimer) {
+                        clearTimeout(widget.countdownTimer);
+                        widget.countdownTimer = null;
+                    }
+                    if (widget.countdownContainer) {
+                        widget.countdownContainer.style.opacity = '0';
+                    }
+                    if (widget.countdownBar) {
+                        widget.countdownBar.style.transition = 'none';
+                        widget.countdownBar.style.width = '100%';
+                    }
+                    break;
+                    
+                case 3: // VideoWidget
+                case 4: // VideoWidget2
+                case 5: // VideoWidget3
+                case 6: // VideoWidget4
+                case 10: // VideoWidget8
+                case 12: // VideoWidget10
+                    // Reset video widgets to their initial video sources
+                    const videoElement = widget.element?.querySelector('video');
+                    if (videoElement) {
+                        videoElement.pause();
+                        videoElement.currentTime = 0;
+                        
+                        // Reset to initial video source
+                        const source = videoElement.querySelector('source');
+                        if (source) {
+                            switch (widgetNum) {
+                                case 5: // VideoWidget3 - now shows image, reset video source but keep hidden
+                                    source.src = '/static/videos/secondpart.mp4';
+                                    break;
+                                case 6: // VideoWidget4
+                                    source.src = '/static/videos/politics_1.mp4';
+                                    break;
+                                case 10: // VideoWidget8
+                                    source.src = '/static/videos/politics_3.mp4';
+                                    break;
+                                case 12: // VideoWidget10
+                                    source.src = '/static/videos/rising.mp4';
+                                    break;
+                            }
+                            videoElement.load();
+                        }
+                    }
+                    break;
+                    
+                case 7: // VideoWidget5
+                case 8: // VideoWidget6
+                case 9: // VideoWidget7
+                    // Reset law widgets - ensure all buttons are in default state
+                    const buttons = widget.element?.querySelectorAll('.law-button');
+                    buttons?.forEach(button => {
+                        const img = button.querySelector('img');
+                        if (img) {
+                            img.src = img.src.replace('filled', '').replace('chosen', '');
+                        }
+                    });
+                    break;
+            }
+        } catch (error) {
+            console.warn(`⚠️ RESET - Could not apply specific reset for widget ${widgetNum}:`, error);
+        }
+    }
+
+    resetAudioSystem() {
+        console.log('🎵 RESET - Phase 3: Resetting audio system');
+        
+        try {
+            // Reset background music
+            if (this.backgroundMusic) {
+                this.backgroundMusic.pause();
+                this.backgroundMusic.currentTime = 0;
+                this.backgroundMusic.volume = 0.5; // Reset to 50% volume for widget 1
+            }
+            
+            // Clear any audio-related localStorage except voting data
+            const audioState = localStorage.getItem('nostalgiaAudioState');
+            if (audioState) {
+                localStorage.removeItem('nostalgiaAudioState');
+            }
+            
+            console.log('✅ RESET - Audio system reset');
+            
+        } catch (error) {
+            console.error('❌ RESET - Failed to reset audio system:', error);
+        }
+    }
+
+    resetNavigationSystem() {
+        console.log('🧭 RESET - Phase 4: Resetting navigation system');
+        
+        try {
+            // Reset navigation icons
+            this.resetNavigationIcons();
+            
+            // Reset navigation buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            if (prevBtn) prevBtn.disabled = true; // Will be at widget 1
+            if (nextBtn) nextBtn.disabled = false;
+            
+            console.log('✅ RESET - Navigation system reset');
+            
+        } catch (error) {
+            console.error('❌ RESET - Failed to reset navigation system:', error);
+        }
+    }
+
+    navigateToInitialState() {
+        console.log('🏠 RESET - Phase 5: Navigating to initial state');
+        
+        try {
+            // Set current widget to 1
+            this.currentWidget = 1;
+            
+            // Update widget positions
+            this.updateWidgetPositions();
+            this.updateNavigationButtons();
+            
+            // Re-enable interactions after a delay
+            setTimeout(() => {
+                document.body.style.pointerEvents = 'auto';
+                console.log('✅ RESET - Navigation to initial state completed');
+            }, 500);
+            
+        } catch (error) {
+            console.error('❌ RESET - Failed to navigate to initial state:', error);
+            this.fallbackReset();
+        }
+    }
+
+    clearAllTimers() {
+        console.log('⏰ RESET - Clearing all timers');
+        
+        try {
+            // Clear any widget-specific timers
+            this.widgets.forEach((widget, index) => {
+                try {
+                    if (widget.countdownTimer) {
+                        clearTimeout(widget.countdownTimer);
+                        widget.countdownTimer = null;
+                    }
+                    if (widget.observer) {
+                        widget.observer.disconnect();
+                    }
+                } catch (timerError) {
+                    console.warn(`⚠️ RESET - Could not clear timer for widget ${index + 1}:`, timerError);
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ RESET - Failed to clear timers:', error);
+        }
+    }
+
+    fallbackReset() {
+        console.log('🚨 FALLBACK RESET - Attempting simple page reload');
+        
+        try {
+            // Preserve voting data one more time
+            this.preserveVotingData();
+            
+            // Simple fallback - reload page to widget 1
+            setTimeout(() => {
+                window.location.href = '/?widget=1';
+            }, 1000);
+            
+        } catch (error) {
+            console.error('💥 CRITICAL RESET FAILURE - Manual intervention required:', error);
+            alert('Reset failed. Please refresh the page manually.');
+        }
+    }
+
+    // Debug and monitoring functionality
+    initializeResetMonitoring() {
+        // Add debug panel if in development mode
+        if (window.location.hostname === 'localhost' || window.location.search.includes('debug=true')) {
+            this.createDebugPanel();
+        }
+        
+        // Monitor reset attempts
+        this.resetAttempts = 0;
+        this.lastResetTime = null;
+        
+        // Add global error handler for reset failures
+        window.addEventListener('error', (event) => {
+            if (event.message.includes('RESET') || event.message.includes('reset')) {
+                console.error('🚨 RESET ERROR DETECTED:', event.error);
+                this.handleResetError(event.error);
+            }
+        });
+    }
+
+    createDebugPanel() {
+        const debugPanel = document.createElement('div');
+        debugPanel.id = 'resetDebugPanel';
+        debugPanel.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            max-width: 300px;
+            display: none;
+        `;
+        
+        debugPanel.innerHTML = `
+            <div><strong>🔄 Reset Debug Panel</strong></div>
+            <div>Current Widget: <span id="debugCurrentWidget">${this.currentWidget}</span></div>
+            <div>Reset Attempts: <span id="debugResetAttempts">0</span></div>
+            <div>Last Reset: <span id="debugLastReset">Never</span></div>
+            <div>Status: <span id="debugStatus">Ready</span></div>
+            <button onclick="this.parentElement.style.display='none'" style="margin-top:5px;padding:2px 5px;">Hide</button>
+        `;
+        
+        document.body.appendChild(debugPanel);
+        
+        // Show debug panel with Ctrl+Shift+D
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
+
+    updateDebugPanel(status = 'Ready') {
+        const panel = document.getElementById('resetDebugPanel');
+        if (panel) {
+            const currentWidgetSpan = document.getElementById('debugCurrentWidget');
+            const resetAttemptsSpan = document.getElementById('debugResetAttempts');
+            const lastResetSpan = document.getElementById('debugLastReset');
+            const statusSpan = document.getElementById('debugStatus');
+            
+            if (currentWidgetSpan) currentWidgetSpan.textContent = this.currentWidget;
+            if (resetAttemptsSpan) resetAttemptsSpan.textContent = this.resetAttempts;
+            if (lastResetSpan) lastResetSpan.textContent = this.lastResetTime ? new Date(this.lastResetTime).toLocaleTimeString() : 'Never';
+            if (statusSpan) statusSpan.textContent = status;
+        }
+    }
+
+    handleResetError(error) {
+        console.error('🚨 RESET ERROR HANDLER:', error);
+        this.updateDebugPanel('Error: ' + error.message);
+        
+        // Attempt recovery
+        setTimeout(() => {
+            console.log('🔧 ATTEMPTING RESET RECOVERY');
+            this.fallbackReset();
+        }, 2000);
     }
 }
 

@@ -116,10 +116,46 @@ export class SecondWidget extends Widget {
         // Clean up countdown timer
         this.stopCountdown();
         
+        // Reset visual state completely
+        if (this.countdownContainer) {
+            this.countdownContainer.style.opacity = '0';
+        }
+        
+        if (this.countdownBar) {
+            this.countdownBar.style.transition = 'none';
+            this.countdownBar.style.width = '100%';
+        }
+        
+        // Ensure headphones button is visible
+        if (this.headphonesBtn) {
+            this.headphonesBtn.style.display = 'block';
+        }
+        
         // Clean up mutation observer
         if (this.observer) {
             this.observer.disconnect();
             this.observer = null;
+        }
+    }
+
+    activate() {
+        // Reinitialize the mutation observer if it was disconnected
+        if (!this.observer) {
+            this.setupMutationObserver();
+        }
+        
+        // Check if the widget is currently active and start countdown if so
+        // This handles the case where the widget is already active after reset
+        if (this.element.classList.contains('widget-active')) {
+            console.log("SecondWidget activate() - widget is active, starting countdown after 1 second delay");
+            
+            // Show countdown and start animation after 1 second
+            setTimeout(() => {
+                if (this.countdownContainer) {
+                    this.countdownContainer.style.opacity = '1';
+                    this.startCountdown();
+                }
+            }, 1000);
         }
     }
 

@@ -114,6 +114,17 @@ img {
     opacity: 1;
 }
 
+/* Voting button selected state - 100% white background */
+.voting-btn.selected {
+    background-color: white !important;
+    color: #A06C45 !important; /* Brown text on white background for vote1 */
+}
+
+/* Vote2 page gets different text color */
+.voting-btn.selected.vote2 {
+    color: #958F71 !important; /* Olive text on white background for vote2 */
+}
+
 @layer utilities {
     .gif-play-once {
         animation-iteration-count: 1;

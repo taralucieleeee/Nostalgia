@@ -100,11 +100,27 @@ export class VideoWidget9 extends Widget {
     }
 
     handleReset() {
-        console.log("VideoWidget9: Reset button clicked - navigating to Widget 1");
+        console.log("VideoWidget9: Reset button clicked - triggering comprehensive reset");
         
+        // Show visual feedback
+        if (this.resetIcon) {
+            this.resetIcon.src = '/static/icons/resetbuttonfilled.svg';
+        }
+        
+        // Dispatch custom reset event to main.js for comprehensive reset
+        const resetEvent = new CustomEvent('comprehensiveReset', {
+            detail: { source: 'VideoWidget9' }
+        });
+        document.dispatchEvent(resetEvent);
+        
+        // Fallback - if main.js doesn't handle it, use direct navigation
         setTimeout(() => {
+            if (this.resetIcon) {
+                this.resetIcon.src = '/static/icons/resetbutton.svg';
+            }
+            console.log("VideoWidget9: Fallback reset - direct navigation");
             window.location.href = '/?widget=1';
-        }, 200);
+        }, 1000);
     }
 
     setupMutationObserver() {

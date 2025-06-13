@@ -10,8 +10,9 @@ export class VideoWidget3 extends Widget {
     render() {
         this.element.innerHTML = `
             <div class="widget relative w-full h-full">
-                <video id="mainVideo3" class="w-full h-full object-cover video-transition video-fade-in" preload="none" muted playsinline>
-                    <source id="videoSource" src="/static/videos/archbridge_agree.mp4" type="video/mp4">
+                <img id="mainImage" src="/static/images/results_2.png" alt="Results 2" class="w-full h-full object-contain">
+                <video id="mainVideo3" class="w-full h-full object-cover video-transition video-fade-in" preload="none" muted playsinline style="display: none;">
+                    <source id="videoSource" src="/static/videos/secondpart.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 
@@ -30,17 +31,15 @@ export class VideoWidget3 extends Widget {
                 </div>
             </div>
         `;
-        
-        // Force video path to be correct
-        const videoSource = this.element.querySelector('#videoSource');
-        videoSource.src = '/static/videos/archbridge_agree.mp4';  // Added leading slash
 
         // Get references to elements
+        this.image = this.element.querySelector('#mainImage');
         this.video = this.element.querySelector('#mainVideo3');
         this.backBtn = this.element.querySelector('#backBtn');
         this.nextBtn = this.element.querySelector('#nextBtn');
         this.backIcon = this.element.querySelector('#backIcon');
         this.nextIcon = this.element.querySelector('#nextIcon');
+        this.isShowingImage = true; // Track whether we're showing image or video
 
         // Set up event listeners
         this.setupVideoListeners();
@@ -49,7 +48,7 @@ export class VideoWidget3 extends Widget {
     }
 
     setupVideoListeners() {
-        // When video ends, no automatic redirect
+        // When video ends, handle transitions
         this.video.addEventListener('ended', () => {
             console.log("Video playback completed");
             
@@ -58,9 +57,7 @@ export class VideoWidget3 extends Widget {
             const currentSrc = videoSource.src;
             console.log("Current video source that ended:", currentSrc);
             
-            if (currentSrc.includes('archbridge_agree.mp4')) {
-                console.log('Archbridge video ended, no automatic action');
-            } else if (currentSrc.includes('secondpart.mp4')) {
+            if (currentSrc.includes('secondpart.mp4')) {
                 console.log('Secondpart video ended, smoothly transitioning to politics_1 (VideoWidget4)');
                 // Directly transition to VideoWidget4 (politics_1.mp4) after secondpart.mp4 ends
                 setTimeout(() => {
@@ -78,13 +75,13 @@ export class VideoWidget3 extends Widget {
             const videoSource = this.element.querySelector('#videoSource');
             if (videoSource) {
                 console.log("Attempting to reload video due to error");
-                videoSource.src = '/static/videos/archbridge_agree.mp4';  // Added leading slash
+                videoSource.src = '/static/videos/secondpart.mp4';
                 this.video.load();
                 this.forcedStartVideo();
             }
         });
         
-        // Add listeners for debugging video loading
+        // Add listeners for debugging video loading (only needed for secondpart video)
         this.video.addEventListener('loadstart', () => console.log('Video3: loadstart'));
         this.video.addEventListener('durationchange', () => console.log('Video3: durationchange'));
         this.video.addEventListener('loadedmetadata', () => console.log('Video3: loadedmetadata'));
@@ -135,25 +132,22 @@ export class VideoWidget3 extends Widget {
         document.addEventListener('keydown', this.handleKeyDown);
     }
     
-    // Method to switch to the second video with smooth transition
+    // Method to switch from image to secondpart video with smooth transition
     switchToSecondVideo() {
-        console.log("Starting smooth transition to secondpart.mp4");
+        console.log("Starting smooth transition from results_2.png image to secondpart.mp4");
         
-        // Step 1: Fade out current video
-        this.video.classList.add('video-fade-out');
+        // Step 1: Fade out the image
+        this.image.style.transition = 'opacity 0.8s ease-in-out';
+        this.image.style.opacity = '0';
         
-        // Step 2: After fade out completes, switch video source
+        // Step 2: After fade out completes, switch to video
         setTimeout(() => {
-            // Pause current video
-            this.video.pause();
+            // Hide the image and show the video
+            this.image.style.display = 'none';
+            this.video.style.display = 'block';
+            this.isShowingImage = false;
             
             console.log("Switching to secondpart.mp4");
-            
-            // Update the video source
-            const videoSource = this.element.querySelector('#videoSource');
-            console.log("Current source before change:", videoSource.src);
-            videoSource.src = '/static/videos/secondpart.mp4';
-            console.log("New source after change:", videoSource.src);
             
             // Hide the footer for secondpart video
             const footer = this.element.querySelector('.absolute.bottom-0');
@@ -167,19 +161,18 @@ export class VideoWidget3 extends Widget {
             this.video.controls = false;
             this.video.muted = false;
             
-            // Load the new source
-            console.log("Loading new video source");
+            // Load the video source (already set to secondpart.mp4 in render)
+            console.log("Loading secondpart video source");
             this.video.load();
             
             // Reset playback state
             this.hasPlayed = false;
             
-            // Step 3: When new video is ready, fade it back in
+            // Step 3: When new video is ready, fade it in
             this.video.onloadeddata = () => {
                 console.log("Secondpart video data loaded, fading in and starting playback");
                 
-                // Remove fade-out and add fade-in
-                this.video.classList.remove('video-fade-out');
+                // Add fade-in class
                 this.video.classList.add('video-fade-in');
                 
                 // Start playing the new video
@@ -191,8 +184,7 @@ export class VideoWidget3 extends Widget {
             // Add error handler
             this.video.onerror = () => {
                 console.error("Error loading secondpart.mp4:", this.video.error);
-                // If error, still fade back in to show something
-                this.video.classList.remove('video-fade-out');
+                // If error, still fade in to show something
                 this.video.classList.add('video-fade-in');
             };
             
@@ -246,8 +238,8 @@ export class VideoWidget3 extends Widget {
             // Prevent any other widgets from being shown
             document.body.style.pointerEvents = 'none';
             
-            // Stop video playback immediately
-            if (this.video) {
+            // Stop any current video playback
+            if (this.video && !this.video.paused) {
                 this.video.pause();
                 this.video.src = ''; // Clear source to prevent any further loading
             }
@@ -261,19 +253,24 @@ export class VideoWidget3 extends Widget {
             event.preventDefault();
             event.stopPropagation();
             
-            console.log("VideoWidget3: D key pressed, switching to secondpart video");
-            
             // Change next icon to filled version  
             this.nextIcon.src = '/static/icons/nextfilled.svg';
             
-            // Switch to the secondpart.mp4 video
-            this.switchToSecondVideo();
-        } else if (key === ' ') {
-            // Space bar toggles play/pause
-            if (this.video.paused) {
-                this.video.play();
+            if (this.isShowingImage) {
+                console.log("VideoWidget3: D key pressed, switching from image to secondpart video");
+                // Switch from image to secondpart video
+                this.switchToSecondVideo();
             } else {
-                this.video.pause();
+                console.log("VideoWidget3: Already showing video");
+            }
+        } else if (key === ' ') {
+            // Space bar toggles play/pause (only works when video is visible)
+            if (!this.isShowingImage && this.video) {
+                if (this.video.paused) {
+                    this.video.play();
+                } else {
+                    this.video.pause();
+                }
             }
         }
     }
@@ -290,28 +287,19 @@ export class VideoWidget3 extends Widget {
                         if (this.nextIcon) this.nextIcon.src = '/static/icons/next.svg';
                         if (this.backIcon) this.backIcon.src = '/static/icons/back.svg';
                         
-                        // Show the footer (in case it was hidden from secondpart video)
+                        // Show the footer when widget becomes active (unless secondpart video is playing)
                         const footer = this.element.querySelector('.absolute.bottom-0');
-                        if (footer) {
-                            console.log("Showing footer for archbridge video");
+                        if (footer && this.isShowingImage) {
+                            console.log("Showing footer for results_2.png image");
                             footer.style.display = 'flex';
                         }
                         
-                        // Ensure the correct video source is set
-                        const videoSource = this.element.querySelector('#videoSource');
-                        if (videoSource) {
-                            // Always start with archbridge video, never presentmoods on activation
-                            if (!videoSource.src.includes('archbridge_agree.mp4')) {
-                                console.log('Resetting VideoWidget3 to archbridge video on activation');
-                                videoSource.src = '/static/videos/archbridge_agree.mp4';
-                                this.video.load();
-                            }
-                        }
-                        
-                        // Start video if it hasn't played yet
-                        if (!this.hasPlayed) {
-                            this.forcedStartVideo(); // Use forcedStartVideo instead
-                            this.hasPlayed = true;
+                        // Ensure we're showing the image initially
+                        if (this.isShowingImage) {
+                            this.image.style.display = 'block';
+                            this.image.style.opacity = '1';
+                            this.video.style.display = 'none';
+                            console.log("VideoWidget3: Showing results_2.png image");
                         }
                     }
                 }
@@ -321,55 +309,25 @@ export class VideoWidget3 extends Widget {
         this.observer.observe(this.element, { attributes: true });
     }
 
-    startVideoWithDelay() {
-        // Reset video
-        this.video.currentTime = 0;
-        this.video.muted = true;
-        
-        console.log(`Starting video with delay: ${this.video.querySelector('source').src}`);
-        console.log(`Initial readyState: ${this.video.readyState}`);
-        
-        // Check if video has buffered enough data
-        const checkBuffer = () => {
-            console.log(`Checking buffer, readyState: ${this.video.readyState}`);
-            
-            if (this.video.readyState >= 3) {  // HAVE_FUTURE_DATA or higher
-                console.log("Video has enough data buffered, starting playback in 2 seconds");
-                
-                // Buffer for 2 seconds, then play with audio
-                setTimeout(() => {
-                    this.video.muted = false;
-                    console.log("Starting video playback with audio");
-                    
-                    this.video.play().catch(e => {
-                        console.error('Video playback failed:', e);
-                        // Fallback to muted playback if audio fails
-                        this.video.muted = true;
-                        this.video.play().catch(e => console.error('Muted playback also failed:', e));
-                    });
-                }, 2000);
-            } else {
-                // Check again in 200ms
-                console.log("Not enough data buffered yet, checking again in 200ms");
-                setTimeout(checkBuffer, 200);
-            }
-        };
-        
-        checkBuffer();
-    }
-
     deactivate() {
+        // Stop any video that might be playing
         if (this.video) {
             this.video.pause();
             this.video.currentTime = 0;
-            
-            // Reset video source to default archbridge video to prevent secondpart from bleeding
-            const videoSource = this.element.querySelector('#videoSource');
-            if (videoSource) {
-                videoSource.src = '/static/videos/archbridge_agree.mp4';
-                this.video.load();
-                console.log('VideoWidget3 deactivated - reset to archbridge video');
-            }
+        }
+        
+        // Reset to image state
+        this.isShowingImage = true;
+        if (this.image) {
+            this.image.style.display = 'block';
+            this.image.style.opacity = '1';
+        }
+        if (this.video) this.video.style.display = 'none';
+        
+        // Show footer (in case it was hidden)
+        const footer = this.element.querySelector('.absolute.bottom-0');
+        if (footer) {
+            footer.style.display = 'flex';
         }
         
         if (this.observer) {

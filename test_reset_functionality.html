@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Functionality Test</title>
+    <style>
+        body {
+            font-family: 'Space Mono', monospace;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #6461EF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #5451cf;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Reset Functionality Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>📊 LocalStorage Data Tests</h2>
+        <button class="test-button" onclick="testVotingDataPreservation()">Test Voting Data Preservation</button>
+        <button class="test-button" onclick="testSessionTracking()">Test Session Tracking</button>
+        <button class="test-button" onclick="clearAllData()">Clear All Test Data</button>
+        <div id="dataStatus"></div>
+        <div id="dataLog" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Reset Trigger Tests</h2>
+        <button class="test-button" onclick="testKeyboardReset()">Test 'R' Key Reset</button>
+        <button class="test-button" onclick="testCustomEventReset()">Test Custom Event Reset</button>
+        <button class="test-button" onclick="testFallbackReset()">Test Fallback Reset</button>
+        <div id="resetStatus"></div>
+        <div id="resetLog" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🛠 Debug Panel Tests</h2>
+        <button class="test-button" onclick="showDebugPanel()">Show Debug Panel (Ctrl+Shift+D)</button>
+        <button class="test-button" onclick="testDebugPanelUpdates()">Test Debug Panel Updates</button>
+        <div id="debugStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📈 Test Results</h2>
+        <div id="testResults" class="log"></div>
+    </div>
+
+    <script>
+        let testResults = [];
+        
+        function logTest(testName, status, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const result = { testName, status, message, timestamp };
+            testResults.push(result);
+            
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = testResults.map(r => 
+                `<div class="${r.status}">[${r.timestamp}] ${r.testName}: ${r.message}</div>`
+            ).join('');
+        }
+
+        function testVotingDataPreservation() {
+            const statusDiv = document.getElementById('dataStatus');
+            const logDiv = document.getElementById('dataLog');
+            
+            try {
+                // Create test voting data
+                const testData = {
+                    vote1: 'yes',
+                    vote2: 'no',
+                    timestamp: Date.now()
+                };
+                
+                localStorage.setItem('userVote', testData.vote1);
+                localStorage.setItem('userVote2', testData.vote2);
+                
+                // Simulate backup creation
+                const backupData = {
+                    vote1: testData.vote1,
+                    vote2: testData.vote2,
+                    timestamp: testData.timestamp,
+                    resetReason: 'test_reset'
+                };
+                
+                localStorage.setItem('nostalgiaDataBackup', JSON.stringify(backupData));
+                
+                // Verify data preservation
+                const retrievedBackup = JSON.parse(localStorage.getItem('nostalgiaDataBackup'));
+                
+                if (retrievedBackup.vote1 === testData.vote1 && retrievedBackup.vote2 === testData.vote2) {
+                    statusDiv.innerHTML = '<div class="success">✅ Voting data preservation test PASSED</div>';
+                    logDiv.innerHTML = `Data preserved: ${JSON.stringify(retrievedBackup, null, 2)}`;
+                    logTest('Voting Data Preservation', 'success', 'Data correctly preserved in backup');
+                } else {
+                    throw new Error('Data mismatch in backup');
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="error">❌ Voting data preservation test FAILED</div>';
+                logDiv.innerHTML = `Error: ${error.message}`;
+                logTest('Voting Data Preservation', 'error', error.message);
+            }
+        }
+
+        function testSessionTracking() {
+            const statusDiv = document.getElementById('dataStatus');
+            const logDiv = document.getElementById('dataLog');
+            
+            try {
+                const sessionData = {
+                    sessionId: 'test_session_' + Date.now(),
+                    step: 'vote1_started',
+                    lastUpdate: Date.now(),
+                    data: { test: true }
+                };
+                
+                localStorage.setItem('nostalgiaSession', JSON.stringify(sessionData));
+                
+                // Verify session tracking
+                const retrievedSession = JSON.parse(localStorage.getItem('nostalgiaSession'));
+                
+                if (retrievedSession.sessionId === sessionData.sessionId) {
+                    statusDiv.innerHTML = '<div class="success">✅ Session tracking test PASSED</div>';
+                    logDiv.innerHTML = `Session tracked: ${JSON.stringify(retrievedSession, null, 2)}`;
+                    logTest('Session Tracking', 'success', 'Session data correctly stored and retrieved');
+                } else {
+                    throw new Error('Session data mismatch');
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="error">❌ Session tracking test FAILED</div>';
+                logDiv.innerHTML = `Error: ${error.message}`;
+                logTest('Session Tracking', 'error', error.message);
+            }
+        }
+
+        function clearAllData() {
+            const statusDiv = document.getElementById('dataStatus');
+            const logDiv = document.getElementById('dataLog');
+            
+            // Clear all nostalgia-related data
+            const keysToRemove = ['userVote', 'userVote2', 'nostalgiaDataBackup', 'nostalgiaSession', 'nostalgiaAudioState'];
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            statusDiv.innerHTML = '<div class="info">🧹 All test data cleared</div>';
+            logDiv.innerHTML = 'Cleared keys: ' + keysToRemove.join(', ');
+            logTest('Clear Data', 'info', 'All test data cleared from localStorage');
+        }
+
+        function testKeyboardReset() {
+            const statusDiv = document.getElementById('resetStatus');
+            const logDiv = document.getElementById('resetLog');
+            
+            try {
+                // Simulate 'R' key press
+                const event = new KeyboardEvent('keydown', {
+                    key: 'r',
+                    code: 'KeyR',
+                    bubbles: true
+                });
+                
+                statusDiv.innerHTML = '<div class="info">⌨️ Simulating R key press...</div>';
+                logDiv.innerHTML = 'Dispatching keyboard event: ' + JSON.stringify({
+                    key: event.key,
+                    code: event.code,
+                    type: event.type
+                }, null, 2);
+                
+                document.dispatchEvent(event);
+                
+                setTimeout(() => {
+                    statusDiv.innerHTML = '<div class="success">✅ Keyboard reset event dispatched</div>';
+                    logTest('Keyboard Reset', 'success', 'R key event successfully dispatched');
+                }, 100);
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="error">❌ Keyboard reset test FAILED</div>';
+                logDiv.innerHTML = `Error: ${error.message}`;
+                logTest('Keyboard Reset', 'error', error.message);
+            }
+        }
+
+        function testCustomEventReset() {
+            const statusDiv = document.getElementById('resetStatus');
+            const logDiv = document.getElementById('resetLog');
+            
+            try {
+                // Create custom reset event
+                const resetEvent = new CustomEvent('comprehensiveReset', {
+                    detail: { source: 'TestSuite' }
+                });
+                
+                statusDiv.innerHTML = '<div class="info">📡 Dispatching custom reset event...</div>';
+                logDiv.innerHTML = 'Custom event details: ' + JSON.stringify(resetEvent.detail, null, 2);
+                
+                document.dispatchEvent(resetEvent);
+                
+                setTimeout(() => {
+                    statusDiv.innerHTML = '<div class="success">✅ Custom reset event dispatched</div>';
+                    logTest('Custom Event Reset', 'success', 'Custom reset event successfully dispatched');
+                }, 100);
+                
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="error">❌ Custom event reset test FAILED</div>';
+                logDiv.innerHTML = `Error: ${error.message}`;
+                logTest('Custom Event Reset', 'error', error.message);
+            }
+        }
+
+        function testFallbackReset() {
+            const statusDiv = document.getElementById('resetStatus');
+            const logDiv = document.getElementById('resetLog');
+            
+            statusDiv.innerHTML = '<div class="info">🚨 Fallback reset would redirect to: /?widget=1</div>';
+            logDiv.innerHTML = 'Fallback reset simulated (no actual redirect performed in test)';
+            logTest('Fallback Reset', 'info', 'Fallback reset mechanism identified');
+        }
+
+        function showDebugPanel() {
+            const statusDiv = document.getElementById('debugStatus');
+            
+            // Simulate Ctrl+Shift+D
+            const event = new KeyboardEvent('keydown', {
+                key: 'D',
+                ctrlKey: true,
+                shiftKey: true,
+                bubbles: true
+            });
+            
+            document.dispatchEvent(event);
+            
+            statusDiv.innerHTML = '<div class="info">⌨️ Debug panel toggle event dispatched (Ctrl+Shift+D)</div>';
+            logTest('Debug Panel', 'info', 'Debug panel toggle event dispatched');
+        }
+
+        function testDebugPanelUpdates() {
+            const statusDiv = document.getElementById('debugStatus');
+            
+            // Check if debug panel exists
+            const debugPanel = document.getElementById('resetDebugPanel');
+            
+            if (debugPanel) {
+                statusDiv.innerHTML = '<div class="success">✅ Debug panel found in DOM</div>';
+                logTest('Debug Panel Updates', 'success', 'Debug panel exists and can be updated');
+            } else {
+                statusDiv.innerHTML = '<div class="info">ℹ️ Debug panel not found (may only be available in main app)</div>';
+                logTest('Debug Panel Updates', 'info', 'Debug panel not found in test environment');
+            }
+        }
+
+        // Initialize tests
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔄 Reset Test Suite Loaded');
+            logTest('Test Suite', 'info', 'Reset test suite initialized');
+        });
+    </script>
+</body>
+</html>

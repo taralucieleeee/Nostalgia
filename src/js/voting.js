@@ -1,11 +1,18 @@
 class VotingSystem {
     constructor() {
         this.currentQuestion = "The world used to be a much better place.";
+        this.sessionId = this.generateSessionId();
         this.init();
     }
 
+    generateSessionId() {
+        return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
     init() {
+        this.restoreVotingData();
         this.bindEvents();
+        this.saveSessionData();
         // Removed loadQuestion() - question text comes from HTML only
     }
 
@@ -24,10 +31,16 @@ class VotingSystem {
     async vote(choice) {
         const voteData = {
             question: this.currentQuestion,
-            vote: choice
+            vote: choice,
+            sessionId: this.sessionId,
+            timestamp: Date.now()
         };
 
         try {
+            // Store immediately in localStorage for persistence
+            localStorage.setItem('userVote', choice);
+            localStorage.setItem('userVoteData', JSON.stringify(voteData));
+            
             // Send vote to server
             const response = await fetch('/api/vote', {
                 method: 'POST',
@@ -39,14 +52,14 @@ class VotingSystem {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('Vote saved:', result);
-                
-                // Store the user's choice in localStorage
-                localStorage.setItem('userVote', choice);
+                console.log('📊 VOTING - Vote saved successfully:', result);
                 
                 this.selectButton(choice);
                 this.showVoteResult(choice, result.upvotes, result.downvotes);
                 this.disableVotingButtons();
+                
+                // Update session data
+                this.updateSessionData('vote1_completed', { vote: choice, result: result });
                 
                 // Redirect to results page after 1 second of visual feedback
                 console.log('Vote registered, navigating to results.html after 1 second');
@@ -107,10 +120,65 @@ class VotingSystem {
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
         
+        // Remove selected class from both buttons first
+        yesBtn.classList.remove('selected');
+        noBtn.classList.remove('selected');
+        
+        // Add selected class only to the chosen button for 100% white background
         if (choice === 'yes' && yesBtn) {
             yesBtn.classList.add('selected');
         } else if (choice === 'no' && noBtn) {
             noBtn.classList.add('selected');
+        }
+    }
+
+    restoreVotingData() {
+        try {
+            // Check for backed up data from reset
+            const backupData = localStorage.getItem('nostalgiaDataBackup');
+            if (backupData) {
+                const backup = JSON.parse(backupData);
+                if (backup.vote1) {
+                    localStorage.setItem('userVote', backup.vote1);
+                    console.log('📊 VOTING - Restored vote1 from backup');
+                }
+            }
+            
+            // Check if user already voted but DON'T auto-select the button
+            // Let the user re-vote if they want
+            const existingVote = localStorage.getItem('userVote');
+            if (existingVote) {
+                console.log('📊 VOTING - Found existing vote:', existingVote);
+                // Don't auto-select or disable - allow re-voting
+            }
+        } catch (error) {
+            console.error('❌ VOTING - Failed to restore voting data:', error);
+        }
+    }
+
+    saveSessionData() {
+        try {
+            const sessionData = {
+                sessionId: this.sessionId,
+                question: this.currentQuestion,
+                timestamp: Date.now(),
+                step: 'vote1'
+            };
+            localStorage.setItem('nostalgiaSession', JSON.stringify(sessionData));
+        } catch (error) {
+            console.error('❌ VOTING - Failed to save session data:', error);
+        }
+    }
+
+    updateSessionData(step, data) {
+        try {
+            const sessionData = JSON.parse(localStorage.getItem('nostalgiaSession') || '{}');
+            sessionData.step = step;
+            sessionData.lastUpdate = Date.now();
+            sessionData.data = { ...sessionData.data, ...data };
+            localStorage.setItem('nostalgiaSession', JSON.stringify(sessionData));
+        } catch (error) {
+            console.error('❌ VOTING - Failed to update session data:', error);
         }
     }
 }
