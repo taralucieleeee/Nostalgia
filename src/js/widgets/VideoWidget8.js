@@ -91,6 +91,25 @@ export class VideoWidget8 extends Widget {
         }
     }
 
+    // Method to ensure political background music continues playing
+    ensurePoliticalMusicPlaying() {
+        const politicalMusic = document.getElementById('politicalMusic');
+        if (politicalMusic) {
+            if (politicalMusic.paused) {
+                politicalMusic.volume = 0.08;
+                politicalMusic.play().then(() => {
+                    console.log("VideoWidget8: Political background music resumed");
+                }).catch(e => {
+                    console.log("VideoWidget8: Political music playback failed:", e);
+                });
+            } else {
+                // Ensure volume is correct even if already playing
+                politicalMusic.volume = 0.08;
+                console.log("VideoWidget8: Political background music confirmed playing");
+            }
+        }
+    }
+
     setupMutationObserver() {
         this.observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -105,11 +124,19 @@ export class VideoWidget8 extends Widget {
                         console.log("VideoWidget8 activated - starting politics_2 video");
                         
                         if (this.video && !this.hasPlayed) {
+                            // Ensure political background music continues playing
+                            this.ensurePoliticalMusicPlaying();
+                            
                             // Unmute the video for audio playback
                             this.video.muted = false;
                             this.video.play().then(() => {
                                 console.log("Politics_2 video started playing with audio");
                                 this.hasPlayed = true;
+                                
+                                // Double-check political music is still playing after video starts
+                                setTimeout(() => {
+                                    this.ensurePoliticalMusicPlaying();
+                                }, 500);
                             }).catch(error => {
                                 console.error("Error playing politics_2 video:", error);
                                 // Fallback: try muted first then unmute
@@ -119,6 +146,8 @@ export class VideoWidget8 extends Widget {
                                     setTimeout(() => {
                                         this.video.muted = false;
                                         console.log("Politics_2 video unmuted");
+                                        // Ensure political music is still playing after unmute
+                                        this.ensurePoliticalMusicPlaying();
                                     }, 1000);
                                 }).catch(err => {
                                     console.error("Failed to play politics_2 even with muted workaround:", err);

@@ -17,11 +17,67 @@ class WidgetManager {
         this.currentWidget = this.getInitialWidget();
         this.widgets = [];
         this.backgroundMusic = document.getElementById('bgMusic');
+        this.politicalMusic = document.getElementById('politicalMusic');
         this.backgroundMusic.loop = true; // Enable continuous looping
+        this.politicalMusic.loop = true; // Enable continuous looping
+        this.currentAudioTrack = 'lavender'; // Track which audio is currently active
         this.setupAudioContext();
         this.setupCrossPageAudio();
         this.init();
         this.initializeResetMonitoring();
+    }
+
+    // Method to switch between audio tracks
+    switchAudioTrack(trackName, volume = 0.08) {
+        console.log(`🎵 Switching audio track to: ${trackName} at ${Math.round(volume * 100)}% volume`);
+        
+        if (trackName === 'political' && this.currentAudioTrack !== 'political') {
+            // Switch from lavender to political
+            this.backgroundMusic.pause();
+            this.backgroundMusic.currentTime = 0;
+            
+            this.politicalMusic.volume = volume;
+            this.politicalMusic.currentTime = 0;
+            this.politicalMusic.play().catch(e => console.log('Political music playback failed:', e));
+            
+            this.currentAudioTrack = 'political';
+            console.log('✅ Switched to political party music');
+            
+        } else if (trackName === 'lavender' && this.currentAudioTrack !== 'lavender') {
+            // Switch from political to lavender
+            this.politicalMusic.pause();
+            this.politicalMusic.currentTime = 0;
+            
+            this.backgroundMusic.volume = volume;
+            this.backgroundMusic.currentTime = 0;
+            this.backgroundMusic.play().catch(e => console.log('Lavender music playback failed:', e));
+            
+            this.currentAudioTrack = 'lavender';
+            console.log('✅ Switched to lavender soundtrack');
+            
+        } else if (trackName === this.currentAudioTrack) {
+            // Just update volume for current track
+            if (this.currentAudioTrack === 'political') {
+                this.politicalMusic.volume = volume;
+                if (this.politicalMusic.paused) {
+                    this.politicalMusic.play().catch(e => console.log('Political music playback failed:', e));
+                }
+            } else {
+                this.backgroundMusic.volume = volume;
+                if (this.backgroundMusic.paused) {
+                    this.backgroundMusic.play().catch(e => console.log('Lavender music playback failed:', e));
+                }
+            }
+        }
+    }
+
+    // Method to stop all audio
+    stopAllAudio() {
+        this.backgroundMusic.pause();
+        this.backgroundMusic.currentTime = 0;
+        this.politicalMusic.pause();
+        this.politicalMusic.currentTime = 0;
+        console.log('🔇 All audio stopped');
     }
 
     getInitialWidget() {
@@ -40,14 +96,15 @@ class WidgetManager {
     setupAudioContext() {
         // Create audio context on user interaction
         const handleFirstInteraction = () => {
-            if (this.currentWidget <= 2) {
-                // 50% volume for FirstWidget and SecondWidget
-                this.backgroundMusic.volume = 0.5;
-                this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            if (this.currentWidget === 1) {
+                // 50% volume for FirstWidget only - lavender soundtrack
+                this.switchAudioTrack('lavender', 0.5);
             } else if (this.currentWidget <= 5) {
-                // Subtle volume for VideoWidget, VideoWidget2, VideoWidget3 (until politics_1 video)
-                this.backgroundMusic.volume = 0.15;
-                this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+                // 8% volume from SecondWidget onwards (until politics_1 video) - lavender soundtrack
+                this.switchAudioTrack('lavender', 0.08);
+            } else {
+                // From VideoWidget4 (politics_1) onwards - political party music at 8%
+                this.switchAudioTrack('political', 0.08);
             }
             // Remove the event listeners once audio is playing
             document.removeEventListener('click', handleFirstInteraction);
@@ -63,8 +120,11 @@ class WidgetManager {
         // Save audio state when leaving page (for vote.html/results.html navigation)
         window.addEventListener('beforeunload', () => {
             const audioState = {
-                isPlaying: !this.backgroundMusic.paused,
-                currentTime: this.backgroundMusic.currentTime
+                currentTrack: this.currentAudioTrack,
+                lavenderIsPlaying: !this.backgroundMusic.paused,
+                lavenderCurrentTime: this.backgroundMusic.currentTime,
+                politicalIsPlaying: !this.politicalMusic.paused,
+                politicalCurrentTime: this.politicalMusic.currentTime
             };
             localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
         });
@@ -73,9 +133,16 @@ class WidgetManager {
         const audioState = localStorage.getItem('nostalgiaAudioState');
         if (audioState) {
             const state = JSON.parse(audioState);
-            if (state.isPlaying && state.currentTime !== undefined) {
-                // Set the time but don't auto-play yet (will start on user interaction)
-                this.backgroundMusic.currentTime = state.currentTime;
+            if (state.currentTrack) {
+                this.currentAudioTrack = state.currentTrack;
+                
+                if (state.currentTrack === 'lavender' && state.lavenderIsPlaying && state.lavenderCurrentTime !== undefined) {
+                    // Set the time but don't auto-play yet (will start on user interaction)
+                    this.backgroundMusic.currentTime = state.lavenderCurrentTime;
+                } else if (state.currentTrack === 'political' && state.politicalIsPlaying && state.politicalCurrentTime !== undefined) {
+                    // Set the time but don't auto-play yet (will start on user interaction)
+                    this.politicalMusic.currentTime = state.politicalCurrentTime;
+                }
             }
             // Clear the stored state since we've restored it
             localStorage.removeItem('nostalgiaAudioState');
@@ -209,22 +276,15 @@ class WidgetManager {
             this.updateNavigationButtons();
             
             // Handle background music based on current widget
-            if (this.currentWidget <= 2) {
-                // 50% volume for FirstWidget and SecondWidget
-                this.backgroundMusic.volume = 0.5;
-                if (this.backgroundMusic.paused) {
-                    this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
-                }
+            if (this.currentWidget === 1) {
+                // 50% volume for FirstWidget only - lavender soundtrack
+                this.switchAudioTrack('lavender', 0.5);
             } else if (this.currentWidget <= 5) {
-                // Subtle volume for VideoWidget, VideoWidget2, VideoWidget3 (until politics_1 video)
-                this.backgroundMusic.volume = 0.15;
-                if (this.backgroundMusic.paused) {
-                    this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
-                }
+                // 8% volume from SecondWidget onwards (until politics_1 video) - lavender soundtrack
+                this.switchAudioTrack('lavender', 0.08);
             } else {
-                // Stop completely from VideoWidget4 (politics_1 video) onwards
-                this.backgroundMusic.pause();
-                this.backgroundMusic.currentTime = 0;
+                // From VideoWidget4 (politics_1) onwards - political party music at 8%
+                this.switchAudioTrack('political', 0.08);
             }
         });
 
@@ -261,8 +321,11 @@ class WidgetManager {
         
         // Save audio state before redirect
         const audioState = {
-            isPlaying: !this.backgroundMusic.paused,
-            currentTime: this.backgroundMusic.currentTime
+            currentTrack: this.currentAudioTrack,
+            lavenderIsPlaying: !this.backgroundMusic.paused,
+            lavenderCurrentTime: this.backgroundMusic.currentTime,
+            politicalIsPlaying: !this.politicalMusic.paused,
+            politicalCurrentTime: this.politicalMusic.currentTime
         };
         localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
         
@@ -308,22 +371,15 @@ class WidgetManager {
         this.updateNavigationButtons();
         
         // Handle background music based on current widget
-        if (this.currentWidget <= 2) {
-            // 50% volume for FirstWidget and SecondWidget
-            this.backgroundMusic.volume = 0.5;
-            if (this.backgroundMusic.paused) {
-                this.backgroundMusic.play().catch(e => console.log('Audio playbook failed:', e));
-            }
+        if (this.currentWidget === 1) {
+            // 50% volume for FirstWidget only - lavender soundtrack
+            this.switchAudioTrack('lavender', 0.5);
         } else if (this.currentWidget <= 5) {
-            // Subtle volume for VideoWidget, VideoWidget2, VideoWidget3 (until politics_1 video)
-            this.backgroundMusic.volume = 0.15;
-            if (this.backgroundMusic.paused) {
-                this.backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
-            }
+            // 8% volume from SecondWidget onwards (until politics_1 video) - lavender soundtrack
+            this.switchAudioTrack('lavender', 0.08);
         } else {
-            // Stop completely from VideoWidget4 (politics_1 video) onwards
-            this.backgroundMusic.pause();
-            this.backgroundMusic.currentTime = 0;
+            // From VideoWidget4 (politics_1) onwards - political party music at 8%
+            this.switchAudioTrack('political', 0.08);
         }
         
         // Extra safety: ensure video cleanup when not on VideoWidget3
@@ -630,12 +686,10 @@ class WidgetManager {
         console.log('🎵 RESET - Phase 3: Resetting audio system');
         
         try {
-            // Reset background music
-            if (this.backgroundMusic) {
-                this.backgroundMusic.pause();
-                this.backgroundMusic.currentTime = 0;
-                this.backgroundMusic.volume = 0.5; // Reset to 50% volume for widget 1
-            }
+            // Stop all audio and reset to lavender soundtrack
+            this.stopAllAudio();
+            this.currentAudioTrack = 'lavender';
+            this.backgroundMusic.volume = 0.5; // Reset to 50% volume for widget 1
             
             // Clear any audio-related localStorage except voting data
             const audioState = localStorage.getItem('nostalgiaAudioState');
@@ -643,7 +697,7 @@ class WidgetManager {
                 localStorage.removeItem('nostalgiaAudioState');
             }
             
-            console.log('✅ RESET - Audio system reset');
+            console.log('✅ RESET - Audio system reset to lavender soundtrack');
             
         } catch (error) {
             console.error('❌ RESET - Failed to reset audio system:', error);

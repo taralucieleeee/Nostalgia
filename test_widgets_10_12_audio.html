@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Widgets 10 & 12 Dual Audio</title>
+    <style>
+        body {
+            font-family: 'Space Mono', monospace;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #9A7A78;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Space Mono', monospace;
+        }
+        .button:hover {
+            background: #7a5a58;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.playing {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.paused {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .audio-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Widgets 10 & 12 Dual Audio System</h1>
+    
+    <div class="test-section">
+        <h2>🎵 Background Audio Status</h2>
+        <div class="audio-controls">
+            <div>
+                <strong>Lavender Soundtrack:</strong>
+                <div id="lavenderStatus" class="status paused">PAUSED</div>
+            </div>
+            <div>
+                <strong>Political Party Music:</strong>
+                <div id="politicalStatus" class="status paused">PAUSED</div>
+            </div>
+        </div>
+        
+        <div class="audio-controls">
+            <button class="button" onclick="playLavender()">Play Lavender</button>
+            <button class="button" onclick="playPolitical()">Play Political</button>
+            <button class="button" onclick="stopAllAudio()">Stop All</button>
+        </div>
+        
+        <div class="volume-control">
+            <label>Political Volume:</label>
+            <input type="range" id="politicalVolume" min="0" max="100" value="8" onchange="updatePoliticalVolume()">
+            <span id="politicalVolumeDisplay">8%</span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎬 Widget Navigation Test</h2>
+        <div class="audio-controls">
+            <button class="button" onclick="goToWidget(6)">Go to Widget 6 (Political Start)</button>
+            <button class="button" onclick="goToWidget(10)">Go to Widget 10 (VideoWidget8)</button>
+            <button class="button" onclick="goToWidget(12)">Go to Widget 12 (VideoWidget10)</button>
+        </div>
+        
+        <div>
+            <p><strong>Expected Behavior:</strong></p>
+            <ul>
+                <li>Widget 6+: Political party music should play at 8% volume</li>
+                <li>Widget 10: Video audio + Political background music simultaneously</li>
+                <li>Widget 12: Video audio + Political background music simultaneously</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Manual Audio Test</h2>
+        <p>Test playing both audio tracks simultaneously:</p>
+        <div class="audio-controls">
+            <button class="button" onclick="testSimultaneousAudio()">Play Both Audio Tracks</button>
+            <button class="button" onclick="testVideoWithPolitical()">Test Video + Political Audio</button>
+        </div>
+        
+        <video id="testVideo" style="width: 300px; margin: 10px 0;" controls muted>
+            <source src="/static/videos/politics_3.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="lavenderMusic" src="/static/sounds/lavendersoundtrack.mp3" loop></audio>
+    <audio id="politicalMusic" src="/static/sounds/politicalpartmusic.mp3" loop></audio>
+
+    <script>
+        const lavenderMusic = document.getElementById('lavenderMusic');
+        const politicalMusic = document.getElementById('politicalMusic');
+        const lavenderStatus = document.getElementById('lavenderStatus');
+        const politicalStatus = document.getElementById('politicalStatus');
+        const testVideo = document.getElementById('testVideo');
+
+        // Update status display
+        function updateStatus() {
+            if (lavenderMusic.paused) {
+                lavenderStatus.textContent = 'PAUSED';
+                lavenderStatus.className = 'status paused';
+            } else {
+                lavenderStatus.textContent = `PLAYING (${Math.round(lavenderMusic.volume * 100)}%)`;
+                lavenderStatus.className = 'status playing';
+            }
+
+            if (politicalMusic.paused) {
+                politicalStatus.textContent = 'PAUSED';
+                politicalStatus.className = 'status paused';
+            } else {
+                politicalStatus.textContent = `PLAYING (${Math.round(politicalMusic.volume * 100)}%)`;
+                politicalStatus.className = 'status playing';
+            }
+        }
+
+        // Audio control functions
+        function playLavender() {
+            politicalMusic.pause();
+            lavenderMusic.volume = 0.08;
+            lavenderMusic.play().catch(e => console.log('Lavender playback failed:', e));
+        }
+
+        function playPolitical() {
+            lavenderMusic.pause();
+            politicalMusic.volume = 0.08;
+            politicalMusic.play().catch(e => console.log('Political playback failed:', e));
+        }
+
+        function stopAllAudio() {
+            lavenderMusic.pause();
+            politicalMusic.pause();
+            testVideo.pause();
+        }
+
+        function updatePoliticalVolume() {
+            const volume = document.getElementById('politicalVolume').value / 100;
+            politicalMusic.volume = volume;
+            document.getElementById('politicalVolumeDisplay').textContent = `${Math.round(volume * 100)}%`;
+        }
+
+        function testSimultaneousAudio() {
+            console.log('Testing simultaneous audio playback...');
+            
+            // Start political music at low volume
+            politicalMusic.volume = 0.08;
+            politicalMusic.play().catch(e => console.log('Political music failed:', e));
+            
+            // Also start a video with audio
+            testVideo.muted = false;
+            testVideo.volume = 0.5;
+            testVideo.play().catch(e => console.log('Video playback failed:', e));
+            
+            console.log('Both audio tracks should be playing simultaneously');
+        }
+
+        function testVideoWithPolitical() {
+            console.log('Testing video with background political music...');
+            
+            // Ensure political music is playing first
+            politicalMusic.volume = 0.08;
+            politicalMusic.play().then(() => {
+                console.log('Political music started');
+                
+                // Start video after a short delay
+                setTimeout(() => {
+                    testVideo.muted = false;
+                    testVideo.volume = 0.8;
+                    testVideo.play().then(() => {
+                        console.log('Video started - both should be playing');
+                    }).catch(e => console.log('Video failed:', e));
+                }, 1000);
+            }).catch(e => console.log('Political music failed:', e));
+        }
+
+        function goToWidget(widgetNumber) {
+            console.log(`Navigating to widget ${widgetNumber}...`);
+            window.open(`http://localhost:3000/?widget=${widgetNumber}`, '_blank');
+        }
+
+        // Event listeners for audio state changes
+        lavenderMusic.addEventListener('play', updateStatus);
+        lavenderMusic.addEventListener('pause', updateStatus);
+        politicalMusic.addEventListener('play', updateStatus);
+        politicalMusic.addEventListener('pause', updateStatus);
+
+        // Initial status update
+        updateStatus();
+        setInterval(updateStatus, 1000);
+
+        // Enable user interaction
+        document.addEventListener('click', function enableAudio() {
+            console.log('User interaction detected - audio context enabled');
+            document.removeEventListener('click', enableAudio);
+        }, { once: true });
+    </script>
+</body>
+</html>

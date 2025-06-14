@@ -75,6 +75,10 @@
         <source src="/static/sounds/lavendersoundtrack.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
+    <audio id="politicalMusic" preload="auto" loop>
+        <source src="/static/sounds/politicalpartmusic.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
     <div class="flex flex-col w-screen h-screen">
         <!-- Header Section -->
         <div class="flex-shrink-0 px-8 py-12">
@@ -128,33 +132,61 @@
         // Cross-page audio management
         document.addEventListener('DOMContentLoaded', () => {
             const backgroundMusic = document.getElementById('bgMusic');
-            
-            // Set subtle volume for voting page
-            backgroundMusic.volume = 0.15;
+            const politicalMusic = document.getElementById('politicalMusic');
             
             // Try to restore audio state from previous page
             const audioState = localStorage.getItem('nostalgiaAudioState');
             if (audioState) {
                 const state = JSON.parse(audioState);
-                if (state.isPlaying && state.currentTime !== undefined) {
-                    backgroundMusic.currentTime = state.currentTime;
-                    backgroundMusic.play().catch(e => {
-                        console.log('Audio autoplay prevented, will start on user interaction');
+                
+                if (state.currentTrack === 'political' && state.politicalIsPlaying && state.politicalCurrentTime !== undefined) {
+                    // Continue political party music
+                    politicalMusic.volume = 0.08;
+                    politicalMusic.currentTime = state.politicalCurrentTime;
+                    politicalMusic.play().catch(e => {
+                        console.log('Political music autoplay prevented, will start on user interaction');
                         // Start audio on first user interaction
                         const startAudio = () => {
-                            backgroundMusic.currentTime = state.currentTime;
-                            backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+                            politicalMusic.currentTime = state.politicalCurrentTime;
+                            politicalMusic.play().catch(e => console.log('Political music playback failed:', e));
                             document.removeEventListener('click', startAudio);
                             document.removeEventListener('keydown', startAudio);
                         };
                         document.addEventListener('click', startAudio);
                         document.addEventListener('keydown', startAudio);
                     });
+                } else if (state.currentTrack === 'lavender' && state.lavenderIsPlaying && state.lavenderCurrentTime !== undefined) {
+                    // Continue lavender soundtrack
+                    backgroundMusic.volume = 0.08;
+                    backgroundMusic.currentTime = state.lavenderCurrentTime;
+                    backgroundMusic.play().catch(e => {
+                        console.log('Lavender music autoplay prevented, will start on user interaction');
+                        // Start audio on first user interaction
+                        const startAudio = () => {
+                            backgroundMusic.currentTime = state.lavenderCurrentTime;
+                            backgroundMusic.play().catch(e => console.log('Lavender music playback failed:', e));
+                            document.removeEventListener('click', startAudio);
+                            document.removeEventListener('keydown', startAudio);
+                        };
+                        document.addEventListener('click', startAudio);
+                        document.addEventListener('keydown', startAudio);
+                    });
+                } else {
+                    // Default to lavender soundtrack if no previous state
+                    backgroundMusic.volume = 0.08;
+                    const startAudio = () => {
+                        backgroundMusic.play().catch(e => console.log('Lavender music playback failed:', e));
+                        document.removeEventListener('click', startAudio);
+                        document.removeEventListener('keydown', startAudio);
+                    };
+                    document.addEventListener('click', startAudio);
+                    document.addEventListener('keydown', startAudio);
                 }
             } else {
-                // No previous state, start audio on user interaction
+                // No previous state, start lavender soundtrack on user interaction
+                backgroundMusic.volume = 0.08;
                 const startAudio = () => {
-                    backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+                    backgroundMusic.play().catch(e => console.log('Lavender music playback failed:', e));
                     document.removeEventListener('click', startAudio);
                     document.removeEventListener('keydown', startAudio);
                 };
@@ -165,8 +197,11 @@
             // Save audio state when leaving page
             window.addEventListener('beforeunload', () => {
                 const audioState = {
-                    isPlaying: !backgroundMusic.paused,
-                    currentTime: backgroundMusic.currentTime
+                    currentTrack: !politicalMusic.paused ? 'political' : 'lavender',
+                    lavenderIsPlaying: !backgroundMusic.paused,
+                    lavenderCurrentTime: backgroundMusic.currentTime,
+                    politicalIsPlaying: !politicalMusic.paused,
+                    politicalCurrentTime: politicalMusic.currentTime
                 };
                 localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
             });

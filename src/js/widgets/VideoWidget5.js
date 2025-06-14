@@ -17,13 +17,13 @@ export class VideoWidget5 extends Widget {
                     <div class="flex items-center justify-between w-full max-w-6xl">
                         <!-- LEFT: DOWN button -->
                         <a href="#" id="downBtn" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
-                            <img id="downIcon" src="/static/icons/down_brown.svg" alt="Down" class="h-8 w-8">
+                            <img id="downIcon" src="/static/icons/downfooter.svg" alt="Down" class="h-8 w-8">
                             DOWN
                         </a>
                         
                         <!-- CENTER: UP button -->
                         <a href="#" id="upBtn" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
-                            <img id="upIcon" src="/static/icons/up_brown.svg" alt="Up" class="h-8 w-8">
+                            <img id="upIcon" src="/static/icons/upfooter.svg" alt="Up" class="h-8 w-8">
                             UP
                         </a>
                         
@@ -86,8 +86,8 @@ export class VideoWidget5 extends Widget {
     navigateWithFeedback(direction, targetWidget) {
         // Show visual feedback immediately
         const iconMap = {
-            'up': { element: this.element.querySelector('#upIcon'), filled: '/static/icons/upfilled_brown.svg' },
-            'down': { element: this.element.querySelector('#downIcon'), filled: '/static/icons/downfilled_brown.svg' },
+            'up': { element: this.element.querySelector('#upIcon'), filled: '/static/icons/upfooter.svg' },
+            'down': { element: this.element.querySelector('#downIcon'), filled: '/static/icons/downfooter.svg' },
             'next': { element: this.element.querySelector('#nextIcon'), filled: '/static/icons/nextfilled.svg' }
         };
         

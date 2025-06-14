@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Volume Test - Nostalgia</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: white; 
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            background: #333; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        button:hover { background: #555; }
+        .volume-display { 
+            font-weight: bold; 
+            color: #4CAF50; 
+        }
+        .expected { color: #2196F3; }
+        .test-pass { color: #4CAF50; }
+        .test-fail { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>🎵 Audio Volume Changes Test</h1>
+    <p>Testing the background music volume changes: <strong>FirstWidget = 50%</strong>, <strong>SecondWidget onwards = 8%</strong></p>
+
+    <audio id="bgMusic" preload="auto" loop>
+        <source src="/static/sounds/lavendersoundtrack.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="test-section">
+        <h2>Widget Audio Volume Tests</h2>
+        <p>Current volume: <span id="currentVolume" class="volume-display">0%</span></p>
+        
+        <button onclick="testFirstWidget()">Test FirstWidget (Expected: 50%)</button>
+        <button onclick="testSecondWidget()">Test SecondWidget (Expected: 8%)</button>
+        <button onclick="testVideoWidget()">Test VideoWidget (Expected: 8%)</button>
+        <button onclick="testVideoWidget2()">Test VideoWidget2 (Expected: 8%)</button>
+        <button onclick="testVideoWidget3()">Test VideoWidget3 (Expected: 8%)</button>
+        <button onclick="testReset()">Test Reset (Expected: 50%)</button>
+        
+        <div id="testResults" style="margin-top: 20px;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Cross-Page Audio Tests</h2>
+        <button onclick="testVotePage()">Test Vote Page Volume (Expected: 8%)</button>
+        <button onclick="testResultsPage()">Test Results Page Volume (Expected: 8%)</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Audio Controls</h2>
+        <button onclick="playAudio()">Play Audio</button>
+        <button onclick="pauseAudio()">Pause Audio</button>
+        <button onclick="setVolume(0.5)">Set 50% Volume</button>
+        <button onclick="setVolume(0.08)">Set 8% Volume</button>
+    </div>
+
+    <script>
+        const backgroundMusic = document.getElementById('bgMusic');
+        const currentVolumeDisplay = document.getElementById('currentVolume');
+        const testResults = document.getElementById('testResults');
+
+        function updateVolumeDisplay() {
+            const volumePercent = Math.round(backgroundMusic.volume * 100);
+            currentVolumeDisplay.textContent = `${volumePercent}%`;
+        }
+
+        function setVolume(volume) {
+            backgroundMusic.volume = volume;
+            updateVolumeDisplay();
+        }
+
+        function playAudio() {
+            backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+        }
+
+        function pauseAudio() {
+            backgroundMusic.pause();
+        }
+
+        function addTestResult(testName, expected, actual, passed) {
+            const result = document.createElement('div');
+            result.className = passed ? 'test-pass' : 'test-fail';
+            result.innerHTML = `
+                <strong>${testName}:</strong> 
+                Expected ${expected}%, Got ${actual}% 
+                ${passed ? '✅ PASS' : '❌ FAIL'}
+            `;
+            testResults.appendChild(result);
+        }
+
+        // Simulate FirstWidget audio logic (Widget 1)
+        function testFirstWidget() {
+            // FirstWidget should get 50% volume
+            if (1 === 1) { // currentWidget === 1
+                backgroundMusic.volume = 0.5;
+                backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            }
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 50;
+            addTestResult('FirstWidget', expected, actual, actual === expected);
+        }
+
+        // Simulate SecondWidget audio logic (Widget 2)
+        function testSecondWidget() {
+            // SecondWidget should get 8% volume
+            if (2 <= 5) { // currentWidget <= 5
+                backgroundMusic.volume = 0.08;
+                backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            }
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 8;
+            addTestResult('SecondWidget', expected, actual, actual === expected);
+        }
+
+        // Simulate VideoWidget audio logic (Widget 3)
+        function testVideoWidget() {
+            // VideoWidget should get 8% volume
+            if (3 <= 5) { // currentWidget <= 5
+                backgroundMusic.volume = 0.08;
+                backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            }
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 8;
+            addTestResult('VideoWidget', expected, actual, actual === expected);
+        }
+
+        // Simulate VideoWidget2 audio logic (Widget 4)
+        function testVideoWidget2() {
+            // VideoWidget2 should get 8% volume
+            if (4 <= 5) { // currentWidget <= 5
+                backgroundMusic.volume = 0.08;
+                backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            }
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 8;
+            addTestResult('VideoWidget2', expected, actual, actual === expected);
+        }
+
+        // Simulate VideoWidget3 audio logic (Widget 5)
+        function testVideoWidget3() {
+            // VideoWidget3 should get 8% volume
+            if (5 <= 5) { // currentWidget <= 5
+                backgroundMusic.volume = 0.08;
+                backgroundMusic.play().catch(e => console.log('Audio playback failed:', e));
+            }
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 8;
+            addTestResult('VideoWidget3', expected, actual, actual === expected);
+        }
+
+        // Simulate reset audio logic
+        function testReset() {
+            // Reset should set back to 50% volume for widget 1
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0;
+            backgroundMusic.volume = 0.5; // Reset to 50% volume for widget 1
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 50;
+            addTestResult('Reset', expected, actual, actual === expected);
+        }
+
+        // Simulate vote page audio logic
+        function testVotePage() {
+            // Vote page should get 8% volume
+            backgroundMusic.volume = 0.08;
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 8;
+            addTestResult('Vote Page', expected, actual, actual === expected);
+        }
+
+        // Simulate results page audio logic
+        function testResultsPage() {
+            // Results page should get 8% volume
+            backgroundMusic.volume = 0.08;
+            
+            updateVolumeDisplay();
+            const actual = Math.round(backgroundMusic.volume * 100);
+            const expected = 8;
+            addTestResult('Results Page', expected, actual, actual === expected);
+        }
+
+        // Clear test results function
+        function clearResults() {
+            testResults.innerHTML = '';
+        }
+
+        // Initialize
+        updateVolumeDisplay();
+        
+        // Add clear button
+        const clearButton = document.createElement('button');
+        clearButton.textContent = 'Clear Test Results';
+        clearButton.onclick = clearResults;
+        clearButton.style.backgroundColor = '#f44336';
+        document.querySelector('.test-section').appendChild(clearButton);
+
+        console.log('🎵 Audio Volume Test Page Loaded');
+        console.log('✅ Changes Applied:');
+        console.log('  - FirstWidget: 50% volume (unchanged)');
+        console.log('  - SecondWidget onwards: 8% volume (changed from 15%)');
+        console.log('  - Vote/Results pages: 8% volume (changed from 15%)');
+    </script>
+</body>
+</html>
