@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Test - FirstPart</title>
+</head>
+<body>
+    <h1>Video Loading Test</h1>
+    <p>Testing firstpart.mp4 loading directly:</p>
+    
+    <video id="testVideo" width="800" height="600" controls preload="metadata">
+        <source src="/static/videos/firstpart.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <div id="debug"></div>
+    
+    <script>
+        const video = document.getElementById('testVideo');
+        const debug = document.getElementById('debug');
+        
+        function logDebug(message) {
+            console.log(message);
+            debug.innerHTML += '<div>' + message + '</div>';
+        }
+        
+        video.addEventListener('loadstart', () => logDebug('loadstart'));
+        video.addEventListener('durationchange', () => logDebug('durationchange - duration: ' + video.duration));
+        video.addEventListener('loadedmetadata', () => logDebug('loadedmetadata'));
+        video.addEventListener('loadeddata', () => logDebug('loadeddata'));
+        video.addEventListener('canplay', () => logDebug('canplay'));
+        video.addEventListener('canplaythrough', () => logDebug('canplaythrough'));
+        video.addEventListener('error', (e) => {
+            logDebug('ERROR: ' + e.type);
+            logDebug('Error code: ' + (video.error ? video.error.code : 'unknown'));
+            logDebug('Error message: ' + (video.error ? video.error.message : 'unknown'));
+            logDebug('Video src: ' + video.src);
+            logDebug('Video readyState: ' + video.readyState);
+            logDebug('Video networkState: ' + video.networkState);
+        });
+        
+        logDebug('Initial video src: ' + video.src);
+        logDebug('Initial readyState: ' + video.readyState);
+        logDebug('Initial networkState: ' + video.networkState);
+    </script>
+</body>
+</html>

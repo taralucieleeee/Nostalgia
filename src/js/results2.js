@@ -85,8 +85,8 @@ document.addEventListener('keydown', (event) => {
         // Wait 1 second showing the filled icon, then navigate
         setTimeout(() => {
             rightIcon.style.backgroundColor = '#666';
-            // Navigate back to main widgets (or end of flow)
-            window.location.href = '/index.html?widget=1';
+            // Navigate back to main widgets (complete restart)
+            window.location.href = '/index.html';
         }, 1000);
     }
 });

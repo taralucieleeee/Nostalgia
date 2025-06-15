@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset → Vote2.html Fix Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .test-section {
+            background: rgba(255,255,255,0.15);
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .critical {
+            background: linear-gradient(45deg, #FF4757, #FF3742);
+        }
+        
+        .success {
+            background: linear-gradient(45deg, #2ED573, #1ABC9C);
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .test-pass {
+            background: rgba(46, 213, 115, 0.2);
+            border-left: 4px solid #2ED573;
+            color: #2ED573;
+        }
+        
+        .test-fail {
+            background: rgba(255, 71, 87, 0.2);
+            border-left: 4px solid #FF4757;
+            color: #FF4757;
+        }
+        
+        .test-info {
+            background: rgba(52, 152, 219, 0.2);
+            border-left: 4px solid #3498DB;
+            color: #3498DB;
+        }
+        
+        .status-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.3);
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(0,255,0,0.3);
+        }
+        
+        .countdown {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #FFD93D;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚨 Reset → Vote2.html Fix Test</h1>
+        <p>Testing the fix for the critical issue where reset causes unwanted redirect to vote2.html</p>
+        <p><strong>Issue:</strong> Reset from any widget → FirstWidget → Audio from transititonvote2.mp4 → Automatic redirect to vote2.html</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Problem Analysis</h2>
+        <div class="test-result test-info">
+            <strong>Root Cause Found:</strong><br>
+            1. Reset sets VideoWidget2 source to transititonvote2.mp4<br>
+            2. Video somehow gets played during reset process<br>
+            3. When video ends, it triggers automatic redirect to vote2.html<br>
+            4. This happens even when user is on FirstWidget
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🛠️ Applied Fixes</h2>
+        <div class="test-result test-pass">
+            <strong>✅ Fix 1:</strong> Added current widget check in video 'ended' event listener<br>
+            Only redirect if user is actually on VideoWidget2 (Widget 4)
+        </div>
+        <div class="test-result test-pass">
+            <strong>✅ Fix 2:</strong> Added reset mode flag to VideoWidget2<br>
+            Prevents activation and video events during reset scenarios
+        </div>
+        <div class="test-result test-pass">
+            <strong>✅ Fix 3:</strong> Enhanced reset system in main.js<br>
+            More aggressive video disabling during reset process
+        </div>
+        <div class="test-result test-pass">
+            <strong>✅ Fix 4:</strong> Widget activation protection<br>
+            VideoWidget2 only activates when user is actually on Widget 4
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Procedure</h2>
+        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <strong>Manual Testing Steps:</strong><br>
+            1. Navigate to different widgets in the main application<br>
+            2. Press 'R' key to reset from various widgets<br>
+            3. Verify: Should go to FirstWidget and stay there<br>
+            4. Verify: Should NOT play transititonvote2 audio<br>
+            5. Verify: Should NOT redirect to vote2.html automatically<br>
+            6. Only lavender soundtrack should play at 50% volume
+        </div>
+        
+        <button class="button critical" onclick="openMainApp()">🚀 Test in Main Application</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Results</h2>
+        <div id="testResults">
+            <div class="test-result test-info">
+                <strong>Ready for Testing</strong><br>
+                Open the main application and test reset functionality from different widgets.
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Debug Information</h2>
+        <div class="status-display" id="debugInfo">
+            Reset fix applied with the following safeguards:
+            - VideoWidget2 video ended event: Checks current widget before redirect
+            - VideoWidget2 activation: Only activates when actually on Widget 4  
+            - Reset mode flag: Prevents video events during reset
+            - Enhanced video disabling: More aggressive reset cleanup
+        </div>
+    </div>
+
+    <script>
+        function openMainApp() {
+            const testResults = document.getElementById('testResults');
+            testResults.innerHTML = `
+                <div class="test-result test-info">
+                    <strong>🚀 Opening Main Application...</strong><br>
+                    Test the reset functionality from different widgets to verify the fix.
+                </div>
+            `;
+            
+            // Open main app
+            window.open('http://localhost:3000', '_blank');
+            
+            // Add countdown for manual testing
+            let countdown = 60;
+            const countdownDiv = document.createElement('div');
+            countdownDiv.className = 'countdown';
+            testResults.appendChild(countdownDiv);
+            
+            const timer = setInterval(() => {
+                countdownDiv.textContent = `⏱️ Manual testing time: ${countdown}s remaining`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(timer);
+                    countdownDiv.textContent = '✅ Manual testing period complete';
+                    
+                    // Add result reporting
+                    const reportDiv = document.createElement('div');
+                    reportDiv.innerHTML = `
+                        <div class="test-result test-info">
+                            <strong>📝 Please report your results:</strong><br>
+                            - Did reset work correctly without redirect to vote2.html?<br>
+                            - Was there any transititonvote2 audio bleeding?<br>
+                            - Did you stay on FirstWidget after reset?
+                        </div>
+                    `;
+                    testResults.appendChild(reportDiv);
+                }
+            }, 1000);
+        }
+
+        // Update debug info with current status
+        document.addEventListener('DOMContentLoaded', () => {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML += `
+                <br><br>Timestamp: ${new Date().toLocaleString()}
+                <br>Status: Fix implemented and ready for testing
+                <br>Expected Result: Reset should work without vote2.html redirect
+            `;
+        });
+    </script>
+</body>
+</html>

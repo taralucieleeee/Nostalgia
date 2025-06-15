@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecondPart Transition Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .fix-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .fix-section h3 {
+            color: #28a745;
+            margin-top: 0;
+        }
+        .test-section {
+            background: #e3f2fd;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        .test-section h3 {
+            color: #2196f3;
+            margin-top: 0;
+        }
+        .code-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            border: 1px solid #dee2e6;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        .debug-log {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 SecondPart Transition Fix Test</h1>
+    <p>Testing the fixes applied to resolve the secondpart → politics_1 transition issue.</p>
+
+    <div class="fix-section">
+        <h3>✅ Fixes Applied</h3>
+        <div class="status pass">
+            <strong>1. AudioConflictManager Protection:</strong><br>
+            Added video protection system to prevent AudioConflictManager from interfering with secondpart video playback.
+            <br><br>
+            <strong>2. Backup Transition Trigger:</strong><br>
+            Added timeupdate listener to trigger transition near video end (within 0.5 seconds) as backup to 'ended' event.
+            <br><br>
+            <strong>3. Enhanced Logging:</strong><br>
+            Added detailed progress logging and duration tracking to debug video playback issues.
+            <br><br>
+            <strong>4. Transition Flag:</strong><br>
+            Added flag to prevent multiple transition triggers from the same video playback.
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 Test the Transition Fix</h3>
+        <div class="status info">
+            <strong>Test Steps:</strong>
+            <ol>
+                <li>Open the main Nostalgia application</li>
+                <li>Navigate to VideoWidget3 (results_2.png)</li>
+                <li>Press 'D' or click NEXT to start secondpart.mp4</li>
+                <li>Watch the browser console for detailed logging</li>
+                <li>Verify the video transitions to politics_1.mp4 automatically</li>
+            </ol>
+        </div>
+        <button onclick="openMainApp()">Open Main App</button>
+        <button onclick="startConsoleMonitoring()">Start Console Monitoring</button>
+        <div id="test-status" class="status info">Ready to test</div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 Expected Console Output</h3>
+        <div class="code-block">
+VideoWidget3: Starting smooth transition from results_2.png image to secondpart.mp4
+VideoWidget3: Protected secondpart video from AudioConflictManager
+Video3: loadstart
+Video3: durationchange - Duration: [X]s
+Video3: Video will end at [X]s
+Video3: play started
+Video3: now playing
+Video3: Progress 10% (...)
+Video3: Progress 20% (...)
+...
+Video3: Progress 90% (...)
+Secondpart video near end (backup trigger), transitioning to politics_1
+OR
+Video playback completed
+Secondpart video ended, smoothly transitioning to politics_1 (VideoWidget4)
+VideoWidget3: Unprotected secondpart video
+Starting smooth transition from secondpart to VideoWidget4 (politics_1)
+Navigating to VideoWidget4 (politics_1.mp4)
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 Debug Console Commands</h3>
+        <div class="code-block">
+// Copy these commands into the browser console for debugging:
+
+// 1. Check video protection status
+console.log('Protected videos:', AudioConflictManager.protectedVideos);
+
+// 2. Check secondpart video element
+const video3 = document.querySelector('#mainVideo3');
+console.log('Video3 element:', video3);
+console.log('Video3 src:', video3?.src);
+console.log('Video3 duration:', video3?.duration);
+console.log('Video3 currentTime:', video3?.currentTime);
+
+// 3. Monitor video progress
+setInterval(() => {
+    const video = document.querySelector('#mainVideo3');
+    if (video && !video.paused) {
+        const progress = (video.currentTime / video.duration * 100).toFixed(1);
+        console.log(`Manual monitor: ${progress}% (${video.currentTime.toFixed(1)}s)`);
+    }
+}, 2000);
+
+// 4. Test transition manually
+const video = document.querySelector('#mainVideo3');
+if (video) {
+    video.currentTime = video.duration - 1; // Jump to near end
+    console.log('Jumped to near end to test transition');
+}
+
+// 5. Force transition
+const testEvent = new CustomEvent('navigateToWidget', {
+    detail: { targetWidget: 6 }
+});
+document.dispatchEvent(testEvent);
+console.log('Forced navigation to politics_1');
+        </div>
+        <button onclick="copyDebugCommands()">Copy Debug Commands</button>
+    </div>
+
+    <div class="test-section">
+        <h3>🎯 Troubleshooting Guide</h3>
+        <div class="status warning">
+            <strong>If transition still doesn't work:</strong>
+            <ul>
+                <li><strong>Check Console:</strong> Look for "Video3: Progress" messages to confirm video is playing</li>
+                <li><strong>Check Duration:</strong> Ensure video duration is detected properly</li>
+                <li><strong>Check Protection:</strong> Verify AudioConflictManager is not interfering</li>
+                <li><strong>Manual Test:</strong> Use debug commands to jump to video end and test transition</li>
+                <li><strong>Check Navigation:</strong> Verify the navigateToWidget event is being dispatched</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 Real-Time Debug Log</h3>
+        <div id="debug-log" class="debug-log">
+            Debug output will appear here when console monitoring is active...
+        </div>
+        <button onclick="clearDebugLog()">Clear Log</button>
+    </div>
+
+    <script>
+        let debugLog = document.getElementById('debug-log');
+        let testStatus = document.getElementById('test-status');
+        let isMonitoring = false;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            console.log(logEntry);
+            debugLog.innerHTML += logEntry + '\n';
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+
+        function setStatus(message, type = 'info') {
+            testStatus.textContent = message;
+            testStatus.className = `status ${type}`;
+        }
+
+        function openMainApp() {
+            log('Opening main Nostalgia application...');
+            const mainWindow = window.open('/', '_blank');
+            if (mainWindow) {
+                setStatus('Main app opened - navigate to VideoWidget3 and test', 'info');
+                log('✅ Main app opened successfully');
+                log('📋 Next steps: Navigate to VideoWidget3 and press D to start secondpart video');
+            } else {
+                setStatus('Failed to open main app - check popup blocker', 'fail');
+                log('❌ Failed to open main app - popup may be blocked');
+            }
+        }
+
+        function startConsoleMonitoring() {
+            if (isMonitoring) {
+                log('Console monitoring already active');
+                return;
+            }
+
+            log('Starting console monitoring for transition debugging...');
+            isMonitoring = true;
+            setStatus('Console monitoring active', 'pass');
+
+            // Override console.log to capture output
+            const originalLog = console.log;
+            console.log = function(...args) {
+                originalLog.apply(console, args);
+                
+                // Check if this is a VideoWidget3 log
+                const message = args.join(' ');
+                if (message.includes('Video3:') || 
+                    message.includes('VideoWidget3:') || 
+                    message.includes('Secondpart') ||
+                    message.includes('politics_1') ||
+                    message.includes('AudioConflictManager')) {
+                    
+                    log(`🎬 ${message}`);
+                }
+            };
+
+            log('Console monitoring activated - VideoWidget3 logs will appear here');
+        }
+
+        function copyDebugCommands() {
+            const commands = `// Debug commands for secondpart transition
+console.log('Protected videos:', AudioConflictManager.protectedVideos);
+
+const video3 = document.querySelector('#mainVideo3');
+console.log('Video3 element:', video3);
+console.log('Video3 src:', video3?.src);
+console.log('Video3 duration:', video3?.duration);
+console.log('Video3 currentTime:', video3?.currentTime);
+
+setInterval(() => {
+    const video = document.querySelector('#mainVideo3');
+    if (video && !video.paused) {
+        const progress = (video.currentTime / video.duration * 100).toFixed(1);
+        console.log(\`Manual monitor: \${progress}% (\${video.currentTime.toFixed(1)}s)\`);
+    }
+}, 2000);`;
+
+            navigator.clipboard.writeText(commands).then(() => {
+                log('✅ Debug commands copied to clipboard');
+                setStatus('Debug commands copied - paste into main app console', 'pass');
+            }).catch(err => {
+                log('❌ Failed to copy commands: ' + err);
+                setStatus('Failed to copy commands', 'fail');
+            });
+        }
+
+        function clearDebugLog() {
+            debugLog.innerHTML = '';
+            log('Debug log cleared');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 SecondPart Transition Fix Test loaded');
+            log('📋 Use the buttons above to test the fixes');
+            setStatus('Test tool ready - click buttons to begin', 'info');
+        });
+    </script>
+</body>
+</html>

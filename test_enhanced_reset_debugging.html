@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Reset Debugging Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: white;
+        }
+        .test-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .test-section { 
+            background: #2a2a2a; 
+            margin: 15px 0; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border-left: 4px solid #4CAF50;
+        }
+        .test-button { 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        .test-button:hover { 
+            background: #45a049; 
+        }
+        .test-button.danger {
+            background: #f44336;
+        }
+        .test-button.danger:hover {
+            background: #da190b;
+        }
+        .status { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border-radius: 4px; 
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #cce7ff; color: #004085; }
+        .log-output {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .performance-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .stat-card {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔄 Enhanced Reset Debugging Test Suite</h1>
+        <p>This test suite validates the enhanced reset functionality with comprehensive debugging and monitoring.</p>
+
+        <!-- Debug Panel Controls -->
+        <div class="test-section">
+            <h2>🎛️ Debug Panel Controls</h2>
+            <button class="test-button" onclick="showDebugPanel()">Show Debug Panel (Ctrl+Shift+D)</button>
+            <button class="test-button" onclick="hideDebugPanel()">Hide Debug Panel</button>
+            <button class="test-button" onclick="resetDebugStats()">Reset Debug Stats</button>
+            <div id="debugPanelStatus" class="status"></div>
+        </div>
+
+        <!-- Reset Performance Tests -->
+        <div class="test-section">
+            <h2>⚡ Reset Performance Tests</h2>
+            <button class="test-button" onclick="testBasicReset()">Test Basic Reset</button>
+            <button class="test-button" onclick="testResetUnderLoad()">Test Reset Under Load</button>
+            <button class="test-button" onclick="testMultipleResets()">Test Multiple Resets</button>
+            <button class="test-button" onclick="testResetFromDifferentWidgets()">Test From Different Widgets</button>
+            <div id="performanceStatus" class="status"></div>
+            
+            <!-- Performance Statistics -->
+            <div class="performance-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalResets">0</div>
+                    <div class="stat-label">Total Resets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="successfulResets">0</div>
+                    <div class="stat-label">Successful</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="failedResets">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgResetTime">0ms</div>
+                    <div class="stat-label">Avg Reset Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="successRate">0%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset Error Simulation -->
+        <div class="test-section">
+            <h2>🚨 Error Simulation Tests</h2>
+            <button class="test-button danger" onclick="simulateResetError()">Simulate Reset Error</button>
+            <button class="test-button danger" onclick="simulateWidgetError()">Simulate Widget Error</button>
+            <button class="test-button danger" onclick="simulateTimerError()">Simulate Timer Error</button>
+            <button class="test-button" onclick="testFallbackReset()">Test Fallback Reset</button>
+            <div id="errorStatus" class="status"></div>
+        </div>
+
+        <!-- Reset History Analysis -->
+        <div class="test-section">
+            <h2>📊 Reset History Analysis</h2>
+            <button class="test-button" onclick="viewResetHistory()">View Reset History</button>
+            <button class="test-button" onclick="analyzeResetPatterns()">Analyze Reset Patterns</button>
+            <button class="test-button" onclick="exportResetData()">Export Reset Data</button>
+            <button class="test-button" onclick="clearResetHistory()">Clear History</button>
+            <div id="historyStatus" class="status"></div>
+            <div id="historyOutput" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Real-time Monitoring -->
+        <div class="test-section">
+            <h2>📡 Real-time Reset Monitoring</h2>
+            <button class="test-button" onclick="startResetMonitoring()">Start Monitoring</button>
+            <button class="test-button" onclick="stopResetMonitoring()">Stop Monitoring</button>
+            <div id="monitoringStatus" class="status"></div>
+            <div id="monitoringOutput" class="log-output" style="display: none;"></div>
+        </div>
+
+        <!-- Console Log Output -->
+        <div class="test-section">
+            <h2>📝 Console Log Output</h2>
+            <div id="consoleOutput" class="log-output"></div>
+            <button class="test-button" onclick="clearConsoleOutput()">Clear Output</button>
+        </div>
+    </div>
+
+    <script>
+        // Intercept console.log for display
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+
+        function logToDisplay(message, type = 'log') {
+            const output = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff4444' : type === 'warn' ? '#ffaa00' : '#00ff00';
+            output.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            logToDisplay(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            logToDisplay(args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            logToDisplay(args.join(' '), 'warn');
+        };
+
+        // Test functions
+        function showDebugPanel() {
+            const event = new KeyboardEvent('keydown', {
+                key: 'D',
+                ctrlKey: true,
+                shiftKey: true,
+                bubbles: true
+            });
+            document.dispatchEvent(event);
+            
+            const statusDiv = document.getElementById('debugPanelStatus');
+            statusDiv.innerHTML = '<div class="info">🎛️ Debug panel toggle event dispatched (Ctrl+Shift+D)</div>';
+            console.log('Debug panel show command sent');
+        }
+
+        function hideDebugPanel() {
+            const panel = document.getElementById('resetDebugPanel');
+            if (panel) {
+                panel.style.display = 'none';
+                console.log('Debug panel hidden');
+            }
+        }
+
+        function resetDebugStats() {
+            if (window.widgetManager) {
+                window.widgetManager.resetAttempts = 0;
+                window.widgetManager.successfulResets = 0;
+                window.widgetManager.failedResets = 0;
+                window.widgetManager.lastResetTime = null;
+                window.widgetManager.resetHistory = [];
+                
+                updatePerformanceStats();
+                console.log('Debug statistics reset');
+                
+                const statusDiv = document.getElementById('debugPanelStatus');
+                statusDiv.innerHTML = '<div class="success">✅ Debug statistics reset successfully</div>';
+            }
+        }
+
+        function testBasicReset() {
+            const statusDiv = document.getElementById('performanceStatus');
+            statusDiv.innerHTML = '<div class="info">🔄 Testing basic reset functionality...</div>';
+            
+            console.log('=== BASIC RESET TEST ===');
+            
+            // Trigger reset
+            const event = new KeyboardEvent('keydown', {
+                key: 'r',
+                bubbles: true
+            });
+            document.dispatchEvent(event);
+            
+            setTimeout(() => {
+                updatePerformanceStats();
+                statusDiv.innerHTML = '<div class="success">✅ Basic reset test completed</div>';
+            }, 1000);
+        }
+
+        function testResetUnderLoad() {
+            const statusDiv = document.getElementById('performanceStatus');
+            statusDiv.innerHTML = '<div class="info">⚡ Testing reset under heavy load...</div>';
+            
+            console.log('=== RESET UNDER LOAD TEST ===');
+            
+            // Simulate heavy load
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const video = document.createElement('video');
+                    video.src = '/static/videos/firstpart.mp4';
+                    document.body.appendChild(video);
+                    video.play().catch(() => {});
+                }, i * 100);
+            }
+            
+            // Trigger reset
+            setTimeout(() => {
+                const event = new KeyboardEvent('keydown', { key: 'r', bubbles: true });
+                document.dispatchEvent(event);
+            }, 1200);
+            
+            setTimeout(() => {
+                updatePerformanceStats();
+                statusDiv.innerHTML = '<div class="success">✅ Reset under load test completed</div>';
+            }, 3000);
+        }
+
+        function testMultipleResets() {
+            const statusDiv = document.getElementById('performanceStatus');
+            statusDiv.innerHTML = '<div class="info">🔄 Testing multiple consecutive resets...</div>';
+            
+            console.log('=== MULTIPLE RESETS TEST ===');
+            
+            let resetCount = 0;
+            const maxResets = 5;
+            
+            function triggerNextReset() {
+                if (resetCount < maxResets) {
+                    resetCount++;
+                    console.log(`Triggering reset ${resetCount}/${maxResets}`);
+                    
+                    const event = new KeyboardEvent('keydown', { key: 'r', bubbles: true });
+                    document.dispatchEvent(event);
+                    
+                    setTimeout(triggerNextReset, 2000);
+                } else {
+                    updatePerformanceStats();
+                    statusDiv.innerHTML = '<div class="success">✅ Multiple resets test completed</div>';
+                }
+            }
+            
+            triggerNextReset();
+        }
+
+        function testResetFromDifferentWidgets() {
+            const statusDiv = document.getElementById('performanceStatus');
+            statusDiv.innerHTML = '<div class="info">🎯 Testing reset from different widget states...</div>';
+            
+            console.log('=== RESET FROM DIFFERENT WIDGETS TEST ===');
+            
+            // Simulate being on different widgets
+            if (window.widgetManager) {
+                const originalWidget = window.widgetManager.currentWidget;
+                
+                const widgets = [1, 2, 3, 4, 5];
+                let testIndex = 0;
+                
+                function testNextWidget() {
+                    if (testIndex < widgets.length) {
+                        window.widgetManager.currentWidget = widgets[testIndex];
+                        console.log(`Testing reset from widget ${widgets[testIndex]}`);
+                        
+                        const event = new KeyboardEvent('keydown', { key: 'r', bubbles: true });
+                        document.dispatchEvent(event);
+                        
+                        testIndex++;
+                        setTimeout(testNextWidget, 2000);
+                    } else {
+                        window.widgetManager.currentWidget = originalWidget;
+                        updatePerformanceStats();
+                        statusDiv.innerHTML = '<div class="success">✅ Reset from different widgets test completed</div>';
+                    }
+                }
+                
+                testNextWidget();
+            }
+        }
+
+        function simulateResetError() {
+            const statusDiv = document.getElementById('errorStatus');
+            statusDiv.innerHTML = '<div class="info">💥 Simulating reset error...</div>';
+            
+            console.log('=== SIMULATING RESET ERROR ===');
+            
+            if (window.widgetManager) {
+                // Temporarily break the reset function
+                const originalReset = window.widgetManager.resetCurrentState;
+                window.widgetManager.resetCurrentState = function() {
+                    throw new Error('Simulated reset error for testing');
+                };
+                
+                // Trigger reset
+                const event = new KeyboardEvent('keydown', { key: 'r', bubbles: true });
+                document.dispatchEvent(event);
+                
+                // Restore original function
+                setTimeout(() => {
+                    window.widgetManager.resetCurrentState = originalReset;
+                    statusDiv.innerHTML = '<div class="error">❌ Reset error simulated and handled</div>';
+                }, 1000);
+            }
+        }
+
+        function simulateWidgetError() {
+            const statusDiv = document.getElementById('errorStatus');
+            statusDiv.innerHTML = '<div class="info">🔧 Simulating widget error...</div>';
+            
+            console.log('=== SIMULATING WIDGET ERROR ===');
+            
+            if (window.widgetManager && window.widgetManager.widgets[0]) {
+                const widget = window.widgetManager.widgets[0];
+                const originalDeactivate = widget.deactivate;
+                
+                widget.deactivate = function() {
+                    throw new Error('Simulated widget deactivation error');
+                };
+                
+                const event = new KeyboardEvent('keydown', { key: 'r', bubbles: true });
+                document.dispatchEvent(event);
+                
+                setTimeout(() => {
+                    if (originalDeactivate) {
+                        widget.deactivate = originalDeactivate;
+                    }
+                    statusDiv.innerHTML = '<div class="error">❌ Widget error simulated and handled</div>';
+                }, 1000);
+            }
+        }
+
+        function simulateTimerError() {
+            const statusDiv = document.getElementById('errorStatus');
+            statusDiv.innerHTML = '<div class="info">⏰ Simulating timer error...</div>';
+            
+            console.log('=== SIMULATING TIMER ERROR ===');
+            
+            if (window.widgetManager) {
+                const originalClearTimers = window.widgetManager.clearAllTimers;
+                window.widgetManager.clearAllTimers = function() {
+                    throw new Error('Simulated timer clearing error');
+                };
+                
+                const event = new KeyboardEvent('keydown', { key: 'r', bubbles: true });
+                document.dispatchEvent(event);
+                
+                setTimeout(() => {
+                    window.widgetManager.clearAllTimers = originalClearTimers;
+                    statusDiv.innerHTML = '<div class="error">❌ Timer error simulated and handled</div>';
+                }, 1000);
+            }
+        }
+
+        function testFallbackReset() {
+            const statusDiv = document.getElementById('errorStatus');
+            statusDiv.innerHTML = '<div class="info">🆘 Testing fallback reset mechanism...</div>';
+            
+            console.log('=== TESTING FALLBACK RESET ===');
+            
+            if (window.widgetManager) {
+                // Direct call to fallback reset
+                window.widgetManager.fallbackReset('TEST_FALLBACK');
+                statusDiv.innerHTML = '<div class="info">🚨 Fallback reset would redirect to /?widget=1 (prevented in test)</div>';
+            }
+        }
+
+        function viewResetHistory() {
+            const statusDiv = document.getElementById('historyStatus');
+            const outputDiv = document.getElementById('historyOutput');
+            
+            if (window.widgetManager && window.widgetManager.resetHistory) {
+                const history = window.widgetManager.resetHistory;
+                outputDiv.innerHTML = JSON.stringify(history, null, 2);
+                outputDiv.style.display = 'block';
+                statusDiv.innerHTML = `<div class="success">✅ Showing ${history.length} reset history entries</div>`;
+                console.log('Reset History:', history);
+            } else {
+                statusDiv.innerHTML = '<div class="error">❌ No reset history available</div>';
+            }
+        }
+
+        function analyzeResetPatterns() {
+            const statusDiv = document.getElementById('historyStatus');
+            
+            if (window.widgetManager && window.widgetManager.resetHistory) {
+                const history = window.widgetManager.resetHistory;
+                const analysis = {
+                    totalEntries: history.length,
+                    successEntries: history.filter(h => h.phase === 'SUCCESS').length,
+                    errorEntries: history.filter(h => h.phase === 'ERROR').length,
+                    averageTime: history.filter(h => h.totalTime).reduce((sum, h) => sum + parseFloat(h.totalTime), 0) / history.filter(h => h.totalTime).length || 0,
+                    commonErrors: {}
+                };
+                
+                // Analyze error patterns
+                history.filter(h => h.phase === 'ERROR').forEach(entry => {
+                    const errorMsg = entry.error?.message || 'Unknown';
+                    analysis.commonErrors[errorMsg] = (analysis.commonErrors[errorMsg] || 0) + 1;
+                });
+                
+                console.log('Reset Pattern Analysis:', analysis);
+                statusDiv.innerHTML = `<div class="success">✅ Analysis complete - ${analysis.successEntries}/${analysis.totalEntries} successful resets</div>`;
+            }
+        }
+
+        function exportResetData() {
+            if (window.widgetManager && window.widgetManager.resetHistory) {
+                const data = {
+                    timestamp: new Date().toISOString(),
+                    resetHistory: window.widgetManager.resetHistory,
+                    stats: {
+                        totalResets: window.widgetManager.resetAttempts,
+                        successful: window.widgetManager.successfulResets,
+                        failed: window.widgetManager.failedResets
+                    }
+                };
+                
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `reset-debug-data-${Date.now()}.json`;
+                a.click();
+                
+                const statusDiv = document.getElementById('historyStatus');
+                statusDiv.innerHTML = '<div class="success">✅ Reset data exported successfully</div>';
+            }
+        }
+
+        function clearResetHistory() {
+            if (window.widgetManager) {
+                window.widgetManager.resetHistory = [];
+                const statusDiv = document.getElementById('historyStatus');
+                const outputDiv = document.getElementById('historyOutput');
+                outputDiv.style.display = 'none';
+                statusDiv.innerHTML = '<div class="success">✅ Reset history cleared</div>';
+                console.log('Reset history cleared');
+            }
+        }
+
+        let monitoringInterval = null;
+
+        function startResetMonitoring() {
+            const statusDiv = document.getElementById('monitoringStatus');
+            const outputDiv = document.getElementById('monitoringOutput');
+            
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+            }
+            
+            outputDiv.style.display = 'block';
+            outputDiv.innerHTML = '<div style="color: #00ff00;">🔄 Real-time reset monitoring started...</div>';
+            
+            monitoringInterval = setInterval(() => {
+                if (window.widgetManager) {
+                    const stats = {
+                        currentWidget: window.widgetManager.currentWidget,
+                        resetAttempts: window.widgetManager.resetAttempts || 0,
+                        successful: window.widgetManager.successfulResets || 0,
+                        failed: window.widgetManager.failedResets || 0,
+                        historyLength: window.widgetManager.resetHistory?.length || 0,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    
+                    outputDiv.innerHTML += `<div>[${stats.timestamp}] Widget: ${stats.currentWidget}, Resets: ${stats.resetAttempts}/${stats.successful}/${stats.failed}, History: ${stats.historyLength}</div>`;
+                    outputDiv.scrollTop = outputDiv.scrollHeight;
+                }
+            }, 1000);
+            
+            statusDiv.innerHTML = '<div class="success">✅ Real-time monitoring started</div>';
+        }
+
+        function stopResetMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+                
+                const statusDiv = document.getElementById('monitoringStatus');
+                statusDiv.innerHTML = '<div class="info">ℹ️ Real-time monitoring stopped</div>';
+            }
+        }
+
+        function updatePerformanceStats() {
+            if (window.widgetManager) {
+                document.getElementById('totalResets').textContent = window.widgetManager.resetAttempts || 0;
+                document.getElementById('successfulResets').textContent = window.widgetManager.successfulResets || 0;
+                document.getElementById('failedResets').textContent = window.widgetManager.failedResets || 0;
+                
+                const successRate = window.widgetManager.resetAttempts > 0 ? 
+                    ((window.widgetManager.successfulResets || 0) / window.widgetManager.resetAttempts * 100).toFixed(1) : '0';
+                document.getElementById('successRate').textContent = successRate + '%';
+                
+                // Calculate average reset time from history
+                const history = window.widgetManager.resetHistory || [];
+                const successfulResets = history.filter(h => h.phase === 'SUCCESS' && h.totalTime);
+                const avgTime = successfulResets.length > 0 ? 
+                    (successfulResets.reduce((sum, h) => sum + parseFloat(h.totalTime), 0) / successfulResets.length).toFixed(2) : '0';
+                document.getElementById('avgResetTime').textContent = avgTime + 'ms';
+            }
+        }
+
+        function clearConsoleOutput() {
+            document.getElementById('consoleOutput').innerHTML = '';
+        }
+
+        // Update performance stats every 2 seconds
+        setInterval(updatePerformanceStats, 2000);
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🧪 Enhanced Reset Debugging Test Suite loaded');
+            console.log('📋 Available tests: Basic Reset, Reset Under Load, Multiple Resets, Error Simulation, History Analysis');
+            
+            setTimeout(() => {
+                if (window.widgetManager) {
+                    console.log('✅ WidgetManager detected - all tests ready');
+                } else {
+                    console.warn('⚠️ WidgetManager not found - some tests may not work');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

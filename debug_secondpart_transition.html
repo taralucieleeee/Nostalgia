@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecondPart Video Transition Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        .debug-section h3 {
+            color: #007acc;
+            margin-top: 0;
+        }
+        .test-steps {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .expected {
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+        }
+        .issue {
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #dc3545;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .log {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🎬 SecondPart Video Transition Debug Tool</h1>
+    <p>Debug the specific issue where secondpart.mp4 is not transitioning into politics_1.mp4</p>
+
+    <div class="debug-section">
+        <h3>Problem Description</h3>
+        <div class="issue">
+            <strong>Issue:</strong> The secondpart video is not transitioning into politics_1. The video plays but doesn't automatically move to the next widget when it ends.
+        </div>
+        <div class="expected">
+            <strong>Expected:</strong> When secondpart.mp4 ends, it should automatically transition to VideoWidget4 (politics_1.mp4)
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Debug Steps</h3>
+        <div class="test-steps">
+            <h4>Step-by-Step Testing:</h4>
+            <ol>
+                <li>Navigate to VideoWidget3 (results_2.png)</li>
+                <li>Press 'D' or click NEXT to start secondpart.mp4</li>
+                <li>Let the video play to completion</li>
+                <li>Check if transition happens automatically</li>
+            </ol>
+        </div>
+        <button onclick="testSecondPartTransition()">Test SecondPart Transition</button>
+        <button onclick="checkEventListeners()">Check Event Listeners</button>
+        <button onclick="simulateVideoEnd()">Simulate Video End</button>
+        <div id="debug-status" class="status info">Ready to debug</div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Real-Time Debug Log</h3>
+        <div id="debug-log" class="log">
+            Console output will appear here...
+        </div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="debug-section">
+        <h3>Diagnostic Tests</h3>
+        <button onclick="checkVideoWidget3()">Check VideoWidget3 State</button>
+        <button onclick="checkNavigationHandler()">Check Navigation Event Handler</button>
+        <button onclick="checkVideoElement()">Check Video Element</button>
+        <button onclick="forceNavigation()">Force Navigation to Politics</button>
+    </div>
+
+    <div class="debug-section">
+        <h3>Implementation Analysis</h3>
+        <div class="test-steps">
+            <h4>Key Components to Check:</h4>
+            <ul>
+                <li><strong>VideoWidget3.setupVideoListeners():</strong> Video 'ended' event listener</li>
+                <li><strong>VideoWidget3.smoothTransitionToNextWidget():</strong> Navigation dispatch</li>
+                <li><strong>main.js navigateToWidget event:</strong> Custom event handler</li>
+                <li><strong>Video source:</strong> Ensure secondpart.mp4 is properly loaded</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let logDiv = document.getElementById('debug-log');
+        let statusDiv = document.getElementById('debug-status');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            console.log(logEntry);
+            logDiv.innerHTML += logEntry + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function setStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function clearLog() {
+            logDiv.innerHTML = '';
+        }
+
+        function testSecondPartTransition() {
+            log('=== TESTING SECONDPART TRANSITION ===', 'info');
+            setStatus('Testing secondpart transition...', 'info');
+            
+            // Open main app in new window for testing
+            const testWindow = window.open('/', '_blank');
+            
+            if (testWindow) {
+                log('✅ Main app opened in new window', 'success');
+                log('📋 Instructions:', 'info');
+                log('  1. Navigate to VideoWidget3 (press keys or navigate manually)', 'info');
+                log('  2. Press D or click NEXT to start secondpart.mp4', 'info');
+                log('  3. Watch video play to completion', 'info');
+                log('  4. Check if it transitions to politics_1.mp4', 'info');
+                setStatus('Test window opened - follow instructions', 'info');
+            } else {
+                log('❌ Failed to open test window - check popup blocker', 'error');
+                setStatus('Failed to open test window', 'fail');
+            }
+        }
+
+        function checkEventListeners() {
+            log('=== CHECKING EVENT LISTENERS ===', 'info');
+            
+            // This function would need to be run in the main app context
+            log('⚠️ This check needs to be run in the main application console', 'warning');
+            log('📋 To check manually:', 'info');
+            log('  1. Open browser console (F12) in main app', 'info');
+            log('  2. Run: document.querySelector("#mainVideo3").getEventListeners?.()', 'info');
+            log('  3. Or check: typeof window.widgetManager', 'info');
+            log('  4. Look for "ended" event listener on video element', 'info');
+        }
+
+        function simulateVideoEnd() {
+            log('=== SIMULATING VIDEO END EVENT ===', 'info');
+            
+            log('⚠️ This simulation needs to be run in the main application console', 'warning');
+            log('📋 To simulate manually:', 'info');
+            log('  1. Open browser console (F12) in main app', 'info');
+            log('  2. Navigate to VideoWidget3', 'info');
+            log('  3. Start secondpart video', 'info');
+            log('  4. Run: document.querySelector("#mainVideo3").dispatchEvent(new Event("ended"))', 'info');
+            log('  5. Check if transition happens', 'info');
+        }
+
+        function checkVideoWidget3() {
+            log('=== CHECKING VIDEOWIDGET3 STATE ===', 'info');
+            
+            // Create a simple test script to copy-paste
+            const testScript = `
+// Copy and paste this into the main app console:
+console.log('=== VideoWidget3 Debug Check ===');
+
+// Check if VideoWidget3 exists
+const widget3Element = document.querySelector('[data-widget="5"]');
+console.log('VideoWidget3 element:', widget3Element);
+
+// Check video element
+const video3 = document.querySelector('#mainVideo3');
+console.log('Video element:', video3);
+console.log('Video src:', video3?.src);
+console.log('Video currentTime:', video3?.currentTime);
+console.log('Video duration:', video3?.duration);
+console.log('Video ended:', video3?.ended);
+
+// Check event listeners (if possible)
+console.log('Video events:', video3?.getEventListeners?.());
+
+// Check if widget manager exists
+console.log('Widget manager:', typeof window.widgetManager);
+            `;
+            
+            log('📋 Copy and paste this script into the main app console:', 'info');
+            log(testScript, 'code');
+        }
+
+        function checkNavigationHandler() {
+            log('=== CHECKING NAVIGATION EVENT HANDLER ===', 'info');
+            
+            const testScript = `
+// Copy and paste this into the main app console:
+console.log('=== Navigation Handler Debug Check ===');
+
+// Test the navigation event handler
+const testEvent = new CustomEvent('navigateToWidget', {
+    detail: { targetWidget: 6 }
+});
+
+console.log('Dispatching test navigation event...');
+document.dispatchEvent(testEvent);
+console.log('Navigation event dispatched - check if widget changed');
+            `;
+            
+            log('📋 Copy and paste this script into the main app console:', 'info');
+            log(testScript, 'code');
+        }
+
+        function checkVideoElement() {
+            log('=== CHECKING VIDEO ELEMENT DETAILS ===', 'info');
+            
+            const testScript = `
+// Copy and paste this into the main app console:
+console.log('=== Video Element Detailed Check ===');
+
+const video = document.querySelector('#mainVideo3');
+if (video) {
+    console.log('Video element found:', video);
+    console.log('- src:', video.src);
+    console.log('- currentSrc:', video.currentSrc);
+    console.log('- readyState:', video.readyState);
+    console.log('- networkState:', video.networkState);
+    console.log('- error:', video.error);
+    console.log('- duration:', video.duration);
+    console.log('- currentTime:', video.currentTime);
+    console.log('- ended:', video.ended);
+    console.log('- paused:', video.paused);
+    
+    // Check source element
+    const source = video.querySelector('source');
+    if (source) {
+        console.log('Source element:', source);
+        console.log('- src:', source.src);
+    }
+    
+    // Try to manually add an ended listener for testing
+    video.addEventListener('ended', () => {
+        console.log('🎬 VIDEO ENDED - Manual test listener triggered!');
+    });
+    console.log('Manual test listener added');
+} else {
+    console.log('❌ Video element #mainVideo3 not found');
+}
+            `;
+            
+            log('📋 Copy and paste this script into the main app console:', 'info');
+            log(testScript, 'code');
+        }
+
+        function forceNavigation() {
+            log('=== FORCING NAVIGATION TO POLITICS ===', 'info');
+            
+            const testScript = `
+// Copy and paste this into the main app console:
+console.log('=== Force Navigation Test ===');
+
+// Method 1: Use the widget manager
+if (window.widgetManager) {
+    console.log('Using widget manager to navigate...');
+    window.widgetManager.currentWidget = 6;
+    window.widgetManager.updateWidgetPositions();
+    window.widgetManager.updateNavigationButtons();
+    console.log('Forced navigation to widget 6 (VideoWidget4/politics_1)');
+} else {
+    // Method 2: Direct URL navigation
+    console.log('Using URL navigation...');
+    window.location.href = '/?widget=6';
+}
+            `;
+            
+            log('📋 Copy and paste this script into the main app console:', 'info');
+            log(testScript, 'code');
+        }
+
+        // Auto-log when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🛠️ SecondPart Video Transition Debug Tool loaded');
+            log('🎯 Use the buttons above to debug the transition issue');
+            log('📊 Main app should be running at http://localhost:3000');
+            setStatus('Debug tool ready', 'info');
+        });
+    </script>
+</body>
+</html>

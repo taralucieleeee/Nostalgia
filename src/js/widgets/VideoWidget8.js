@@ -59,20 +59,28 @@ export class VideoWidget8 extends Widget {
             return;
         }
         
-        if (key === 'w' || key === 'arrowup') {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            console.log("VideoWidget8: UP key pressed - navigating back to Widget 9");
-            
-            if (this.video && !this.video.paused) {
-                this.video.pause();
+        console.log("VideoWidget8: Key pressed:", key);
+        
+        // While politics_3 video is playing, only allow 'R' key (reset)
+        if (!this.video.paused && !this.video.ended) {
+            if (key === 'r') {
+                // Allow reset functionality during video playback - let main.js handle it
+                console.log("VideoWidget8: Reset key pressed during video playback - allowing main.js to handle");
+                return;
+            } else {
+                // Block all other keys during video playback
+                event.preventDefault();
+                event.stopPropagation();
+                console.log("VideoWidget8: Key blocked during video playback - only 'R' allowed");
+                return;
             }
-            
-            setTimeout(() => {
-                window.location.href = '/?widget=9';
-            }, 200);
-        } else if (key === ' ') {
+        }
+        
+        // Video is paused or ended - politics_3 video does not allow back navigation
+        // The video automatically transitions to law carousel when it ends
+        // Only allow space bar (play/pause) and 'R' (reset) when video is paused
+        if (key === ' ') {
+            // Space bar toggles play/pause (only when video is paused)
             event.preventDefault();
             event.stopPropagation();
             
@@ -86,7 +94,8 @@ export class VideoWidget8 extends Widget {
                 }
             }
         } else if (key === 'r') {
-            console.log("VideoWidget8: Reset key pressed - allowing main.js to handle");
+            // Allow reset functionality when video is paused/ended - let main.js handle it
+            console.log("VideoWidget8: Reset key pressed while video paused/ended - allowing main.js to handle");
             return;
         }
     }
@@ -187,19 +196,23 @@ export class VideoWidget8 extends Widget {
     }
 
     deactivate() {
+        console.log('VideoWidget8: Simple deactivation - muting video to prevent bleeding');
+        
         if (this.observer) {
             this.observer.disconnect();
         }
 
-        if (this.video && !this.video.paused) {
+        if (this.video) {
+            // Simple approach: just mute and pause
+            this.video.muted = true;
             this.video.pause();
-            this.video.currentTime = 0;
+            console.log('VideoWidget8: Video muted and paused');
         }
 
         // VideoWidget8 doesn't have footer buttons/icons to reset
 
         document.removeEventListener('keydown', this.handleKeyDown);
         
-        console.log('VideoWidget8 deactivated');
+        console.log('VideoWidget8: Enhanced deactivation completed');
     }
 }

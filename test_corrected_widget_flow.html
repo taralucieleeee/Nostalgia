@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrected Widget Flow Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-section {
+            border: 2px solid #333;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-passed { border-color: #22c55e; background-color: #f0fdf4; }
+        .test-failed { border-color: #ef4444; background-color: #fef2f2; }
+        .test-pending { border-color: #f59e0b; background-color: #fffbeb; }
+        .key-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .key-blocked { background-color: #fef2f2; color: #dc2626; }
+        .key-allowed { background-color: #f0fdf4; color: #16a34a; }
+        .flow-diagram {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">Corrected Widget Flow Test</h1>
+        
+        <div class="test-section test-pending">
+            <h2 class="text-xl font-bold mb-4">🎬 Politics Video Sequence Test</h2>
+            <p class="mb-4">The politics videos should flow automatically without back navigation:</p>
+            <div class="flow-diagram mb-4">
+politics_1.mp4 → politics_2.mp4 → politics_3.mp4 → law carousel
+     (Widget 6)      (Widget 6)     (Widget 10)     (Widget 7-9)
+            </div>
+            <div class="mb-4">
+                <strong>VideoWidget4 (Widget 6) - Politics 1 & 2:</strong><br>
+                <span class="key-indicator key-blocked">A (Back)</span>
+                <span class="key-indicator key-allowed">R (Reset)</span>
+                <span class="key-indicator key-allowed">Space (Play/Pause)</span>
+            </div>
+            <div class="mb-4">
+                <strong>VideoWidget8 (Widget 10) - Politics 3:</strong><br>
+                <span class="key-indicator key-blocked">W (Up/Back)</span>
+                <span class="key-indicator key-allowed">R (Reset)</span>
+                <span class="key-indicator key-allowed">Space (Play/Pause)</span>
+            </div>
+            <button onclick="testPoliticsSequence()" class="bg-blue-500 text-white px-4 py-2 rounded">Test Politics Sequence</button>
+        </div>
+
+        <div class="test-section test-pending">
+            <h2 class="text-xl font-bold mb-4">🎭 Vote2.html Integration Test</h2>
+            <p class="mb-4">VideoWidget2 transition video should lead to vote2.html:</p>
+            <div class="flow-diagram mb-4">
+results_1.png → transititonvote2.mp4 → vote2.html
+   (Widget 4)        (Widget 4)      (External Page)
+            </div>
+            <button onclick="testVote2Integration()" class="bg-blue-500 text-white px-4 py-2 rounded">Test Vote2 Integration</button>
+        </div>
+
+        <div class="test-section test-pending">
+            <h2 class="text-xl font-bold mb-4">🏛️ Law Carousel Test</h2>
+            <p class="mb-4">Law carousel should allow cycling and forward navigation:</p>
+            <div class="flow-diagram mb-4">
+law_1.png ↕ law_2.png ↕ law_3.png → rising.mp4
+(Widget 7)   (Widget 8)   (Widget 9)   (Widget 12)
+            </div>
+            <div class="mb-4">
+                <strong>Law Widgets (7-9):</strong><br>
+                <span class="key-indicator key-allowed">W/S (Up/Down)</span>
+                <span class="key-indicator key-allowed">D (Next to Rising)</span>
+                <span class="key-indicator key-allowed">R (Reset)</span>
+            </div>
+            <button onclick="testLawCarousel()" class="bg-blue-500 text-white px-4 py-2 rounded">Test Law Carousel</button>
+        </div>
+
+        <div class="test-section test-pending">
+            <h2 class="text-xl font-bold mb-4">🎬 Final Video Sequence Test</h2>
+            <p class="mb-4">Rising video should transition to final video then lastframe:</p>
+            <div class="flow-diagram mb-4">
+rising.mp4 → finalpart_4.mp4 → lastframe.png
+(Widget 12)    (Widget 12)     (Widget 11)
+            </div>
+            <div class="mb-4">
+                <strong>VideoWidget10 (Widget 12):</strong><br>
+                <span class="key-indicator key-allowed">A (Back to Law)</span>
+                <span class="key-indicator key-allowed">D (Next to Final)</span>
+                <span class="key-indicator key-allowed">R (Reset)</span>
+            </div>
+            <button onclick="testFinalSequence()" class="bg-blue-500 text-white px-4 py-2 rounded">Test Final Sequence</button>
+        </div>
+
+        <div class="test-section test-pending">
+            <h2 class="text-xl font-bold mb-4">🔄 Lastframe Reset-Only Test</h2>
+            <p class="mb-4">Lastframe should only allow reset, no other navigation:</p>
+            <div class="flow-diagram mb-4">
+lastframe.png → (R key only) → Widget 1 (FirstWidget)
+  (Widget 11)                     (Reset)
+            </div>
+            <div class="mb-4">
+                <strong>VideoWidget9 (Widget 11) - Lastframe:</strong><br>
+                <span class="key-indicator key-blocked">W (Up/Back)</span>
+                <span class="key-indicator key-blocked">A (Back)</span>
+                <span class="key-indicator key-blocked">D (Next)</span>
+                <span class="key-indicator key-allowed">R (Reset)</span>
+            </div>
+            <button onclick="testLastframeResetOnly()" class="bg-blue-500 text-white px-4 py-2 rounded">Test Lastframe Reset-Only</button>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-bold mb-4">🗺️ Complete Flow Map</h2>
+            <div class="flow-diagram">
+Widget 1 (FirstWidget) → Widget 2 (SecondWidget) → Widget 3 (VideoWidget)
+    ↓ F                      ↓ Auto (5s)               ↓ Auto
+    
+Widget 4 (VideoWidget2) ← vote.html
+    ↓ D (transition)
+    
+vote2.html ← transititonvote2.mp4 ← results_1.png
+                                      ↑ A
+Widget 5 (VideoWidget3) ← results2.html
+    ↓ D (transition)
+    
+Widget 6 (VideoWidget4) ← secondpart.mp4 ← results_2.png
+    ↓ Auto                                    ↑ A
+    
+politics_1.mp4 → politics_2.mp4 → Widget 10 (VideoWidget8)
+(NO A KEY)       (NO A KEY)           ↓ Auto
+                                      
+Widget 7-9 (Law Carousel) ← politics_3.mp4 (NO W KEY)
+    ↓ D (All law widgets)
+    
+Widget 12 (VideoWidget10) → finalpart_4.mp4 → Widget 11 (VideoWidget9)
+rising.mp4 ↑ A                                      ↓ Auto
+(Back to Law)                                       
+                                               lastframe.png
+                                                   ↓ R (ONLY)
+                                               Widget 1 (RESET)
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <button onclick="runAllTests()" class="bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-bold">
+                Test Complete Flow
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function testPoliticsSequence() {
+            console.log('Testing politics video sequence...');
+            // Test VideoWidget4 (politics_1 & politics_2)
+            window.open('/?widget=6', '_blank');
+        }
+
+        function testVote2Integration() {
+            console.log('Testing vote2.html integration...');
+            // Test VideoWidget2 transition
+            window.open('/?widget=4', '_blank');
+        }
+
+        function testLawCarousel() {
+            console.log('Testing law carousel...');
+            // Test law widgets
+            window.open('/?widget=7', '_blank');
+        }
+
+        function testFinalSequence() {
+            console.log('Testing final video sequence...');
+            // Test VideoWidget10
+            window.open('/?widget=12', '_blank');
+        }
+
+        function testLastframeResetOnly() {
+            console.log('Testing lastframe reset-only...');
+            // Test VideoWidget9
+            window.open('/?widget=11', '_blank');
+        }
+
+        function runAllTests() {
+            const tests = [
+                { name: 'Politics Sequence', func: testPoliticsSequence },
+                { name: 'Vote2 Integration', func: testVote2Integration },
+                { name: 'Law Carousel', func: testLawCarousel },
+                { name: 'Final Sequence', func: testFinalSequence },
+                { name: 'Lastframe Reset-Only', func: testLastframeResetOnly }
+            ];
+
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    console.log(`Running test: ${test.name}`);
+                    test.func();
+                }, index * 2000);
+            });
+        }
+    </script>
+</body>
+</html>

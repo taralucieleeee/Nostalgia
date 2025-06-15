@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Page Reset Functionality Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-section {
+            border: 2px solid #e5e5e5;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-success { border-color: #10b981; background-color: #f0fdf4; }
+        .test-fail { border-color: #ef4444; background-color: #fef2f2; }
+        .test-warning { border-color: #f59e0b; background-color: #fffbeb; }
+        .page-link {
+            background: #9A7A78;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            font-family: 'Space Mono', monospace;
+            transition: background-color 0.3s;
+        }
+        .page-link:hover {
+            background: #7a5a58;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">🔄 Cross-Page Reset Functionality Test</h1>
+        
+        <div class="test-section test-warning">
+            <h2 class="text-xl font-semibold mb-4">🎯 Problem Fixed</h2>
+            <p><strong>Issue:</strong> Reset functionality (R key) was not working on voting/results pages.</p>
+            <p><strong>Solution:</strong> Added R key reset functionality to all four voting/results pages.</p>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">📋 Test All Pages</h2>
+            <p>Click each link below and press the <strong>R key</strong> to test reset functionality:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="bg-blue-50 p-4 rounded">
+                    <h3 class="font-semibold mb-2">Vote Page 1</h3>
+                    <p class="text-sm mb-3">Press R key to reset to Widget 1</p>
+                    <a href="http://localhost:3000/vote.html" target="_blank" class="page-link">
+                        Test vote.html
+                    </a>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded">
+                    <h3 class="font-semibold mb-2">Results Page 1</h3>
+                    <p class="text-sm mb-3">Press R key to reset to Widget 1</p>
+                    <a href="http://localhost:3000/results.html" target="_blank" class="page-link">
+                        Test results.html
+                    </a>
+                </div>
+                
+                <div class="bg-yellow-50 p-4 rounded">
+                    <h3 class="font-semibold mb-2">Vote Page 2</h3>
+                    <p class="text-sm mb-3">Press R key to reset to Widget 1</p>
+                    <a href="http://localhost:3000/vote2.html" target="_blank" class="page-link">
+                        Test vote2.html
+                    </a>
+                </div>
+                
+                <div class="bg-purple-50 p-4 rounded">
+                    <h3 class="font-semibold mb-2">Results Page 2</h3>
+                    <p class="text-sm mb-3">Press R key to reset to Widget 1</p>
+                    <a href="http://localhost:3000/results2.html" target="_blank" class="page-link">
+                        Test results2.html
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🔧 Technical Changes Applied</h2>
+            <div class="bg-gray-50 p-4 rounded">
+                <h3 class="font-semibold mb-2">Added to all four pages:</h3>
+                <pre class="text-sm bg-black text-green-400 p-3 rounded overflow-x-auto"><code>} else if (key === 'r') {
+    // Reset functionality - return to main app
+    event.preventDefault();
+    console.log('Reset triggered from [page].html');
+    window.location.href = '/?widget=1';
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">📊 Expected Behavior</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-red-50 p-4 rounded">
+                    <h3 class="font-semibold text-red-700">❌ BEFORE (Broken)</h3>
+                    <ul class="text-sm list-disc list-inside mt-2">
+                        <li>Press R on vote.html → Nothing happens</li>
+                        <li>Press R on results.html → Nothing happens</li>
+                        <li>Press R on vote2.html → Nothing happens</li>
+                        <li>Press R on results2.html → Nothing happens</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-4 rounded">
+                    <h3 class="font-semibold text-green-700">✅ AFTER (Fixed)</h3>
+                    <ul class="text-sm list-disc list-inside mt-2">
+                        <li>Press R on vote.html → Reset to Widget 1</li>
+                        <li>Press R on results.html → Reset to Widget 1</li>
+                        <li>Press R on vote2.html → Reset to Widget 1</li>
+                        <li>Press R on results2.html → Reset to Widget 1</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🎮 Quick Test Sequence</h2>
+            <div class="space-y-3">
+                <button id="testAll" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Open All Pages for Testing
+                </button>
+                <div class="text-sm text-gray-600">
+                    <p><strong>Test Instructions:</strong></p>
+                    <ol class="list-decimal list-inside space-y-1 mt-2">
+                        <li>Click "Open All Pages for Testing" to open all four pages</li>
+                        <li>On each page, press the <kbd class="bg-gray-200 px-2 py-1 rounded">R</kbd> key</li>
+                        <li>Verify that each page redirects to the main app at Widget 1</li>
+                        <li>Check console logs for reset confirmation messages</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">📝 Test Status</h2>
+            <div id="testStatus" class="bg-gray-50 p-4 rounded">
+                <p>Ready to test reset functionality on all voting/results pages. Use the links above to test each page.</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🔍 Integration Notes</h2>
+            <div class="bg-blue-50 p-4 rounded">
+                <h3 class="font-semibold mb-2">System Integration:</h3>
+                <ul class="text-sm list-disc list-inside space-y-1">
+                    <li>✅ <strong>Consistent behavior:</strong> R key now works across entire application</li>
+                    <li>✅ <strong>Preserved functionality:</strong> All existing keyboard controls maintained</li>
+                    <li>✅ <strong>Clean reset:</strong> Returns to Widget 1 with proper audio state</li>
+                    <li>✅ <strong>Console logging:</strong> Reset actions logged for debugging</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('testAll').addEventListener('click', () => {
+            const pages = [
+                'http://localhost:3000/vote.html',
+                'http://localhost:3000/results.html',
+                'http://localhost:3000/vote2.html',
+                'http://localhost:3000/results2.html'
+            ];
+            
+            const status = document.getElementById('testStatus');
+            status.innerHTML = `
+                <div class="test-warning">
+                    <h3 class="font-semibold">🚀 Opening All Test Pages</h3>
+                    <p>Opening all four voting/results pages for reset testing...</p>
+                    <p class="mt-2"><strong>Next:</strong> Press R key on each page to test reset functionality.</p>
+                </div>
+            `;
+            
+            pages.forEach((url, index) => {
+                setTimeout(() => {
+                    window.open(url, `_blank_${index}`);
+                }, index * 500); // Stagger the opening
+            });
+            
+            setTimeout(() => {
+                status.innerHTML += `
+                    <div class="mt-4 p-3 bg-blue-50 rounded">
+                        <p><strong>Test each page:</strong> Press <kbd class="bg-gray-200 px-2 py-1 rounded">R</kbd> on each opened page.</p>
+                        <p><strong>Expected result:</strong> Each should redirect to /?widget=1</p>
+                    </div>
+                `;
+            }, 2500);
+        });
+
+        // Add keyboard shortcut for this test page
+        document.addEventListener('keydown', (event) => {
+            if (event.key.toLowerCase() === 'r') {
+                alert('Reset functionality test:\nThis test page doesn\'t need reset - use the links to test the actual voting/results pages!');
+            }
+        });
+    </script>
+</body>
+</html>

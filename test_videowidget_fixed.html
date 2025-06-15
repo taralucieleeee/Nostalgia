@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoWidget Fix Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Video transition effects */
+        .video-fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .video-fade-out {
+            animation: fadeOut 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-black overflow-hidden">
+    <div class="h-screen w-screen bg-black text-white">
+        <!-- Widget navigation buttons for testing -->
+        <div class="absolute top-4 left-4 z-50 flex gap-2">
+            <button onclick="testVideoWidget()" class="bg-blue-600 px-4 py-2 rounded text-white">Test VideoWidget (Widget 3)</button>
+            <button onclick="testReset()" class="bg-red-600 px-4 py-2 rounded text-white">Test Reset</button>
+            <button onclick="goToWidget1()" class="bg-green-600 px-4 py-2 rounded text-white">Go to Widget 1</button>
+        </div>
+
+        <!-- Video Widget Test Container -->
+        <div id="videoWidget" class="widget relative w-full h-full bg-black widget-inactive" data-widget="3">
+            <video id="mainVideo" 
+                   class="absolute inset-0 w-full h-full object-contain z-0"
+                   preload="metadata"
+                   muted
+                   playsinline>
+                <source src="/static/videos/firstpart.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Status Display -->
+        <div id="statusDisplay" class="absolute bottom-4 left-4 bg-gray-800 p-4 rounded text-sm z-50">
+            <div id="videoStatus">Video Status: Waiting...</div>
+            <div id="widgetStatus">Widget Status: Inactive</div>
+            <div id="hasPlayedStatus">Has Played: false</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { VideoWidget } from '/src/js/widgets/VideoWidget.js';
+
+        let videoWidget = null;
+        let isActive = false;
+
+        // Initialize VideoWidget
+        function initVideoWidget() {
+            const container = document.getElementById('videoWidget');
+            videoWidget = new VideoWidget(container, 3);
+            videoWidget.render();
+            console.log('VideoWidget initialized');
+        }
+
+        // Test functions
+        window.testVideoWidget = function() {
+            console.log('Testing VideoWidget activation...');
+            const container = document.getElementById('videoWidget');
+            
+            // Activate widget
+            container.classList.remove('widget-inactive');
+            container.classList.add('widget-active');
+            isActive = true;
+            
+            // Call activate method like main.js does
+            if (videoWidget && typeof videoWidget.activate === 'function') {
+                videoWidget.activate();
+                console.log('VideoWidget.activate() called');
+            }
+            
+            updateStatus();
+        };
+
+        window.testReset = function() {
+            console.log('Testing VideoWidget reset...');
+            
+            // Deactivate widget
+            if (videoWidget && typeof videoWidget.deactivate === 'function') {
+                videoWidget.deactivate();
+                console.log('VideoWidget.deactivate() called');
+            }
+            
+            const container = document.getElementById('videoWidget');
+            container.classList.remove('widget-active');
+            container.classList.add('widget-inactive');
+            isActive = false;
+            
+            updateStatus();
+            
+            // Reactivate after short delay to test reset
+            setTimeout(() => {
+                console.log('Reactivating VideoWidget after reset...');
+                testVideoWidget();
+            }, 1000);
+        };
+
+        window.goToWidget1 = function() {
+            window.location.href = '/?widget=1';
+        };
+
+        function updateStatus() {
+            const video = document.getElementById('mainVideo');
+            const videoStatus = document.getElementById('videoStatus');
+            const widgetStatus = document.getElementById('widgetStatus');
+            const hasPlayedStatus = document.getElementById('hasPlayedStatus');
+            
+            if (video) {
+                videoStatus.textContent = `Video Status: ${video.paused ? 'Paused' : 'Playing'} | CurrentTime: ${video.currentTime.toFixed(2)}s | Muted: ${video.muted}`;
+            }
+            
+            widgetStatus.textContent = `Widget Status: ${isActive ? 'Active' : 'Inactive'}`;
+            
+            if (videoWidget) {
+                hasPlayedStatus.textContent = `Has Played: ${videoWidget.hasPlayed}`;
+            }
+        }
+
+        // Update status every second
+        setInterval(updateStatus, 1000);
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initVideoWidget();
+            updateStatus();
+        });
+
+        // Debug: Log video events
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('mainVideo');
+            
+            ['loadstart', 'canplay', 'canplaythrough', 'play', 'playing', 'pause', 'ended', 'error'].forEach(eventType => {
+                video.addEventListener(eventType, (e) => {
+                    console.log(`Video Event: ${eventType}`, e);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

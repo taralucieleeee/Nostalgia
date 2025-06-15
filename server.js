@@ -204,6 +204,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Serve static files from src directory
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
+// Add logging middleware for video requests BEFORE static serving
+app.use('/static/videos', (req, res, next) => {
+    console.log('Video request:', req.url);
+    console.log('Full path:', path.join(staticPath, 'videos', req.url));
+    next();
+});
+
+// Add logging middleware for image requests BEFORE static serving
+app.use('/static/images', (req, res, next) => {
+    console.log('Image request:', req.url);
+    console.log('Full path:', path.join(staticPath, 'images', req.url));
+    next();
+});
+
 // Serve static files from static directory
 const staticPath = path.join(__dirname, 'static');
 console.log('Static directory path:', staticPath);
@@ -212,22 +226,12 @@ app.use('/static', express.static(staticPath, {
         if (path.endsWith('.mov')) {
             res.set('Content-Type', 'video/quicktime');
         }
+        if (path.endsWith('.mp4')) {
+            res.set('Content-Type', 'video/mp4');
+            res.set('Accept-Ranges', 'bytes');
+        }
     }
 }));
-
-// Add logging middleware for video requests
-app.use('/static/videos', (req, res, next) => {
-    console.log('Video request:', req.url);
-    console.log('Full path:', path.join(staticPath, 'videos', req.url));
-    next();
-});
-
-// Add logging middleware for image requests
-app.use('/static/images', (req, res, next) => {
-    console.log('Image request:', req.url);
-    console.log('Full path:', path.join(staticPath, 'images', req.url));
-    next();
-});
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Key Locking Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/dist/style.css">
+    <style>
+        .test-section {
+            border: 2px solid #333;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-passed { border-color: #22c55e; background-color: #f0fdf4; }
+        .test-failed { border-color: #ef4444; background-color: #fef2f2; }
+        .test-pending { border-color: #f59e0b; background-color: #fffbeb; }
+        .key-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .key-blocked { background-color: #fef2f2; color: #dc2626; }
+        .key-allowed { background-color: #f0fdf4; color: #16a34a; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">Video Key Interaction Locking Test</h1>
+        
+        <div class="test-section test-pending" id="test-videowidget">
+            <h2 class="text-xl font-bold mb-4">VideoWidget (Widget 3) - firstpart.mp4</h2>
+            <p class="mb-4">This widget should block all keys except 'R' during video playback.</p>
+            <div class="mb-4">
+                <span class="key-indicator key-blocked">F</span>
+                <span class="key-indicator key-blocked">A</span>
+                <span class="key-indicator key-blocked">D</span>
+                <span class="key-indicator key-blocked">Space</span>
+                <span class="key-indicator key-allowed">R</span>
+            </div>
+            <button onclick="testVideoWidget()" class="bg-blue-500 text-white px-4 py-2 rounded">Test VideoWidget</button>
+            <div id="videowidget-result" class="mt-4"></div>
+        </div>
+
+        <div class="test-section test-pending" id="test-videowidget4">
+            <h2 class="text-xl font-bold mb-4">VideoWidget4 (Widget 6) - politics_1.mp4</h2>
+            <p class="mb-4">This widget should block all keys except 'R' during video playback.</p>
+            <div class="mb-4">
+                <span class="key-indicator key-blocked">A</span>
+                <span class="key-indicator key-blocked">D</span>
+                <span class="key-indicator key-blocked">Space</span>
+                <span class="key-indicator key-allowed">R</span>
+            </div>
+            <button onclick="testVideoWidget4()" class="bg-blue-500 text-white px-4 py-2 rounded">Test VideoWidget4</button>
+            <div id="videowidget4-result" class="mt-4"></div>
+        </div>
+
+        <div class="test-section test-pending" id="test-videowidget8">
+            <h2 class="text-xl font-bold mb-4">VideoWidget8 (Widget 8) - politics_3.mp4</h2>
+            <p class="mb-4">This widget should block all keys except 'R' during video playback.</p>
+            <div class="mb-4">
+                <span class="key-indicator key-blocked">W</span>
+                <span class="key-indicator key-blocked">Space</span>
+                <span class="key-indicator key-allowed">R</span>
+            </div>
+            <button onclick="testVideoWidget8()" class="bg-blue-500 text-white px-4 py-2 rounded">Test VideoWidget8</button>
+            <div id="videowidget8-result" class="mt-4"></div>
+        </div>
+
+        <div class="test-section test-pending" id="test-videowidget2">
+            <h2 class="text-xl font-bold mb-4">VideoWidget2 (Widget 4) - transititonvote2.mp4</h2>
+            <p class="mb-4">This widget should block all keys except 'R' during transition video playback.</p>
+            <div class="mb-4">
+                <span class="key-indicator key-blocked">A</span>
+                <span class="key-indicator key-blocked">D</span>
+                <span class="key-indicator key-blocked">Space</span>
+                <span class="key-indicator key-allowed">R</span>
+            </div>
+            <button onclick="testVideoWidget2()" class="bg-blue-500 text-white px-4 py-2 rounded">Test VideoWidget2</button>
+            <div id="videowidget2-result" class="mt-4"></div>
+        </div>
+
+        <div class="test-section test-pending" id="test-videowidget3">
+            <h2 class="text-xl font-bold mb-4">VideoWidget3 (Widget 5) - secondpart.mp4</h2>
+            <p class="mb-4">This widget should block all keys except 'R' during secondpart video playback.</p>
+            <div class="mb-4">
+                <span class="key-indicator key-blocked">A</span>
+                <span class="key-indicator key-blocked">D</span>
+                <span class="key-indicator key-blocked">Space</span>
+                <span class="key-indicator key-allowed">R</span>
+            </div>
+            <button onclick="testVideoWidget3()" class="bg-blue-500 text-white px-4 py-2 rounded">Test VideoWidget3</button>
+            <div id="videowidget3-result" class="mt-4"></div>
+        </div>
+
+        <div class="test-section test-pending" id="test-videowidget10">
+            <h2 class="text-xl font-bold mb-4">VideoWidget10 (Widget 12) - finalpart_4.mp4</h2>
+            <p class="mb-4">This widget should block all keys except 'R' during finalpart_4 video playback.</p>
+            <div class="mb-4">
+                <span class="key-indicator key-blocked">A</span>
+                <span class="key-indicator key-blocked">D</span>
+                <span class="key-indicator key-blocked">Space</span>
+                <span class="key-indicator key-allowed">R</span>
+            </div>
+            <button onclick="testVideoWidget10()" class="bg-blue-500 text-white px-4 py-2 rounded">Test VideoWidget10</button>
+            <div id="videowidget10-result" class="mt-4"></div>
+        </div>
+
+        <div class="mt-8 p-4 bg-white rounded-lg shadow">
+            <h3 class="text-lg font-bold mb-4">Test Instructions:</h3>
+            <ol class="list-decimal list-inside space-y-2">
+                <li>Click on each "Test" button to navigate to the corresponding widget</li>
+                <li>Once the video starts playing, try pressing the keys shown above</li>
+                <li>Blocked keys should show no response, allowed keys should work normally</li>
+                <li>Use the 'R' key to reset and return to this test page</li>
+                <li>Mark tests as passed/failed based on the key blocking behavior</li>
+            </ol>
+        </div>
+
+        <div class="mt-8 text-center">
+            <button onclick="runAllTests()" class="bg-green-500 text-white px-6 py-3 rounded-lg text-lg font-bold">
+                Run All Tests
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function testVideoWidget() {
+            window.open('/?widget=3', '_blank');
+        }
+
+        function testVideoWidget4() {
+            window.open('/?widget=6', '_blank');
+        }
+
+        function testVideoWidget8() {
+            window.open('/?widget=8', '_blank');
+        }
+
+        function testVideoWidget2() {
+            window.open('/?widget=4', '_blank');
+        }
+
+        function testVideoWidget3() {
+            window.open('/?widget=5', '_blank');
+        }
+
+        function testVideoWidget10() {
+            window.open('/?widget=12', '_blank');
+        }
+
+        function runAllTests() {
+            const tests = [
+                { name: 'VideoWidget', func: testVideoWidget },
+                { name: 'VideoWidget4', func: testVideoWidget4 },
+                { name: 'VideoWidget8', func: testVideoWidget8 },
+                { name: 'VideoWidget2', func: testVideoWidget2 },
+                { name: 'VideoWidget3', func: testVideoWidget3 },
+                { name: 'VideoWidget10', func: testVideoWidget10 }
+            ];
+
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    console.log(`Running test for ${test.name}`);
+                    test.func();
+                }, index * 2000);
+            });
+        }
+
+        function markTestPassed(testId) {
+            const testElement = document.getElementById(testId);
+            testElement.className = testElement.className.replace('test-pending', 'test-passed');
+        }
+
+        function markTestFailed(testId) {
+            const testElement = document.getElementById(testId);
+            testElement.className = testElement.className.replace('test-pending', 'test-failed');
+        }
+    </script>
+</body>
+</html>

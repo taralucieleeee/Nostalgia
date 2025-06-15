@@ -31,10 +31,52 @@ export class VideoWidget4 extends Widget {
         this.backIcon = null;
         this.nextIcon = null;
 
+        // DON'T load the video immediately - wait until widget becomes active
+        // The video will be loaded in the setupMutationObserver() when widget activates
+
         // Set up event listeners
         this.setupVideoListeners();
         this.setupFooterListeners();
         this.setupMutationObserver();
+    }
+
+    // Method to completely reload the video element when source errors occur
+    reloadVideoElement() {
+        console.log('VideoWidget4 - Reloading video element completely');
+        
+        if (this.video) {
+            // Store the parent container
+            const container = this.video.parentElement;
+            
+            // Remove the old video element
+            this.video.remove();
+            
+            // Create a new video element
+            const newVideo = document.createElement('video');
+            newVideo.id = 'mainVideo4';
+            newVideo.className = 'w-full h-full object-cover video-transition video-fade-in';
+            newVideo.setAttribute('preload', 'metadata');
+            newVideo.setAttribute('muted', '');
+            newVideo.setAttribute('playsinline', '');
+            
+            // Add source
+            const source = document.createElement('source');
+            source.id = 'videoSource';
+            source.src = '/static/videos/politics_1.mp4';
+            source.type = 'video/mp4';
+            newVideo.appendChild(source);
+            
+            // Insert the new video element
+            container.insertBefore(newVideo, container.firstChild);
+            
+            // Update reference
+            this.video = newVideo;
+            
+            // Set up listeners again
+            this.setupVideoListeners();
+            
+            console.log('VideoWidget4 - Video element reloaded successfully');
+        }
     }
 
     setupVideoListeners() {
@@ -69,16 +111,25 @@ export class VideoWidget4 extends Widget {
         
         // Add error handling for video
         this.video.addEventListener('error', (e) => {
-            console.error("Video playback error:", e);
-            console.error("Video error code:", this.video.error ? this.video.error.code : 'unknown');
+            console.error("VideoWidget4 - Video playback error:", e);
+            console.error("VideoWidget4 - Video error code:", this.video.error ? this.video.error.code : 'unknown');
             
-            // Try to reload the video with the correct source
+            // If Error Code 4 (no supported source), try complete reload
+            if (this.video.error?.code === 4) {
+                console.log("VideoWidget4 - Source error detected (Code 4), attempting complete reload");
+                this.reloadVideoElement();
+                return;
+            }
+            
+            // Try to reload the video with the correct source (other errors)
             const videoSource = this.element.querySelector('#videoSource');
             if (videoSource) {
-                console.log("Attempting to reload video due to error");
+                console.log("VideoWidget4 - Attempting to reload video due to error");
                 videoSource.src = '/static/videos/politics_1.mp4';
                 this.video.load();
-                this.forcedStartVideo();
+                setTimeout(() => {
+                    this.forcedStartVideo();
+                }, 500);
             }
         });
         
@@ -128,28 +179,9 @@ export class VideoWidget4 extends Widget {
             }
         }
         
-        // Video is paused or ended - allow normal navigation
-        if (key === 'a') {
-            // Prevent any event propagation
-            event.preventDefault();
-            event.stopPropagation();
-            
-            console.log("VideoWidget4: Keyboard navigation - going back to Widget 5");
-            
-            // Prevent any other widgets from being shown
-            document.body.style.pointerEvents = 'none';
-            
-            // Stop video playback immediately
-            if (this.video) {
-                this.video.pause();
-                this.video.src = '';
-            }
-            
-            // Navigate back to Widget 5
-            setTimeout(() => {
-                window.location.href = '/?widget=5';
-            }, 500);
-        } else if (key === 'd') {
+        // Video is paused or ended - politics videos do not allow back navigation
+        // Only allow 'R' (reset) and space bar (play/pause) when video is paused
+        if (key === 'd') {
             // Prevent any event propagation
             event.preventDefault();
             event.stopPropagation();
@@ -205,21 +237,18 @@ export class VideoWidget4 extends Widget {
     }
 
     deactivate() {
+        console.log('VideoWidget4: Simple deactivation - muting video to prevent bleeding');
+        
         if (this.video) {
+            // Simple approach: just mute and pause
+            this.video.muted = true;
             this.video.pause();
-            this.video.currentTime = 0;
-            
-            // Reset video source to default
-            const videoSource = this.element.querySelector('#videoSource');
-            if (videoSource) {
-                videoSource.src = '/static/videos/politics_1.mp4';
-                this.video.load();
-                console.log('VideoWidget4 deactivated - reset to politics_1 video');
-            }
+            console.log('VideoWidget4: Video muted and paused');
         }
         
         if (this.observer) {
             this.observer.disconnect();
+            this.observer = null;  // Clear reference for proper cleanup
         }
 
         // Reset button icons to default state
@@ -231,6 +260,52 @@ export class VideoWidget4 extends Widget {
         
         // Reset hasPlayed flag so video can play again when reactivated
         this.hasPlayed = false;
+        
+        console.log('VideoWidget4: Enhanced deactivation completed');
+    }
+
+    activate() {
+        console.log('VideoWidget4 - activate() called - ensuring clean audio state');
+        
+        // ENHANCED: Prevent audio bleeding from other videos before loading politics
+        this.preventAudioBleeding();
+        
+        if (!this.observer) {
+            this.setupMutationObserver();
+        }
+        
+        // Reset the hasPlayed flag when activated
+        this.hasPlayed = false;
+        
+        // Load the video only when widget becomes active (not during render)
+        if (this.video) {
+            console.log('VideoWidget4 - Loading politics_1 video with clean audio state');
+            
+            // Ensure video source is correct for politics_1
+            const videoSource = this.element.querySelector('#videoSource');
+            if (videoSource && !videoSource.src.includes('politics_1.mp4')) {
+                videoSource.src = '/static/videos/politics_1.mp4';
+            }
+            
+            this.video.load();
+        }
+    }
+
+    // Method to prevent audio bleeding from other videos - SIMPLIFIED
+    preventAudioBleeding() {
+        console.log('VideoWidget4: Simple audio bleeding prevention - muting other videos');
+        
+        // Simple approach: just mute all other video elements
+        const allVideos = document.querySelectorAll('video');
+        allVideos.forEach((video, index) => {
+            // Skip our own video
+            if (video === this.video) return;
+            
+            if (!video.paused) {
+                console.log(`VideoWidget4: Muting video ${index + 1} to prevent audio bleeding`);
+            }
+            video.muted = true;
+        });
     }
     
     // Method for forcing video playback with minimal delay

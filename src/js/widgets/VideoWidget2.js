@@ -48,10 +48,74 @@ export class VideoWidget2 extends Widget {
         this.setupMutationObserver();
     }
 
+    // Method to completely reload the video element when source errors occur
+    reloadVideoElement() {
+        console.log('VideoWidget2 - Reloading video element completely');
+        
+        if (this.video) {
+            // Store the parent container
+            const container = this.video.parentElement;
+            
+            // Remove the old video element
+            this.video.remove();
+            
+            // Create a new video element
+            const newVideo = document.createElement('video');
+            newVideo.id = 'mainVideo';
+            newVideo.className = 'w-full h-full object-cover';
+            newVideo.setAttribute('preload', 'metadata');
+            newVideo.setAttribute('muted', '');
+            newVideo.setAttribute('playsinline', '');
+            newVideo.setAttribute('autoplay', '');
+            newVideo.style.display = 'none';
+            
+            // Add source
+            const source = document.createElement('source');
+            source.id = 'videoSource';
+            source.src = '/static/videos/transititonvote2.mp4';
+            source.type = 'video/mp4';
+            newVideo.appendChild(source);
+            
+            // Insert the new video element (after the image)
+            const image = container.querySelector('#mainImage');
+            container.insertBefore(newVideo, image.nextSibling);
+            
+            // Update reference
+            this.video = newVideo;
+            
+            // Set up listeners again
+            this.setupVideoListeners();
+            
+            console.log('VideoWidget2 - Video element reloaded successfully');
+        }
+    }
+
     setupVideoListeners() {
         // Add an 'ended' event listener for when the transition video finishes
         this.video.addEventListener('ended', () => {
-            console.log('Video playback completed');
+            console.log('VideoWidget2: Video playback completed');
+            
+            // CRITICAL: Check if we're in global reset state
+            if (window.resetInProgress) {
+                console.log('🚨 VideoWidget2: Video ended during GLOBAL RESET - IGNORING to prevent redirect');
+                return;
+            }
+            
+            // CRITICAL: Check if we're in reset mode - if so, ignore the ended event
+            if (this.video.dataset.resetMode === 'true') {
+                console.log('🚨 VideoWidget2: Video ended but in RESET MODE - IGNORING to prevent redirect');
+                return;
+            }
+            
+            // CRITICAL: Check if we're on VideoWidget2 (Widget 4) before redirecting
+            // This prevents redirect during reset scenarios when user is on FirstWidget
+            const currentWidgetManager = window.widgetManager;
+            const isOnVideoWidget2 = currentWidgetManager && currentWidgetManager.currentWidget === 4;
+            
+            if (!isOnVideoWidget2) {
+                console.log('🚨 VideoWidget2: Video ended but user is NOT on VideoWidget2 - PREVENTING REDIRECT to avoid reset interference');
+                return;
+            }
             
             // Always show footer when video ends
             if (this.footer) {
@@ -62,10 +126,10 @@ export class VideoWidget2 extends Widget {
             // Get the current source
             const videoSource = this.element.querySelector('#videoSource');
             const currentSrc = videoSource.src;
-            console.log("Current video source:", currentSrc);
+            console.log("VideoWidget2: Current video source:", currentSrc);
             
             if (currentSrc.includes('transititonvote2.mp4')) {
-                console.log('Transition video ended, redirecting to vote2.html');
+                console.log('VideoWidget2: Transition video ended while on VideoWidget2, redirecting to vote2.html');
                 // Redirect to vote2.html after the transititonvote2.mp4 video ends
                 setTimeout(() => {
                     window.location.href = '/vote2.html';
@@ -97,17 +161,23 @@ export class VideoWidget2 extends Widget {
         this.video.addEventListener('error', (e) => {
             console.error('Video error:', e);
             console.error('Video error code:', this.video.error ? this.video.error.code : 'unknown');
+            
+            // Handle specific error code 4 by reloading the video element
+            if (this.video.error && this.video.error.code === 4) {
+                console.warn('Video error code 4 detected - reloading video element');
+                this.reloadVideoElement();
+            }
         });
     }
 
     setupFooterListeners() {
-        // Back button - restart from vote.html with 1 second delay for visual feedback
+        // Back button - navigate back to results.html with 1 second delay for visual feedback
         this.backBtn.addEventListener('click', (e) => {
             e.preventDefault();
             
             // Change icon to provide visual feedback
             this.backIcon.src = '/static/icons/backfilled.svg';
-            console.log("Navigating back to vote.html with 1 second visual feedback");
+            console.log("Navigating back to results.html with 1 second visual feedback");
             
             // Prevent any other widgets from being shown during transition
             document.body.style.pointerEvents = 'none'; // Prevent further clicks
@@ -120,7 +190,7 @@ export class VideoWidget2 extends Widget {
             
             // Wait 1 second showing the filled icon, then navigate
             setTimeout(() => {
-                window.location.href = '/vote.html';
+                window.location.href = '/results.html';
             }, 1000);
         });
 
@@ -191,6 +261,24 @@ export class VideoWidget2 extends Widget {
             return;
         }
         
+        // Check if transition video is playing (when footer is hidden)
+        const isTransitionVideoPlaying = !this.isShowingImage && this.video.src.includes('transititonvote2.mp4') && !this.video.paused && !this.video.ended;
+        
+        if (isTransitionVideoPlaying) {
+            // During transition video playback, only allow 'R' key (reset)
+            if (key === 'r') {
+                console.log("VideoWidget2: Reset key pressed during transition video playback - allowing main.js to handle");
+                return;
+            } else {
+                // Block all other keys during transition video playback
+                event.preventDefault();
+                event.stopPropagation();
+                console.log("VideoWidget2: Key blocked during transition video playback - only 'R' allowed");
+                return;
+            }
+        }
+        
+        // Normal navigation when showing image or video is paused/ended
         if (key === 'a' && this.backIcon) {
             // Prevent main.js navigation from handling this
             event.preventDefault();
@@ -199,7 +287,7 @@ export class VideoWidget2 extends Widget {
             // Change back icon to filled version
             this.backIcon.src = '/static/icons/backfilled.svg';
             
-            console.log("VideoWidget2: Keyboard navigation - going back to vote.html with 1 second visual feedback");
+            console.log("VideoWidget2: Keyboard navigation - going back to results.html with 1 second visual feedback");
             
             // Prevent any other widgets from being shown
             document.body.style.pointerEvents = 'none';
@@ -212,7 +300,7 @@ export class VideoWidget2 extends Widget {
             
             // Wait 1 second showing the filled icon, then navigate
             setTimeout(() => {
-                window.location.href = '/vote.html';
+                window.location.href = '/results.html';
             }, 1000);
         } else if (key === 'd' && this.nextIcon) {
             // Prevent main.js navigation from handling this
@@ -274,10 +362,13 @@ export class VideoWidget2 extends Widget {
     }
 
     deactivate() {
-        // Stop any video that might be playing
+        console.log('VideoWidget2: Simple deactivation - muting video to prevent bleeding');
+        
+        // SIMPLE: Just mute and pause the video
         if (this.video) {
+            this.video.muted = true;
             this.video.pause();
-            this.video.currentTime = 0;
+            console.log('VideoWidget2: Video muted and paused');
         }
         
         // Reset to image state
@@ -287,6 +378,7 @@ export class VideoWidget2 extends Widget {
         
         if (this.observer) {
             this.observer.disconnect();
+            this.observer = null; // Proper cleanup
         }
 
         // Reset button icons to default state
@@ -295,6 +387,62 @@ export class VideoWidget2 extends Widget {
 
         // Remove keyboard event listener
         document.removeEventListener('keydown', this.handleKeyDown, true);
+        
+        console.log('VideoWidget2: Enhanced deactivation completed');
+    }
+
+    activate() {
+        console.log('VideoWidget2 - activate() called');
+        
+        // CRITICAL: Check if we're in a global reset state
+        if (window.resetInProgress) {
+            console.log('🚨 VideoWidget2: activate() called during GLOBAL RESET - BLOCKING activation completely');
+            return;
+        }
+        
+        // CRITICAL: Check if this video element has reset mode flag
+        if (this.video && this.video.dataset.resetMode === 'true') {
+            console.log('🚨 VideoWidget2: activate() called but video is in RESET MODE - BLOCKING activation');
+            return;
+        }
+        
+        // CRITICAL: Only activate if we're actually on VideoWidget2 (Widget 4)
+        const currentWidgetManager = window.widgetManager;
+        const isOnVideoWidget2 = currentWidgetManager && currentWidgetManager.currentWidget === 4;
+        
+        if (!isOnVideoWidget2) {
+            console.log('🚨 VideoWidget2: activate() called but user is NOT on VideoWidget2 - SKIPPING activation to prevent interference');
+            return;
+        }
+        
+        // Clear reset mode flag if it exists
+        if (this.video && this.video.dataset.resetMode) {
+            delete this.video.dataset.resetMode;
+            console.log('VideoWidget2: Cleared reset mode flag - normal activation proceeding');
+        }
+        
+        if (!this.observer) {
+            this.setupMutationObserver();
+        }
+        
+        // Reset to image state initially
+        this.isShowingImage = true;
+        if (this.image) {
+            this.image.style.display = 'block';
+            this.image.style.opacity = '1';
+        }
+        if (this.video) {
+            this.video.style.display = 'none';
+            this.video.pause();
+            this.video.muted = true;
+            this.video.currentTime = 0;
+            // Reset video source to transititonvote2.mp4 but don't load yet
+            const videoSource = this.element.querySelector('#videoSource');
+            if (videoSource) {
+                videoSource.src = '/static/videos/transititonvote2.mp4';
+                console.log('VideoWidget2 - Reset to transititonvote2.mp4 (showing image, video muted)');
+            }
+        }
     }
     
     // New method for forcing video playback with minimal delay

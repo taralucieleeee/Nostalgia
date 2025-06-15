@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoWidget Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black">
+    <div id="debug" class="fixed top-4 right-4 bg-white p-4 rounded text-sm max-w-md z-50">
+        <h3>Debug Info</h3>
+        <div id="debugOutput"></div>
+    </div>
+    
+    <h1 class="text-white text-center p-4">VideoWidget Direct Test</h1>
+    
+    <div class="flex justify-center gap-4 p-4">
+        <button id="testWidget3" class="bg-blue-500 text-white px-4 py-2 rounded">Test Widget 3 (VideoWidget)</button>
+        <button id="testReset" class="bg-red-500 text-white px-4 py-2 rounded">Test Reset</button>
+        <button id="testNavigateToWidget4" class="bg-green-500 text-white px-4 py-2 rounded">Navigate to Widget 4</button>
+    </div>
+    
+    <div id="widgetContainer" class="relative w-full h-96 bg-gray-800"></div>
+    
+    <script type="module">
+        import { VideoWidget } from '/src/js/widgets/VideoWidget.js';
+        import { VideoWidget2 } from '/src/js/widgets/VideoWidget2.js';
+        
+        let currentWidget = null;
+        const container = document.getElementById('widgetContainer');
+        const debugOutput = document.getElementById('debugOutput');
+        
+        function log(message) {
+            console.log(message);
+            debugOutput.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+        }
+        
+        function clearWidget() {
+            if (currentWidget) {
+                currentWidget.deactivate();
+                currentWidget = null;
+            }
+            container.innerHTML = '';
+        }
+        
+        document.getElementById('testWidget3').addEventListener('click', () => {
+            log('Testing VideoWidget (Widget 3)');
+            clearWidget();
+            
+            const widgetElement = document.createElement('div');
+            widgetElement.className = 'widget-container absolute inset-0';
+            widgetElement.setAttribute('data-widget', '3');
+            container.appendChild(widgetElement);
+            
+            currentWidget = new VideoWidget(widgetElement, 'widget-3');
+            currentWidget.render();
+            
+            // Simulate widget activation
+            setTimeout(() => {
+                widgetElement.classList.add('widget-active');
+                log('Widget 3 activated');
+            }, 100);
+        });
+        
+        document.getElementById('testReset').addEventListener('click', () => {
+            log('Testing reset functionality');
+            // Simulate reset key press
+            const resetEvent = new KeyboardEvent('keydown', { key: 'r' });
+            document.dispatchEvent(resetEvent);
+        });
+        
+        document.getElementById('testNavigateToWidget4').addEventListener('click', () => {
+            log('Testing VideoWidget2 (Widget 4)');
+            clearWidget();
+            
+            const widgetElement = document.createElement('div');
+            widgetElement.className = 'widget-container absolute inset-0';
+            widgetElement.setAttribute('data-widget', '4');
+            container.appendChild(widgetElement);
+            
+            currentWidget = new VideoWidget2(widgetElement, 'widget-4');
+            currentWidget.render();
+            
+            // Simulate widget activation
+            setTimeout(() => {
+                widgetElement.classList.add('widget-active');
+                log('Widget 4 activated');
+            }, 100);
+        });
+        
+        // Listen for video events
+        document.addEventListener('DOMNodeInserted', (e) => {
+            if (e.target.tagName === 'VIDEO') {
+                const video = e.target;
+                video.addEventListener('loadstart', () => log('Video: loadstart'));
+                video.addEventListener('loadedmetadata', () => log('Video: loadedmetadata'));
+                video.addEventListener('canplay', () => log('Video: canplay'));
+                video.addEventListener('playing', () => log('Video: playing'));
+                video.addEventListener('error', (err) => {
+                    log('Video ERROR: ' + (video.error ? video.error.code + ' - ' + video.error.message : 'unknown'));
+                });
+                video.addEventListener('ended', () => log('Video: ended'));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Transititonvote2 Audio Reset Fix</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .critical-test {
+            background: linear-gradient(45deg, #ff4757, #c44569);
+        }
+        
+        .status-box {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .success { color: #2ed573; }
+        .error { color: #ff4757; }
+        .warning { color: #ffa502; }
+        .info { color: #70a1ff; }
+        
+        .test-results {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .widget-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .widget-button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .widget-button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚨 Transititonvote2 Audio Reset Fix Test</h1>
+        <p><strong>Critical Issue:</strong> When reset is pressed from any widget, it goes back to FirstWidget but plays audio from transititonvote2 video</p>
+        <p><strong>Expected Result:</strong> Reset should return to FirstWidget with only lavender soundtrack, NO transititonvote2 audio</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Critical Reset Tests</h2>
+        <p>These tests will verify the transititonvote2 audio bleeding fix during reset:</p>
+        
+        <div class="widget-nav">
+            <button class="test-button" onclick="goToWidget(1)">Widget 1 (FirstWidget)</button>
+            <button class="test-button" onclick="goToWidget(2)">Widget 2 (SecondWidget)</button>
+            <button class="test-button" onclick="goToWidget(4)">Widget 4 (VideoWidget2)</button>
+            <button class="test-button" onclick="goToWidget(6)">Widget 6 (VideoWidget4)</button>
+            <button class="test-button" onclick="goToWidget(9)">Widget 9 (Reset Button)</button>
+        </div>
+        
+        <button class="test-button critical-test" onclick="runCriticalResetTest()">🚨 RUN CRITICAL RESET TEST</button>
+        <button class="test-button" onclick="testResetFromDifferentWidgets()">Test Reset from Multiple Widgets</button>
+        <button class="test-button" onclick="testVideoWidget2Audio()">Test VideoWidget2 Audio Control</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Manual Testing Instructions</h2>
+        <div class="status-box">
+            <p><strong>Step 1:</strong> Navigate to any widget (2, 4, 6, or 9)</p>
+            <p><strong>Step 2:</strong> Press 'R' key to trigger reset</p>
+            <p><strong>Step 3:</strong> Verify you return to FirstWidget</p>
+            <p><strong>Step 4:</strong> 🚨 <span class="error">LISTEN CAREFULLY</span> - You should ONLY hear lavender soundtrack</p>
+            <p><strong>Step 5:</strong> If you hear transititonvote2 audio, the bug still exists</p>
+        </div>
+        
+        <div class="widget-nav">
+            <h3>Quick Navigation for Testing:</h3>
+            <button class="widget-button" onclick="openMainApp()">🏠 Open Main App</button>
+            <button class="widget-button" onclick="openMainApp('?widget=2')">Go to Widget 2</button>
+            <button class="widget-button" onclick="openMainApp('?widget=4')">Go to Widget 4</button>
+            <button class="widget-button" onclick="openMainApp('?widget=6')">Go to Widget 6</button>
+            <button class="widget-button" onclick="openMainApp('?widget=9')">Go to Widget 9</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎵 Audio State Monitor</h2>
+        <p>Monitor all video elements for audio activity:</p>
+        <button class="test-button" onclick="monitorAllVideos()">Start Audio Monitoring</button>
+        <button class="test-button" onclick="stopMonitoring()">Stop Monitoring</button>
+        <button class="test-button" onclick="checkCurrentAudioState()">Check Current Audio State</button>
+        
+        <div id="audioStatus" class="status-box">
+            <div>Monitoring Status: <span id="monitoringStatus" class="info">Not Started</span></div>
+            <div>Active Videos: <span id="activeVideos">0</span></div>
+            <div>Transititonvote2 Status: <span id="transititonvote2Status" class="success">Not Playing</span></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🛠️ Fix Implementation Details</h2>
+        <div class="status-box">
+            <p><strong>Enhanced Reset Audio System:</strong></p>
+            <ul>
+                <li>✅ Comprehensive video cleanup with autoplay=false</li>
+                <li>✅ Specific transititonvote2 video control during reset</li>
+                <li>✅ Extra safeguards when navigating to FirstWidget</li>
+                <li>✅ Final safeguard in navigateToInitialState method</li>
+                <li>✅ Enhanced video muting with preload='none'</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="testResults" class="test-results">
+        <div class="info">🧪 Test results will appear here...</div>
+    </div>
+
+    <script>
+        let monitoringInterval = null;
+        let testResults = document.getElementById('testResults');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            testResults.appendChild(logEntry);
+            testResults.scrollTop = testResults.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function openMainApp(params = '') {
+            const url = `http://localhost:3000${params}`;
+            window.open(url, '_blank');
+            log(`Opened main app: ${url}`, 'info');
+        }
+        
+        function goToWidget(widgetNumber) {
+            openMainApp(`?widget=${widgetNumber}`);
+        }
+        
+        function runCriticalResetTest() {
+            log('🚨 STARTING CRITICAL RESET TEST', 'warning');
+            log('This test will verify the transititonvote2 audio fix during reset', 'info');
+            
+            // Start monitoring first
+            monitorAllVideos();
+            
+            // Open widget 4 (VideoWidget2 - has transititonvote2 video)
+            setTimeout(() => {
+                log('Step 1: Opening VideoWidget2 (Widget 4) - contains transititonvote2 video', 'info');
+                openMainApp('?widget=4');
+                
+                setTimeout(() => {
+                    log('Step 2: Now manually press "R" key in the main app to trigger reset', 'warning');
+                    log('🎧 LISTEN CAREFULLY: You should ONLY hear lavender soundtrack', 'warning');
+                    log('🚨 If you hear transititonvote2 audio, the bug still exists!', 'error');
+                    
+                    setTimeout(() => {
+                        checkForTransititonvote2Audio();
+                    }, 3000);
+                }, 2000);
+            }, 1000);
+        }
+        
+        function testResetFromDifferentWidgets() {
+            log('🧪 Testing reset from multiple widgets', 'info');
+            
+            const widgets = [2, 4, 6, 9];
+            let currentIndex = 0;
+            
+            function testNextWidget() {
+                if (currentIndex >= widgets.length) {
+                    log('✅ Multi-widget reset test completed', 'success');
+                    return;
+                }
+                
+                const widget = widgets[currentIndex];
+                log(`Testing reset from Widget ${widget}`, 'info');
+                openMainApp(`?widget=${widget}`);
+                
+                setTimeout(() => {
+                    log(`Manually press 'R' key in Widget ${widget} and verify no transititonvote2 audio`, 'warning');
+                    currentIndex++;
+                    setTimeout(testNextWidget, 5000);
+                }, 2000);
+            }
+            
+            testNextWidget();
+        }
+        
+        function testVideoWidget2Audio() {
+            log('🎬 Testing VideoWidget2 audio control specifically', 'info');
+            openMainApp('?widget=4');
+            
+            setTimeout(() => {
+                log('VideoWidget2 opened - check if transititonvote2 video is properly controlled', 'info');
+                checkForTransititonvote2Audio();
+            }, 2000);
+        }
+        
+        function monitorAllVideos() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+            }
+            
+            log('🔍 Starting audio monitoring...', 'info');
+            document.getElementById('monitoringStatus').textContent = 'Active';
+            document.getElementById('monitoringStatus').className = 'success';
+            
+            monitoringInterval = setInterval(() => {
+                try {
+                    // This will only work if the videos are in the same origin
+                    // For cross-frame monitoring, we'd need postMessage communication
+                    const iframes = document.querySelectorAll('iframe');
+                    const videos = document.querySelectorAll('video');
+                    
+                    let activeCount = 0;
+                    let hasTransititonvote2 = false;
+                    
+                    videos.forEach(video => {
+                        if (!video.paused && !video.muted) {
+                            activeCount++;
+                            if (video.src && video.src.includes('transititonvote2')) {
+                                hasTransititonvote2 = true;
+                            }
+                        }
+                    });
+                    
+                    document.getElementById('activeVideos').textContent = activeCount;
+                    
+                    if (hasTransititonvote2) {
+                        document.getElementById('transititonvote2Status').textContent = 'PLAYING - BUG DETECTED!';
+                        document.getElementById('transititonvote2Status').className = 'error';
+                        log('🚨 CRITICAL: Transititonvote2 video is playing!', 'error');
+                    } else {
+                        document.getElementById('transititonvote2Status').textContent = 'Not Playing';
+                        document.getElementById('transititonvote2Status').className = 'success';
+                    }
+                } catch (error) {
+                    // Expected for cross-origin iframe access
+                    document.getElementById('activeVideos').textContent = 'Cross-origin (normal)';
+                }
+            }, 1000);
+        }
+        
+        function stopMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+            }
+            
+            log('⏹️ Audio monitoring stopped', 'info');
+            document.getElementById('monitoringStatus').textContent = 'Stopped';
+            document.getElementById('monitoringStatus').className = 'warning';
+        }
+        
+        function checkCurrentAudioState() {
+            log('🔍 Checking current audio state...', 'info');
+            
+            try {
+                const videos = document.querySelectorAll('video');
+                log(`Found ${videos.length} video elements in test page`, 'info');
+                
+                videos.forEach((video, index) => {
+                    const status = video.paused ? 'Paused' : 'Playing';
+                    const muted = video.muted ? 'Muted' : 'Unmuted';
+                    log(`Video ${index + 1}: ${status}, ${muted}, src: ${video.src || 'No source'}`, 'info');
+                });
+                
+                // Note: Can't check main app videos due to iframe cross-origin restrictions
+                log('Note: Cannot check main app videos due to cross-origin restrictions', 'warning');
+                log('For main app testing, use browser developer tools console', 'info');
+                
+            } catch (error) {
+                log(`Error checking audio state: ${error.message}`, 'error');
+            }
+        }
+        
+        function checkForTransititonvote2Audio() {
+            log('🎧 Checking for transititonvote2 audio bleeding...', 'info');
+            log('MANUAL CHECK REQUIRED: Listen for transititonvote2 audio in the main app', 'warning');
+            log('If you hear it, the bug still exists and needs further investigation', 'warning');
+        }
+        
+        // Initialize
+        log('🧪 Transititonvote2 Audio Reset Fix Test Page Loaded', 'success');
+        log('Use the buttons above to test the reset functionality', 'info');
+        log('🚨 CRITICAL: Listen carefully for transititonvote2 audio after reset', 'warning');
+    </script>
+</body>
+</html>

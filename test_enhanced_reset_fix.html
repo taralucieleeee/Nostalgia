@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Reset Fix - Global Flag Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .test-section {
+            background: rgba(255,255,255,0.15);
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .critical {
+            background: linear-gradient(45deg, #FF4757, #FF3742);
+        }
+        
+        .success {
+            background: linear-gradient(45deg, #2ED573, #1ABC9C);
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .test-pass {
+            background: rgba(46, 213, 115, 0.2);
+            border-left: 4px solid #2ED573;
+            color: #2ED573;
+        }
+        
+        .test-fail {
+            background: rgba(255, 71, 87, 0.2);
+            border-left: 4px solid #FF4757;
+            color: #FF4757;
+        }
+        
+        .test-info {
+            background: rgba(52, 152, 219, 0.2);
+            border-left: 4px solid #3498DB;
+            color: #3498DB;
+        }
+        
+        .status-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.3);
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(0,255,0,0.3);
+        }
+        
+        .flag-status {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .flag-true {
+            background: rgba(255, 71, 87, 0.3);
+            border: 2px solid #FF4757;
+            color: #FF4757;
+        }
+        
+        .flag-false {
+            background: rgba(46, 213, 115, 0.3);
+            border: 2px solid #2ED573;
+            color: #2ED573;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ Enhanced Reset Fix - Global Flag Test</h1>
+        <p>Testing the new global reset flag system to prevent VideoWidget2 activation during reset</p>
+        <p><strong>New Solution:</strong> Global `window.resetInProgress` flag blocks all widget activations during reset</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🚨 Root Cause Analysis</h2>
+        <div class="test-result test-info">
+            <strong>The Real Problem:</strong><br>
+            1. Reset process calls `updateWidgetPositions()` to activate FirstWidget<br>
+            2. During this process, ALL widgets get their CSS classes updated<br>
+            3. VideoWidget2's `activate()` method gets called even though user is on FirstWidget<br>
+            4. This happens DURING reset, causing race conditions and timing issues<br>
+            5. The video gets loaded and somehow plays, triggering the redirect
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🛡️ Enhanced Protection System</h2>
+        <div class="test-result test-pass">
+            <strong>✅ Layer 1:</strong> Global Reset Flag<br>
+            `window.resetInProgress = true` blocks ALL widget activations during reset
+        </div>
+        <div class="test-result test-pass">
+            <strong>✅ Layer 2:</strong> Reset Mode Video Flag<br>
+            Individual videos marked with `resetMode = 'true'` ignore all events
+        </div>
+        <div class="test-result test-pass">
+            <strong>✅ Layer 3:</strong> Current Widget Check<br>
+            VideoWidget2 only activates when user is actually on Widget 4
+        </div>
+        <div class="test-result test-pass">
+            <strong>✅ Layer 4:</strong> Video Event Protection<br>
+            Video 'ended' events check global reset flag before triggering redirect
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Global Reset Flag Monitor</h2>
+        <div id="flagStatus" class="flag-status flag-false">
+            🟢 window.resetInProgress: false
+        </div>
+        <button class="button" onclick="checkResetFlag()">Check Reset Flag</button>
+        <button class="button critical" onclick="simulateReset()">Simulate Reset Flag</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Procedure</h2>
+        <div class="status-display">
+            <strong>Complete Test Steps:</strong><br>
+            1. Open main application<br>
+            2. Navigate to different widgets (2, 3, 4, 5, 6)<br>
+            3. Press 'R' key to reset from each widget<br>
+            4. Monitor console for reset flag messages<br>
+            5. Verify: Should go to FirstWidget and stay there<br>
+            6. Verify: Should NOT play transititonvote2 audio<br>
+            7. Verify: Should NOT redirect to vote2.html<br>
+            8. Check that reset flag is properly cleared after reset
+        </div>
+        
+        <button class="button success" onclick="openMainApp()">🚀 Test in Main Application</button>
+        <button class="button" onclick="showConsoleCommands()">📋 Console Commands</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Protection Verification</h2>
+        <div id="testResults">
+            <div class="test-result test-info">
+                <strong>Ready for Enhanced Testing</strong><br>
+                The global reset flag system is now implemented and ready for verification.
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Debug Commands</h2>
+        <div class="status-display" id="debugCommands" style="display: none;">
+            <strong>Console Commands for Testing:</strong><br><br>
+            // Check global reset flag<br>
+            console.log('Reset flag:', window.resetInProgress);<br><br>
+            
+            // Monitor VideoWidget2 state<br>
+            const vw2 = document.querySelector('[data-widget="4"] video');<br>
+            console.log('VideoWidget2 video:', {<br>
+            &nbsp;&nbsp;src: vw2?.src,<br>
+            &nbsp;&nbsp;paused: vw2?.paused,<br>
+            &nbsp;&nbsp;muted: vw2?.muted,<br>
+            &nbsp;&nbsp;resetMode: vw2?.dataset.resetMode<br>
+            });<br><br>
+            
+            // Force test reset flag<br>
+            window.resetInProgress = true;<br>
+            console.log('Reset flag manually set to true');<br><br>
+            
+            // Clear reset flag<br>
+            window.resetInProgress = false;<br>
+            console.log('Reset flag manually cleared');
+        </div>
+    </div>
+
+    <script>
+        function checkResetFlag() {
+            const flagStatus = document.getElementById('flagStatus');
+            const isReset = window.resetInProgress || false;
+            
+            flagStatus.textContent = `${isReset ? '🔴' : '🟢'} window.resetInProgress: ${isReset}`;
+            flagStatus.className = `flag-status ${isReset ? 'flag-true' : 'flag-false'}`;
+            
+            console.log('Reset flag check:', window.resetInProgress);
+        }
+
+        function simulateReset() {
+            const flagStatus = document.getElementById('flagStatus');
+            
+            // Simulate reset flag
+            window.resetInProgress = true;
+            flagStatus.textContent = '🔴 window.resetInProgress: true (SIMULATED)';
+            flagStatus.className = 'flag-status flag-true';
+            
+            console.log('🚨 SIMULATED: Reset flag set to true');
+            
+            // Clear after 3 seconds
+            setTimeout(() => {
+                window.resetInProgress = false;
+                flagStatus.textContent = '🟢 window.resetInProgress: false (CLEARED)';
+                flagStatus.className = 'flag-status flag-false';
+                console.log('✅ SIMULATED: Reset flag cleared');
+            }, 3000);
+        }
+
+        function openMainApp() {
+            const testResults = document.getElementById('testResults');
+            testResults.innerHTML = `
+                <div class="test-result test-info">
+                    <strong>🚀 Opening Main Application...</strong><br>
+                    Test the enhanced reset functionality with global flag protection.
+                </div>
+            `;
+            
+            // Open main app
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        function showConsoleCommands() {
+            const debugCommands = document.getElementById('debugCommands');
+            debugCommands.style.display = debugCommands.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Monitor reset flag changes
+        let lastResetFlag = false;
+        setInterval(() => {
+            const currentResetFlag = window.resetInProgress || false;
+            if (currentResetFlag !== lastResetFlag) {
+                console.log(`🔄 Reset flag changed: ${lastResetFlag} → ${currentResetFlag}`);
+                lastResetFlag = currentResetFlag;
+                checkResetFlag();
+            }
+        }, 100);
+
+        // Initial check
+        document.addEventListener('DOMContentLoaded', () => {
+            checkResetFlag();
+            console.log('🛡️ Enhanced Reset Fix Test Page Loaded');
+            console.log('🔍 Global reset flag monitoring active');
+        });
+    </script>
+</body>
+</html>

@@ -148,10 +148,6 @@
         <source src="/static/sounds/lavendersoundtrack.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
-    <audio id="politicalMusic" preload="auto" loop>
-        <source src="/static/sounds/politicalpartmusic.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
     
     <div class="flex flex-col w-screen h-screen">
         <!-- Header Section -->
@@ -206,16 +202,10 @@
         
         <!-- Footer Section -->
         <div class="flex-shrink-0 flex flex-row justify-center w-full px-8 py-12" style="background-color: #FFDCDC;">
-            <div class="flex items-center justify-between w-full max-w-6xl">
-                <a href="/vote.html" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
-                    <img id="backIcon" src="/static/icons/back.svg" alt="Back" class="h-8 w-8">
-                    BACK
-                </a>
-                <a href="/?widget=4" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
-                    NEXT
-                    <img id="nextIcon" src="/static/icons/next.svg" alt="Next" class="h-8 w-8">
-                </a>
-            </div>
+            <a href="/?widget=4" class="inline-flex items-center gap-2 text-4xl transition-colors" style="font-family: 'Space Mono', monospace; color: #9A7A78;">
+                NEXT
+                <img id="nextIcon" src="/static/icons/next.svg" alt="Next" class="h-8 w-8">
+            </a>
         </div>
     </div>
 
@@ -336,9 +326,7 @@
         // Load results when page loads
         window.addEventListener('load', async () => {
             // Reset navigation button icons to default state
-            const backIcon = document.getElementById('backIcon');
             const nextIcon = document.getElementById('nextIcon');
-            if (backIcon) backIcon.src = '/static/icons/back.svg';
             if (nextIcon) nextIcon.src = '/static/icons/next.svg';
             
             try {
@@ -366,21 +354,9 @@
         // Keyboard navigation functionality
         document.addEventListener('keydown', (event) => {
             const key = event.key.toLowerCase();
-            const backIcon = document.getElementById('backIcon');
             const nextIcon = document.getElementById('nextIcon');
             
-            if (key === 'a' && backIcon) {
-                // Change back icon to filled version
-                backIcon.src = '/static/icons/backfilled.svg';
-                
-                // Prevent any other interactions during navigation
-                document.body.style.pointerEvents = 'none';
-                
-                // Wait 1 second showing the filled icon, then navigate
-                setTimeout(() => {
-                    window.location.href = '/vote.html';
-                }, 1000);
-            } else if (key === 'd' && nextIcon) {
+            if (key === 'd' && nextIcon) {
                 // Change next icon to filled version  
                 nextIcon.src = '/static/icons/nextfilled.svg';
                 
@@ -391,39 +367,27 @@
                 setTimeout(() => {
                     window.location.href = '/?widget=4';
                 }, 1000);
+            } else if (key === 'r') {
+                // Reset functionality - complete application restart
+                event.preventDefault();
+                console.log('Reset triggered from results.html - restarting application');
+                window.location.href = '/index.html';
             }
         });
     </script>
     
     <script>
-        // Cross-page audio management
+        // Cross-page audio management - Lavender soundtrack only
         document.addEventListener('DOMContentLoaded', () => {
             const backgroundMusic = document.getElementById('bgMusic');
-            const politicalMusic = document.getElementById('politicalMusic');
             
             // Try to restore audio state from previous page
             const audioState = localStorage.getItem('nostalgiaAudioState');
             if (audioState) {
                 const state = JSON.parse(audioState);
                 
-                if (state.currentTrack === 'political' && state.politicalIsPlaying && state.politicalCurrentTime !== undefined) {
-                    // Continue political party music
-                    politicalMusic.volume = 0.08;
-                    politicalMusic.currentTime = state.politicalCurrentTime;
-                    politicalMusic.play().catch(e => {
-                        console.log('Political music autoplay prevented, will start on user interaction');
-                        // Start audio on first user interaction
-                        const startAudio = () => {
-                            politicalMusic.currentTime = state.politicalCurrentTime;
-                            politicalMusic.play().catch(e => console.log('Political music playback failed:', e));
-                            document.removeEventListener('click', startAudio);
-                            document.removeEventListener('keydown', startAudio);
-                        };
-                        document.addEventListener('click', startAudio);
-                        document.addEventListener('keydown', startAudio);
-                    });
-                } else if (state.currentTrack === 'lavender' && state.lavenderIsPlaying && state.lavenderCurrentTime !== undefined) {
-                    // Continue lavender soundtrack
+                // Always use lavender soundtrack on results pages at 8% volume
+                if (state.lavenderIsPlaying && state.lavenderCurrentTime !== undefined) {
                     backgroundMusic.volume = 0.08;
                     backgroundMusic.currentTime = state.lavenderCurrentTime;
                     backgroundMusic.play().catch(e => {
@@ -439,7 +403,7 @@
                         document.addEventListener('keydown', startAudio);
                     });
                 } else {
-                    // Default to lavender soundtrack if no previous state
+                    // Default to lavender soundtrack at 8% volume
                     backgroundMusic.volume = 0.08;
                     const startAudio = () => {
                         backgroundMusic.play().catch(e => console.log('Lavender music playback failed:', e));
@@ -461,14 +425,14 @@
                 document.addEventListener('keydown', startAudio);
             }
             
-            // Save audio state when leaving page
+            // Save audio state when leaving page (only lavender soundtrack)
             window.addEventListener('beforeunload', () => {
                 const audioState = {
-                    currentTrack: !politicalMusic.paused ? 'political' : 'lavender',
+                    currentTrack: 'lavender',
                     lavenderIsPlaying: !backgroundMusic.paused,
                     lavenderCurrentTime: backgroundMusic.currentTime,
-                    politicalIsPlaying: !politicalMusic.paused,
-                    politicalCurrentTime: politicalMusic.currentTime
+                    politicalIsPlaying: false,
+                    politicalCurrentTime: 0
                 };
                 localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
             });

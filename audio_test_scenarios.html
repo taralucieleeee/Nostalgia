@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Overlap Test Scenarios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .scenario {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        .scenario h3 {
+            color: #007acc;
+            margin-top: 0;
+        }
+        .test-steps {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .expected {
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #ffc107;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🎵 Audio Overlap Test Scenarios</h1>
+    <p>Test the specific audio overlap issues that were reported and fixed.</p>
+
+    <div class="scenario">
+        <h3>Scenario 1: SecondPart → Politics Audio Bleeding</h3>
+        <div class="test-steps">
+            <h4>Test Steps:</h4>
+            <ol>
+                <li>Open the main Nostalgia application</li>
+                <li>Navigate to the widget that plays <code>secondpart.mp4</code> (VideoWidget3)</li>
+                <li>Let the video play for a few seconds</li>
+                <li>Navigate to the politics section (VideoWidget4 - <code>politics_1.mp4</code>)</li>
+                <li>Listen carefully for any background audio from secondpart</li>
+            </ol>
+        </div>
+        <div class="expected">
+            <strong>Expected Result:</strong> Only politics video audio should play. No secondpart audio bleeding.
+        </div>
+        <div class="warning">
+            <strong>Previous Issue:</strong> Audio from secondpart.mp4 was bleeding into politics_1.mp4 playback
+        </div>
+        <button onclick="openApp()">Open Main App</button>
+        <button onclick="testScenario1()">Test This Scenario</button>
+        <div id="scenario1-status" class="status info">Ready to test</div>
+    </div>
+
+    <div class="scenario">
+        <h3>Scenario 2: Reset Audio Cleanup</h3>
+        <div class="test-steps">
+            <h4>Test Steps:</h4>
+            <ol>
+                <li>Navigate to any video widget</li>
+                <li>Let a video play</li>
+                <li>Click the reset button or trigger reset</li>
+                <li>Listen for any residual audio</li>
+                <li>Wait a few seconds after reset</li>
+            </ol>
+        </div>
+        <div class="expected">
+            <strong>Expected Result:</strong> Complete silence after reset. No random video audio playing.
+        </div>
+        <div class="warning">
+            <strong>Previous Issue:</strong> Random video audio playing over the start screen after reset
+        </div>
+        <button onclick="testScenario2()">Test Reset Scenario</button>
+        <div id="scenario2-status" class="status info">Ready to test</div>
+    </div>
+
+    <div class="scenario">
+        <h3>Scenario 3: Multiple Audio Sources</h3>
+        <div class="test-steps">
+            <h4>Test Steps:</h4>
+            <ol>
+                <li>Quickly navigate between different video widgets</li>
+                <li>Switch between VideoWidget2, VideoWidget3, VideoWidget4, VideoWidget8</li>
+                <li>Listen for simultaneous audio from multiple sources</li>
+                <li>Test rapid widget switching</li>
+            </ol>
+        </div>
+        <div class="expected">
+            <strong>Expected Result:</strong> Only one video audio source at a time. Clean transitions.
+        </div>
+        <div class="warning">
+            <strong>Previous Issue:</strong> Multiple audio sources playing simultaneously
+        </div>
+        <button onclick="testScenario3()">Test Multiple Sources</button>
+        <div id="scenario3-status" class="status info">Ready to test</div>
+    </div>
+
+    <div class="scenario">
+        <h3>Scenario 4: AudioConflictManager Test</h3>
+        <div class="test-steps">
+            <h4>Test Steps:</h4>
+            <ol>
+                <li>Open browser console (F12)</li>
+                <li>Test AudioConflictManager methods directly</li>
+                <li>Use the buttons below to test individual methods</li>
+            </ol>
+        </div>
+        <button onclick="testSilenceAll()">Test Silence All Videos</button>
+        <button onclick="testResetAll()">Test Reset All Videos</button>
+        <button onclick="testPreventBleeding()">Test Prevent Bleeding</button>
+        <div id="scenario4-status" class="status info">Ready to test</div>
+    </div>
+
+    <div class="scenario">
+        <h3>Implementation Details</h3>
+        <div class="test-steps">
+            <h4>Key Fixes Applied:</h4>
+            <ul>
+                <li><strong>AudioConflictManager:</strong> New class for managing audio conflicts</li>
+                <li><strong>Enhanced Deactivation:</strong> Complete video pipeline cleanup in all widgets</li>
+                <li><strong>Proactive Prevention:</strong> VideoWidget4 silences others before loading politics</li>
+                <li><strong>Async Reset:</strong> Multi-phase reset with timing control</li>
+                <li><strong>Source Clearing:</strong> Complete src removal and pipeline reset</li>
+            </ul>
+        </div>
+        <div class="expected">
+            <strong>Files Modified:</strong>
+            <ul>
+                <li>main.js - AudioConflictManager, enhanced reset</li>
+                <li>VideoWidget.js - Enhanced base deactivation</li>
+                <li>VideoWidget2.js - Enhanced deactivation</li>
+                <li>VideoWidget3.js - Critical secondpart fix</li>
+                <li>VideoWidget4.js - Bleeding prevention</li>
+                <li>VideoWidget8.js & VideoWidget10.js - Enhanced deactivation</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function openApp() {
+            window.open('/', '_blank');
+        }
+
+        function testScenario1() {
+            document.getElementById('scenario1-status').textContent = 'Testing secondpart → politics transition...';
+            document.getElementById('scenario1-status').className = 'status info';
+            // Open app in new window for testing
+            const testWindow = window.open('/', '_blank');
+            setTimeout(() => {
+                document.getElementById('scenario1-status').textContent = 'Test window opened. Follow the test steps manually.';
+                document.getElementById('scenario1-status').className = 'status info';
+            }, 1000);
+        }
+
+        function testScenario2() {
+            document.getElementById('scenario2-status').textContent = 'Testing reset audio cleanup...';
+            document.getElementById('scenario2-status').className = 'status info';
+            // This would need to be tested in the main app
+            setTimeout(() => {
+                document.getElementById('scenario2-status').textContent = 'Test the reset functionality in the main app.';
+                document.getElementById('scenario2-status').className = 'status info';
+            }, 1000);
+        }
+
+        function testScenario3() {
+            document.getElementById('scenario3-status').textContent = 'Testing multiple audio sources...';
+            document.getElementById('scenario3-status').className = 'status info';
+            // This would need to be tested in the main app
+            setTimeout(() => {
+                document.getElementById('scenario3-status').textContent = 'Test rapid widget switching in the main app.';
+                document.getElementById('scenario3-status').className = 'status info';
+            }, 1000);
+        }
+
+        function testSilenceAll() {
+            // This would work if AudioConflictManager is available
+            try {
+                if (typeof AudioConflictManager !== 'undefined') {
+                    AudioConflictManager.silenceAllVideos();
+                    document.getElementById('scenario4-status').textContent = 'AudioConflictManager.silenceAllVideos() executed';
+                    document.getElementById('scenario4-status').className = 'status pass';
+                } else {
+                    document.getElementById('scenario4-status').textContent = 'AudioConflictManager not available in this context. Test in main app.';
+                    document.getElementById('scenario4-status').className = 'status info';
+                }
+            } catch (error) {
+                document.getElementById('scenario4-status').textContent = 'Error: ' + error.message;
+                document.getElementById('scenario4-status').className = 'status fail';
+            }
+        }
+
+        function testResetAll() {
+            try {
+                if (typeof AudioConflictManager !== 'undefined') {
+                    AudioConflictManager.resetAllVideos();
+                    document.getElementById('scenario4-status').textContent = 'AudioConflictManager.resetAllVideos() executed';
+                    document.getElementById('scenario4-status').className = 'status pass';
+                } else {
+                    document.getElementById('scenario4-status').textContent = 'AudioConflictManager not available in this context. Test in main app.';
+                    document.getElementById('scenario4-status').className = 'status info';
+                }
+            } catch (error) {
+                document.getElementById('scenario4-status').textContent = 'Error: ' + error.message;
+                document.getElementById('scenario4-status').className = 'status fail';
+            }
+        }
+
+        function testPreventBleeding() {
+            try {
+                if (typeof AudioConflictManager !== 'undefined') {
+                    AudioConflictManager.preventAudioBleeding();
+                    document.getElementById('scenario4-status').textContent = 'AudioConflictManager.preventAudioBleeding() executed';
+                    document.getElementById('scenario4-status').className = 'status pass';
+                } else {
+                    document.getElementById('scenario4-status').textContent = 'AudioConflictManager not available in this context. Test in main app.';
+                    document.getElementById('scenario4-status').className = 'status info';
+                }
+            } catch (error) {
+                document.getElementById('scenario4-status').textContent = 'Error: ' + error.message;
+                document.getElementById('scenario4-status').className = 'status fail';
+            }
+        }
+
+        // Show ready status
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Audio Overlap Test Scenarios loaded');
+            console.log('Use this page to systematically test the audio fixes');
+            console.log('Main app should be running at http://localhost:3000');
+        });
+    </script>
+</body>
+</html>

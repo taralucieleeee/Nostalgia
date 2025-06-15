@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransitionVote2 Audio Bleeding Fix Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-section {
+            border: 2px solid #e5e5e5;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-success { border-color: #10b981; background-color: #f0fdf4; }
+        .test-fail { border-color: #ef4444; background-color: #fef2f2; }
+        .test-warning { border-color: #f59e0b; background-color: #fffbeb; }
+        .console-log {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">🎵 TransitionVote2 Audio Bleeding Fix Test</h1>
+        
+        <div class="test-section test-warning">
+            <h2 class="text-xl font-semibold mb-4">🎯 Problem Description</h2>
+            <p><strong>Issue:</strong> After reset, audio from <code>transititonvote2.mp4</code> (VideoWidget2) was randomly appearing on FirstWidget.</p>
+            <p><strong>Root Cause:</strong> VideoWidget2's <code>deactivate()</code> method wasn't properly clearing the video source, allowing the video with audio to remain loaded.</p>
+            <p><strong>Fix Applied:</strong> Enhanced VideoWidget2 deactivation and added proper <code>activate()</code> method.</p>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🧪 Test Procedure</h2>
+            <div class="space-y-4">
+                <div class="bg-blue-50 p-4 rounded">
+                    <h3 class="font-semibold">Step 1: Navigate to VideoWidget2 (Widget 4)</h3>
+                    <p>Go to Widget 4 and play the transititonvote2.mp4 video (press D key)</p>
+                    <button id="goToWidget4" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">
+                        Go to Widget 4
+                    </button>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded">
+                    <h3 class="font-semibold">Step 2: Let Video Play</h3>
+                    <p>Allow the transititonvote2.mp4 video to play with audio (don't complete to vote2.html)</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded">
+                    <h3 class="font-semibold">Step 3: Reset Application</h3>
+                    <p>Press 'R' key or reset button to trigger comprehensive reset</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded">
+                    <h3 class="font-semibold">Step 4: Check FirstWidget (Widget 1)</h3>
+                    <p>After reset, you should be on FirstWidget with only lavender background music. <strong>NO transititonvote2 audio should be heard!</strong></p>
+                    <button id="goToWidget1" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-2">
+                        Go to Widget 1 (After Reset)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🔧 Technical Changes Applied</h2>
+            <div class="bg-gray-50 p-4 rounded">
+                <h3 class="font-semibold mb-2">VideoWidget2.js Enhanced:</h3>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>✅ <strong>Enhanced deactivate():</strong> Added <code>this.video.src = ''</code> to clear video source</li>
+                    <li>✅ <strong>Proper observer cleanup:</strong> Added <code>this.observer = null</code></li>
+                    <li>✅ <strong>Added activate() method:</strong> Following consistent pattern with other video widgets</li>
+                    <li>✅ <strong>Source cleanup:</strong> Prevents audio bleeding by clearing video source completely</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">📊 Expected Results</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-red-50 p-4 rounded">
+                    <h3 class="font-semibold text-red-700">❌ BEFORE (Problematic)</h3>
+                    <ul class="text-sm list-disc list-inside mt-2">
+                        <li>Reset → Go to FirstWidget</li>
+                        <li>Hear transititonvote2 audio randomly</li>
+                        <li>Audio bleeding from VideoWidget2</li>
+                        <li>Multiple audio tracks playing</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-4 rounded">
+                    <h3 class="font-semibold text-green-700">✅ AFTER (Fixed)</h3>
+                    <ul class="text-sm list-disc list-inside mt-2">
+                        <li>Reset → Go to FirstWidget</li>
+                        <li>Only lavender background music</li>
+                        <li>No audio bleeding</li>
+                        <li>Clean audio state</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🎮 Quick Test Controls</h2>
+            <div class="flex gap-4 mb-4">
+                <button id="testSequence" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    Run Full Test Sequence
+                </button>
+                <button id="openConsole" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                    Monitor Console
+                </button>
+                <button id="checkAudio" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+                    Check Audio State
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">📋 Test Status</h2>
+            <div id="testStatus" class="bg-gray-50 p-4 rounded">
+                <p>Ready to test the transititonvote2 audio bleeding fix. Follow the test procedure above.</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🔍 Console Monitor</h2>
+            <div id="consoleMonitor" class="console-log">
+                Console output will appear here when monitoring is active...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        const consoleMonitor = document.getElementById('consoleMonitor');
+        let isMonitoring = false;
+
+        function logToMonitor(message, type = 'log') {
+            if (!isMonitoring) return;
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'warn' ? '#ffa500' : '#00ff00';
+            consoleMonitor.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            consoleMonitor.scrollTop = consoleMonitor.scrollHeight;
+        }
+
+        // Override console methods when monitoring
+        function startMonitoring() {
+            isMonitoring = true;
+            consoleMonitor.innerHTML = 'Console monitoring started...\n';
+            
+            console.log = function(...args) {
+                originalConsoleLog.apply(console, args);
+                logToMonitor(args.join(' '), 'log');
+            };
+            
+            console.error = function(...args) {
+                originalConsoleError.apply(console, args);
+                logToMonitor(args.join(' '), 'error');
+            };
+            
+            console.warn = function(...args) {
+                originalConsoleWarn.apply(console, args);
+                logToMonitor(args.join(' '), 'warn');
+            };
+        }
+
+        function stopMonitoring() {
+            isMonitoring = false;
+            console.log = originalConsoleLog;
+            console.error = originalConsoleError;
+            console.warn = originalConsoleWarn;
+        }
+
+        // Event listeners
+        document.getElementById('goToWidget4').addEventListener('click', () => {
+            window.open('http://localhost:3000/?widget=4', '_blank');
+        });
+
+        document.getElementById('goToWidget1').addEventListener('click', () => {
+            window.open('http://localhost:3000/?widget=1', '_blank');
+        });
+
+        document.getElementById('testSequence').addEventListener('click', () => {
+            const status = document.getElementById('testStatus');
+            status.innerHTML = `
+                <div class="test-warning">
+                    <h3 class="font-semibold">🚀 Test Sequence Started</h3>
+                    <ol class="list-decimal list-inside mt-2 space-y-1">
+                        <li>Opening Widget 4 in new tab...</li>
+                        <li>Play the transititonvote2.mp4 video (press D)</li>
+                        <li>Press R to reset</li>
+                        <li>Check if only lavender music plays (no transititonvote2 audio)</li>
+                    </ol>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                window.open('http://localhost:3000/?widget=4', '_blank');
+            }, 1000);
+        });
+
+        document.getElementById('openConsole').addEventListener('click', () => {
+            if (!isMonitoring) {
+                startMonitoring();
+                document.getElementById('openConsole').textContent = 'Stop Console Monitoring';
+                document.getElementById('openConsole').className = 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600';
+            } else {
+                stopMonitoring();
+                document.getElementById('openConsole').textContent = 'Monitor Console';
+                document.getElementById('openConsole').className = 'bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600';
+                consoleMonitor.innerHTML += '\nConsole monitoring stopped.\n';
+            }
+        });
+
+        document.getElementById('checkAudio').addEventListener('click', () => {
+            // This would need to be implemented with access to the main app's audio elements
+            alert('Audio Check Instructions:\n\n1. Listen carefully for any transititonvote2 audio\n2. Only lavender background music should be playing\n3. Check browser console for audio-related messages\n4. Verify no multiple audio tracks are playing simultaneously');
+        });
+
+        // Auto-start console monitoring
+        setTimeout(() => {
+            startMonitoring();
+            document.getElementById('openConsole').textContent = 'Stop Console Monitoring';
+            document.getElementById('openConsole').className = 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600';
+        }, 1000);
+    </script>
+</body>
+</html>

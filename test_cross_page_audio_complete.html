@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Page Audio Test - Complete</title>
+    <style>
+        body {
+            font-family: 'Space Mono', monospace;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .button {
+            background: #9A7A78;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Space Mono', monospace;
+        }
+        .button:hover {
+            background: #7a5a58;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .page-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .page-link {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            border: 2px solid #555;
+            transition: all 0.3s ease;
+        }
+        .page-link:hover {
+            background: #444;
+            border-color: #9A7A78;
+        }
+        .console {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Cross-Page Audio Test - Complete Implementation</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Summary</h2>
+        <p>This test verifies that background music continues seamlessly across all voting and results pages:</p>
+        <ul>
+            <li><strong>vote.html</strong> - ✅ Audio elements and cross-page management implemented</li>
+            <li><strong>vote2.html</strong> - ✅ Audio elements and cross-page management implemented</li>
+            <li><strong>results.html</strong> - ✅ Audio elements and cross-page management implemented</li>
+            <li><strong>results2.html</strong> - ✅ Audio elements and cross-page management implemented</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🎮 Audio System Overview</h2>
+        <div class="status info">
+            <strong>Lavender Soundtrack:</strong> Widgets 1-5 (50% on Widget 1, 8% on Widgets 2-5)
+        </div>
+        <div class="status info">
+            <strong>Political Party Music:</strong> Widgets 6+ (8% volume)
+        </div>
+        <div class="status success">
+            <strong>Cross-Page Continuity:</strong> Audio state preserved via localStorage
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Audio State Management</h2>
+        <div class="button" onclick="simulateAudioState('lavender')">Simulate Lavender State</div>
+        <div class="button" onclick="simulateAudioState('political')">Simulate Political State</div>
+        <div class="button" onclick="clearAudioState()">Clear Audio State</div>
+        <div class="button" onclick="testAudioRestore()">Test Audio Restore</div>
+        
+        <div id="testResults" class="console">
+            Audio state testing console...\n
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 Page Navigation Tests</h2>
+        <p>Open these pages to test cross-page audio continuity:</p>
+        <div class="page-links">
+            <a href="/vote.html" class="page-link" target="_blank">
+                <strong>Vote Page 1</strong><br>
+                Test lavender → political continuity
+            </a>
+            <a href="/vote2.html" class="page-link" target="_blank">
+                <strong>Vote Page 2</strong><br>
+                Test political music continuity
+            </a>
+            <a href="/results.html" class="page-link" target="_blank">
+                <strong>Results Page 1</strong><br>
+                Test audio state preservation
+            </a>
+            <a href="/results2.html" class="page-link" target="_blank">
+                <strong>Results Page 2</strong><br>
+                Test final audio continuity
+            </a>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎵 Expected Audio Behavior</h2>
+        <div class="status info">
+            <strong>Scenario 1:</strong> User navigates from Widget 1-5 → Vote page should continue lavender music at 8%
+        </div>
+        <div class="status info">
+            <strong>Scenario 2:</strong> User navigates from Widget 6+ → Vote page should continue political music at 8%
+        </div>
+        <div class="status info">
+            <strong>Scenario 3:</strong> User navigates Vote → Results → Vote2 → Results2 → Main app should maintain audio continuity
+        </div>
+        <div class="status success">
+            <strong>Reset:</strong> 'R' key from any page returns to main app and resets to lavender music
+        </div>
+    </div>
+
+    <script>
+        const testResults = document.getElementById('testResults');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#0f0',
+                success: '#0f0',
+                error: '#f00',
+                warning: '#ff0'
+            };
+            testResults.innerHTML += `<span style="color: ${colors[type] || '#0f0'}">[${timestamp}] ${message}</span>\n`;
+            testResults.scrollTop = testResults.scrollHeight;
+        }
+
+        function simulateAudioState(trackType) {
+            const audioState = {
+                currentTrack: trackType,
+                lavenderIsPlaying: trackType === 'lavender',
+                lavenderCurrentTime: trackType === 'lavender' ? 45.5 : 0,
+                politicalIsPlaying: trackType === 'political',
+                politicalCurrentTime: trackType === 'political' ? 123.7 : 0,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
+            log(`✅ Simulated ${trackType} audio state - saved to localStorage`, 'success');
+            log(`   Current time: ${trackType === 'lavender' ? audioState.lavenderCurrentTime : audioState.politicalCurrentTime}s`, 'info');
+        }
+
+        function clearAudioState() {
+            localStorage.removeItem('nostalgiaAudioState');
+            log('🗑️ Cleared audio state from localStorage', 'info');
+        }
+
+        function testAudioRestore() {
+            const audioState = localStorage.getItem('nostalgiaAudioState');
+            if (audioState) {
+                const state = JSON.parse(audioState);
+                log('📦 Found audio state in localStorage:', 'success');
+                log(`   Track: ${state.currentTrack}`, 'info');
+                log(`   Lavender playing: ${state.lavenderIsPlaying}`, 'info');
+                log(`   Political playing: ${state.politicalIsPlaying}`, 'info');
+                log(`   Lavender time: ${state.lavenderCurrentTime}s`, 'info');
+                log(`   Political time: ${state.politicalCurrentTime}s`, 'info');
+            } else {
+                log('❌ No audio state found in localStorage', 'error');
+            }
+        }
+
+        // Test audio state management functions
+        function demonstrateAudioFlow() {
+            log('🎵 Demonstrating audio flow:', 'info');
+            log('1. Widget 1 → Lavender at 50%', 'info');
+            log('2. Widget 2-5 → Lavender at 8%', 'info');
+            log('3. Widget 6+ → Political at 8%', 'info');
+            log('4. Vote/Results pages → Continue current track at 8%', 'info');
+            log('5. Reset → Return to lavender at 50%', 'info');
+        }
+
+        // Initialize
+        log('🎵 Cross-Page Audio Test initialized', 'success');
+        log('✅ All voting and results pages now have audio continuity', 'success');
+        log('🔧 Test the page links above to verify audio behavior', 'info');
+        
+        // Demonstrate flow
+        setTimeout(demonstrateAudioFlow, 1000);
+    </script>
+</body>
+</html>

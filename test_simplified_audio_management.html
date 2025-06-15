@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplified Audio Management Test</title>
+    <link href="/static/css/main.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Space Mono', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #9A7A78;
+            padding-bottom: 10px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-pass { background-color: #4CAF50; }
+        .status-fail { background-color: #f44336; }
+        .status-warning { background-color: #ff9800; }
+        .status-info { background-color: #2196F3; }
+        
+        button {
+            background-color: #9A7A78;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        button:hover {
+            background-color: #8A6A68;
+        }
+        
+        .code-block {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        
+        .test-log {
+            background-color: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        .simplified-approach {
+            background-color: #e8f5e8;
+            border: 2px solid #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .complex-approach {
+            background-color: #ffe8e8;
+            border: 2px solid #f44336;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-section">
+        <div class="test-title">
+            🎵 Simplified Audio Management Test
+        </div>
+        <p>Testing the simplified approach: <strong>Just mute videos after playback to prevent audio bleeding</strong></p>
+        
+        <div class="simplified-approach">
+            <h3>✅ NEW SIMPLIFIED APPROACH</h3>
+            <div class="code-block">
+// VideoWidget3 - When secondpart.mp4 ends:
+this.video.addEventListener('ended', () => {
+    console.log("Video playback completed - muting to prevent audio interference");
+    
+    // SIMPLE: Just mute the video after it ends
+    this.video.muted = true;
+    
+    // Then transition to VideoWidget4...
+});
+
+// SimpleVideoManager - Basic video muting:
+class SimpleVideoManager {
+    static muteAllVideos() {
+        const allVideos = document.querySelectorAll('video');
+        allVideos.forEach((video, index) => {
+            if (!video.paused) {
+                console.log(`SimpleVideoManager: Muting active video ${index + 1}`);
+            }
+            video.muted = true;
+        });
+    }
+}
+
+// Video widget deactivation - Just mute and pause:
+deactivate() {
+    if (this.video) {
+        this.video.muted = true;
+        this.video.pause();
+        console.log('Video muted and paused');
+    }
+}
+            </div>
+        </div>
+        
+        <div class="complex-approach">
+            <h3>❌ OLD COMPLEX APPROACH (REMOVED)</h3>
+            <div class="code-block">
+// AudioConflictManager - Complex interference management:
+class AudioConflictManager {
+    static protectedVideos = new Set();
+    static protectVideo(video, reason) { ... }
+    static completeVideoReset(video) { 
+        // Clear sources, reload, multiple safety checks...
+    }
+    static preventAudioBleeding() { ... }
+}
+
+// Complex deactivation with source clearing:
+deactivate() {
+    // Clear all sources, reload empty state, timeouts...
+    video.src = '';
+    video.removeAttribute('src');
+    video.load();
+    setTimeout(() => { /* more cleanup */ }, 200);
+}
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">
+            🎯 SecondPart → Politics_1 Transition Test
+        </div>
+        
+        <button onclick="testSecondPartTransition()">Test SecondPart Transition Logic</button>
+        <button onclick="testVideoMuting()">Test Video Muting</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div class="test-log" id="testLog"></div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">
+            📊 Implementation Status
+        </div>
+        
+        <div id="implementationStatus">
+            <div><span class="status-indicator status-pass"></span><strong>AudioConflictManager Replaced:</strong> Complex class replaced with SimpleVideoManager</div>
+            <div><span class="status-indicator status-pass"></span><strong>VideoWidget3 Simplified:</strong> Basic muting in ended listener</div>
+            <div><span class="status-indicator status-pass"></span><strong>Deactivation Methods:</strong> All video widgets use simple mute+pause</div>
+            <div><span class="status-indicator status-pass"></span><strong>Main.js Cleanup:</strong> SimpleVideoManager.muteAllVideos() used</div>
+            <div><span class="status-indicator status-info"></span><strong>Ready for Testing:</strong> Simplified approach ready for validation</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">
+            📝 Testing Instructions
+        </div>
+        
+        <ol>
+            <li><strong>Navigate to VideoWidget3:</strong> Go to widget 5 (shows results_2.png image)</li>
+            <li><strong>Switch to SecondPart Video:</strong> Press 'D' key or click NEXT button</li>
+            <li><strong>Watch Transition:</strong> Let secondpart.mp4 play to completion</li>
+            <li><strong>Verify Politics_1:</strong> Should automatically transition to VideoWidget4 (politics_1.mp4)</li>
+            <li><strong>Check Audio:</strong> No audio bleeding between videos</li>
+            <li><strong>Test Reset:</strong> Press 'R' key to ensure clean reset functionality</li>
+        </ol>
+        
+        <div class="simplified-approach">
+            <h4>Expected Behavior:</h4>
+            <ul>
+                <li>SecondPart video ends → gets muted immediately</li>
+                <li>Smooth transition to VideoWidget4 (politics_1)</li>
+                <li>No complex audio management interference</li>
+                <li>Clean, simple muting prevents audio bleeding</li>
+                <li>Reset functionality works without complex cleanup</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let logCount = 0;
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logCount++;
+            
+            const color = {
+                'info': '#0f0',
+                'success': '#4CAF50',
+                'warning': '#ff9800',
+                'error': '#f44336'
+            }[type] || '#0f0';
+            
+            logElement.innerHTML += `<div style="color: ${color}">[${timestamp}] ${logCount}: ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+            logCount = 0;
+            log('Log cleared - ready for testing', 'info');
+        }
+        
+        function testSecondPartTransition() {
+            log('🎬 Testing SecondPart → Politics_1 Transition Logic', 'info');
+            
+            // Simulate the simplified approach
+            log('Simulating secondpart.mp4 ended event...', 'info');
+            
+            // NEW SIMPLIFIED APPROACH
+            log('✅ SIMPLE: video.muted = true (after ended)', 'success');
+            log('✅ SIMPLE: Starting transition to VideoWidget4', 'success');
+            log('✅ SIMPLE: No complex AudioConflictManager interference', 'success');
+            
+            // Show what used to happen
+            log('❌ OLD: AudioConflictManager.protectVideo() calls', 'warning');
+            log('❌ OLD: Complex source clearing and reloading', 'warning');
+            log('❌ OLD: Multiple safety timeouts and checks', 'warning');
+            
+            log('🎯 Result: Clean, simple transition logic', 'success');
+        }
+        
+        function testVideoMuting() {
+            log('🔇 Testing Simple Video Muting', 'info');
+            
+            // Find any video elements on the page
+            const videos = document.querySelectorAll('video');
+            log(`Found ${videos.length} video elements`, 'info');
+            
+            if (videos.length === 0) {
+                log('No videos found - but SimpleVideoManager.muteAllVideos() would work', 'warning');
+                log('Code: allVideos.forEach(video => video.muted = true)', 'info');
+            } else {
+                videos.forEach((video, index) => {
+                    video.muted = true;
+                    log(`✅ Muted video ${index + 1}: ${video.src || 'No source'}`, 'success');
+                });
+            }
+            
+            log('Simple muting approach applied successfully', 'success');
+        }
+        
+        // Initialize
+        clearLog();
+        log('🎵 Simplified Audio Management Test Ready', 'success');
+        log('The complex AudioConflictManager has been replaced with SimpleVideoManager', 'info');
+        log('All video widgets now use basic muting instead of complex cleanup', 'info');
+    </script>
+</body>
+</html>

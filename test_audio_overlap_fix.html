@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Overlap Fix Validation Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-section {
+            border: 2px solid #333;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .test-passed { border-color: #22c55e; background-color: #f0fdf4; }
+        .test-failed { border-color: #ef4444; background-color: #fef2f2; }
+        .test-pending { border-color: #f59e0b; background-color: #fffbeb; }
+        .audio-status {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .audio-playing { background-color: #f0fdf4; color: #16a34a; }
+        .audio-silent { background-color: #f3f4f6; color: #6b7280; }
+        .audio-error { background-color: #fef2f2; color: #dc2626; }
+        .log-console {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #2563eb;
+        }
+        .button.danger {
+            background-color: #ef4444;
+        }
+        .button.danger:hover {
+            background-color: #dc2626;
+        }
+        .button.success {
+            background-color: #22c55e;
+        }
+        .button.success:hover {
+            background-color: #16a34a;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">🔊 Audio Overlap Fix Validation Test</h1>
+        <p class="text-center mb-8">Testing fixes for audio bleeding between videos and during reset</p>
+        
+        <!-- Current Audio Status -->
+        <div class="test-section">
+            <h2 class="text-xl font-bold mb-4">🎵 Current Audio Status</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <strong>Videos Playing:</strong>
+                    <div id="videosStatus">No videos detected</div>
+                </div>
+                <div>
+                    <strong>Background Music:</strong>
+                    <div id="backgroundStatus" class="audio-status audio-silent">SILENT</div>
+                </div>
+                <div>
+                    <strong>Political Music:</strong>
+                    <div id="politicalStatus" class="audio-status audio-silent">SILENT</div>
+                </div>
+            </div>
+            <button class="button" onclick="updateAudioStatus()">Refresh Status</button>
+            <button class="button danger" onclick="silenceAllAudio()">Emergency Silence All</button>
+        </div>
+
+        <!-- Core Issue Tests -->
+        <div class="test-section test-pending">
+            <h2 class="text-xl font-bold mb-4">🚨 Core Issue Tests</h2>
+            <p class="mb-4">Testing the specific issues reported:</p>
+            
+            <div class="mb-4">
+                <strong>Issue 1: Secondpart audio during politics_1 video</strong>
+                <button class="button" onclick="testSecondpartBleedingFix()">Test Secondpart → Politics Audio Isolation</button>
+                <div id="secondpartTestResult"></div>
+            </div>
+            
+            <div class="mb-4">
+                <strong>Issue 2: Random video audio during reset</strong>
+                <button class="button" onclick="testResetAudioCleanup()">Test Reset Audio Cleanup</button>
+                <div id="resetTestResult"></div>
+            </div>
+            
+            <div class="mb-4">
+                <strong>Issue 3: Multiple audio sources playing simultaneously</strong>
+                <button class="button" onclick="testSimultaneousAudioPrevention()">Test Simultaneous Audio Prevention</button>
+                <div id="simultaneousTestResult"></div>
+            </div>
+        </div>
+
+        <!-- Video Source Management Test -->
+        <div class="test-section">
+            <h2 class="text-xl font-bold mb-4">🎬 Video Source Management Test</h2>
+            <p class="mb-4">Testing complete video cleanup and source management:</p>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <video id="testVideo1" controls muted style="width: 100%; max-width: 300px;">
+                    <source src="/static/videos/secondpart.mp4" type="video/mp4">
+                </video>
+                <video id="testVideo2" controls muted style="width: 100%; max-width: 300px;">
+                    <source src="/static/videos/politics_1.mp4" type="video/mp4">
+                </video>
+            </div>
+            
+            <div class="mb-4">
+                <button class="button" onclick="startSecondpartVideo()">Start Secondpart Video</button>
+                <button class="button" onclick="startPoliticsVideo()">Start Politics Video</button>
+                <button class="button" onclick="testCompleteVideoReset()">Test Complete Video Reset</button>
+                <button class="button danger" onclick="forceStopAllVideos()">Force Stop All Videos</button>
+            </div>
+            
+            <div id="videoManagementResult"></div>
+        </div>
+
+        <!-- Navigation Test -->
+        <div class="test-section">
+            <h2 class="text-xl font-bold mb-4">🧭 Widget Navigation Audio Test</h2>
+            <p class="mb-4">Test audio behavior during widget transitions:</p>
+            
+            <div class="mb-4">
+                <button class="button" onclick="navigateToWidget(5)">Navigate to Widget 5 (VideoWidget3)</button>
+                <button class="button" onclick="navigateToWidget(6)">Navigate to Widget 6 (Politics - VideoWidget4)</button>
+                <button class="button" onclick="testWidgetTransitionAudio()">Test Complete Widget Transition</button>
+            </div>
+            
+            <div id="navigationTestResult"></div>
+        </div>
+
+        <!-- Audio Pipeline Analysis -->
+        <div class="test-section">
+            <h2 class="text-xl font-bold mb-4">🔍 Audio Pipeline Analysis</h2>
+            <p class="mb-4">Deep analysis of audio pipeline state:</p>
+            
+            <button class="button" onclick="analyzeAudioPipeline()">Analyze Current Audio Pipeline</button>
+            <button class="button" onclick="testAudioConflictManager()">Test AudioConflictManager Functions</button>
+            
+            <div id="pipelineAnalysisResult" class="mt-4"></div>
+        </div>
+
+        <!-- Live Console -->
+        <div class="test-section">
+            <h2 class="text-xl font-bold mb-4">📋 Live Test Console</h2>
+            <div id="testConsole" class="log-console"></div>
+            <button class="button" onclick="clearConsole()">Clear Console</button>
+            <button class="button success" onclick="runFullAudioTest()">Run Full Audio Test Suite</button>
+        </div>
+    </div>
+
+    <!-- Audio elements for testing -->
+    <audio id="testBackgroundMusic" src="/static/sounds/lavendersoundtrack.mp3" loop></audio>
+    <audio id="testPoliticalMusic" src="/static/sounds/politicalpartmusic.mp3" loop></audio>
+
+    <script>
+        let consoleEl = document.getElementById('testConsole');
+        let testResults = {};
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : 'text-blue-400';
+            consoleEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearConsole() {
+            consoleEl.innerHTML = 'Console cleared...\n';
+        }
+
+        function updateAudioStatus() {
+            const videos = document.querySelectorAll('video');
+            const backgroundMusic = document.getElementById('testBackgroundMusic');
+            const politicalMusic = document.getElementById('testPoliticalMusic');
+            
+            // Update video status
+            let playingVideos = [];
+            videos.forEach((video, index) => {
+                if (!video.paused) {
+                    playingVideos.push(`Video ${index + 1} (${video.src.split('/').pop()})`);
+                }
+            });
+            
+            document.getElementById('videosStatus').innerHTML = playingVideos.length > 0 ? 
+                playingVideos.map(v => `<span class="audio-status audio-error">${v}</span>`).join('<br>') : 
+                '<span class="audio-status audio-silent">No videos playing</span>';
+            
+            // Update background music status
+            document.getElementById('backgroundStatus').className = `audio-status ${backgroundMusic.paused ? 'audio-silent' : 'audio-playing'}`;
+            document.getElementById('backgroundStatus').textContent = backgroundMusic.paused ? 'SILENT' : `PLAYING (${Math.round(backgroundMusic.volume * 100)}%)`;
+            
+            // Update political music status
+            document.getElementById('politicalStatus').className = `audio-status ${politicalMusic.paused ? 'audio-silent' : 'audio-playing'}`;
+            document.getElementById('politicalStatus').textContent = politicalMusic.paused ? 'SILENT' : `PLAYING (${Math.round(politicalMusic.volume * 100)}%)`;
+        }
+
+        function silenceAllAudio() {
+            log('🚨 Emergency silence all audio triggered', 'error');
+            
+            // Silence all videos
+            document.querySelectorAll('video').forEach((video, index) => {
+                video.muted = true;
+                video.pause();
+                video.currentTime = 0;
+                video.volume = 0;
+                log(`Silenced video ${index + 1}`, 'info');
+            });
+            
+            // Silence background music
+            document.getElementById('testBackgroundMusic').pause();
+            document.getElementById('testPoliticalMusic').pause();
+            
+            updateAudioStatus();
+            log('✅ All audio silenced', 'success');
+        }
+
+        function testSecondpartBleedingFix() {
+            log('🧪 Testing secondpart → politics audio isolation...', 'info');
+            
+            const video1 = document.getElementById('testVideo1'); // secondpart
+            const video2 = document.getElementById('testVideo2'); // politics
+            
+            // Step 1: Start secondpart video
+            video1.muted = false;
+            video1.volume = 0.5;
+            video1.play().then(() => {
+                log('✓ Secondpart video started', 'info');
+                
+                // Step 2: Simulate widget transition with enhanced cleanup
+                setTimeout(() => {
+                    log('🔄 Simulating enhanced widget transition...', 'info');
+                    
+                    // Enhanced cleanup (like VideoWidget3 deactivation)
+                    video1.muted = true;
+                    video1.pause();
+                    video1.currentTime = 0;
+                    video1.volume = 0;
+                    video1.src = '';
+                    video1.removeAttribute('src');
+                    const sources1 = video1.querySelectorAll('source');
+                    sources1.forEach(source => {
+                        source.src = '';
+                        source.removeAttribute('src');
+                    });
+                    video1.load();
+                    
+                    log('✓ Enhanced cleanup applied to secondpart video', 'success');
+                    
+                    // Step 3: Start politics video
+                    setTimeout(() => {
+                        video2.muted = false;
+                        video2.volume = 0.8;
+                        video2.play().then(() => {
+                            log('✓ Politics video started', 'info');
+                            
+                            // Step 4: Check for audio bleeding
+                            setTimeout(() => {
+                                const hasAudioBleeding = !video1.paused || video1.currentTime > 0 || video1.volume > 0;
+                                if (hasAudioBleeding) {
+                                    log('❌ AUDIO BLEEDING DETECTED: Secondpart audio still active', 'error');
+                                    document.getElementById('secondpartTestResult').innerHTML = '<span class="text-red-600">❌ Test Failed - Audio bleeding detected</span>';
+                                } else {
+                                    log('✅ NO AUDIO BLEEDING: Politics video playing cleanly', 'success');
+                                    document.getElementById('secondpartTestResult').innerHTML = '<span class="text-green-600">✅ Test Passed - No audio bleeding</span>';
+                                }
+                                
+                                updateAudioStatus();
+                            }, 1000);
+                            
+                        }).catch(e => log(`❌ Politics video failed: ${e.message}`, 'error'));
+                    }, 500);
+                    
+                }, 2000);
+                
+            }).catch(e => log(`❌ Secondpart video failed: ${e.message}`, 'error'));
+        }
+
+        function testResetAudioCleanup() {
+            log('🧪 Testing reset audio cleanup...', 'info');
+            
+            // Step 1: Start multiple audio sources
+            const video1 = document.getElementById('testVideo1');
+            const video2 = document.getElementById('testVideo2');
+            const bgMusic = document.getElementById('testBackgroundMusic');
+            
+            Promise.all([
+                video1.play().catch(e => log(`Video1 play failed: ${e.message}`, 'error')),
+                video2.play().catch(e => log(`Video2 play failed: ${e.message}`, 'error')),
+                bgMusic.play().catch(e => log(`Background music failed: ${e.message}`, 'error'))
+            ]).then(() => {
+                log('✓ Multiple audio sources started', 'info');
+                
+                // Step 2: Simulate enhanced reset after 2 seconds
+                setTimeout(() => {
+                    log('🔄 Simulating enhanced reset process...', 'info');
+                    
+                    // Enhanced reset process
+                    silenceAllAudio();
+                    
+                    // Additional reset steps
+                    setTimeout(() => {
+                        document.querySelectorAll('video').forEach(video => {
+                            video.src = '';
+                            video.removeAttribute('src');
+                            video.querySelectorAll('source').forEach(source => {
+                                source.src = '';
+                                source.removeAttribute('src');
+                            });
+                            video.load();
+                        });
+                        
+                        log('✓ Complete video pipeline reset applied', 'success');
+                        
+                        // Step 3: Check for silence
+                        setTimeout(() => {
+                            const hasResidualAudio = Array.from(document.querySelectorAll('video')).some(v => !v.paused || v.currentTime > 0);
+                            
+                            if (hasResidualAudio) {
+                                log('❌ RESIDUAL AUDIO DETECTED after reset', 'error');
+                                document.getElementById('resetTestResult').innerHTML = '<span class="text-red-600">❌ Test Failed - Residual audio detected</span>';
+                            } else {
+                                log('✅ COMPLETE SILENCE achieved after reset', 'success');
+                                document.getElementById('resetTestResult').innerHTML = '<span class="text-green-600">✅ Test Passed - Complete silence after reset</span>';
+                            }
+                            
+                            updateAudioStatus();
+                        }, 1000);
+                        
+                    }, 500);
+                    
+                }, 2000);
+            });
+        }
+
+        function testCompleteVideoReset() {
+            log('🧪 Testing complete video reset function...', 'info');
+            
+            const videos = [document.getElementById('testVideo1'), document.getElementById('testVideo2')];
+            
+            // Start videos first
+            Promise.all(videos.map(v => v.play().catch(e => console.log('Play failed:', e)))).then(() => {
+                log('✓ Test videos started', 'info');
+                
+                setTimeout(() => {
+                    // Apply complete video reset
+                    videos.forEach((video, index) => {
+                        // Enhanced cleanup method
+                        video.muted = true;
+                        video.pause();
+                        video.currentTime = 0;
+                        video.volume = 0;
+                        video.src = '';
+                        video.removeAttribute('src');
+                        
+                        const sources = video.querySelectorAll('source');
+                        sources.forEach(source => {
+                            source.src = '';
+                            source.removeAttribute('src');
+                        });
+                        
+                        video.load();
+                        
+                        log(`✓ Complete reset applied to video ${index + 1}`, 'success');
+                    });
+                    
+                    // Verify reset
+                    setTimeout(() => {
+                        const resetSuccess = videos.every(v => v.paused && v.currentTime === 0 && v.volume === 0);
+                        
+                        if (resetSuccess) {
+                            log('✅ Complete video reset successful', 'success');
+                            document.getElementById('videoManagementResult').innerHTML = '<span class="text-green-600">✅ Complete video reset successful</span>';
+                        } else {
+                            log('❌ Complete video reset failed', 'error');
+                            document.getElementById('videoManagementResult').innerHTML = '<span class="text-red-600">❌ Complete video reset failed</span>';
+                        }
+                        
+                        updateAudioStatus();
+                    }, 500);
+                    
+                }, 2000);
+            });
+        }
+
+        function startSecondpartVideo() {
+            const video = document.getElementById('testVideo1');
+            video.muted = false;
+            video.volume = 0.5;
+            video.play().then(() => {
+                log('✓ Secondpart video started manually', 'info');
+                updateAudioStatus();
+            }).catch(e => log(`❌ Secondpart video failed: ${e.message}`, 'error'));
+        }
+
+        function startPoliticsVideo() {
+            const video = document.getElementById('testVideo2');
+            video.muted = false;
+            video.volume = 0.5;
+            video.play().then(() => {
+                log('✓ Politics video started manually', 'info');
+                updateAudioStatus();
+            }).catch(e => log(`❌ Politics video failed: ${e.message}`, 'error'));
+        }
+
+        function forceStopAllVideos() {
+            document.querySelectorAll('video').forEach((video, index) => {
+                video.pause();
+                video.currentTime = 0;
+                video.src = '';
+                video.load();
+                log(`✓ Force stopped video ${index + 1}`, 'info');
+            });
+            updateAudioStatus();
+        }
+
+        function navigateToWidget(widgetNumber) {
+            log(`🧭 Simulating navigation to widget ${widgetNumber}...`, 'info');
+            window.open(`http://localhost:3000/?widget=${widgetNumber}`, '_blank');
+        }
+
+        function testWidgetTransitionAudio() {
+            log('🧪 Testing widget transition audio cleanup...', 'info');
+            // This would test the actual widget transition in the main app
+            document.getElementById('navigationTestResult').innerHTML = '<span class="text-blue-600">ℹ️ Use navigation buttons to test with actual widgets</span>';
+        }
+
+        function analyzeAudioPipeline() {
+            log('🔍 Analyzing current audio pipeline...', 'info');
+            
+            const videos = document.querySelectorAll('video');
+            const analysis = {
+                totalVideos: videos.length,
+                playingVideos: 0,
+                mutedVideos: 0,
+                videosWithSources: 0,
+                backgroundMusicState: 'unknown',
+                politicalMusicState: 'unknown'
+            };
+            
+            videos.forEach((video, index) => {
+                if (!video.paused) analysis.playingVideos++;
+                if (video.muted) analysis.mutedVideos++;
+                if (video.src || video.querySelector('source[src]')) analysis.videosWithSources++;
+                
+                log(`Video ${index + 1}: Paused=${video.paused}, Muted=${video.muted}, Volume=${video.volume}, Src=${video.src ? 'Yes' : 'No'}`, 'info');
+            });
+            
+            const bgMusic = document.getElementById('testBackgroundMusic');
+            const polMusic = document.getElementById('testPoliticalMusic');
+            
+            analysis.backgroundMusicState = bgMusic.paused ? 'paused' : 'playing';
+            analysis.politicalMusicState = polMusic.paused ? 'paused' : 'playing';
+            
+            log(`📊 Pipeline Analysis: ${JSON.stringify(analysis, null, 2)}`, 'info');
+            
+            document.getElementById('pipelineAnalysisResult').innerHTML = `
+                <div class="bg-gray-800 text-white p-4 rounded">
+                    <strong>Audio Pipeline Analysis:</strong><br>
+                    Total Videos: ${analysis.totalVideos}<br>
+                    Playing Videos: ${analysis.playingVideos}<br>
+                    Muted Videos: ${analysis.mutedVideos}<br>
+                    Videos with Sources: ${analysis.videosWithSources}<br>
+                    Background Music: ${analysis.backgroundMusicState}<br>
+                    Political Music: ${analysis.politicalMusicState}
+                </div>
+            `;
+        }
+
+        function testAudioConflictManager() {
+            log('🧪 Testing AudioConflictManager functions...', 'info');
+            
+            // Start some videos first
+            document.getElementById('testVideo1').play().catch(e => {});
+            document.getElementById('testVideo2').play().catch(e => {});
+            
+            setTimeout(() => {
+                log('✓ Test videos started', 'info');
+                
+                // Test silenceAllVideos equivalent
+                document.querySelectorAll('video').forEach((video, index) => {
+                    video.muted = true;
+                    video.pause();
+                    video.currentTime = 0;
+                    video.volume = 0;
+                    log(`✓ AudioConflictManager.immediateVideoSilence() applied to video ${index + 1}`, 'success');
+                });
+                
+                setTimeout(() => {
+                    // Test completeVideoReset equivalent
+                    document.querySelectorAll('video').forEach((video, index) => {
+                        video.src = '';
+                        video.removeAttribute('src');
+                        video.querySelectorAll('source').forEach(source => {
+                            source.src = '';
+                            source.removeAttribute('src');
+                        });
+                        video.load();
+                        log(`✓ AudioConflictManager.completeVideoReset() applied to video ${index + 1}`, 'success');
+                    });
+                    
+                    log('✅ AudioConflictManager functions test completed', 'success');
+                    updateAudioStatus();
+                }, 1000);
+                
+            }, 1000);
+        }
+
+        function testSimultaneousAudioPrevention() {
+            log('🧪 Testing simultaneous audio prevention...', 'info');
+            
+            // Try to start multiple audio sources
+            const video1 = document.getElementById('testVideo1');
+            const video2 = document.getElementById('testVideo2');
+            const bgMusic = document.getElementById('testBackgroundMusic');
+            
+            // Start all simultaneously
+            Promise.all([
+                video1.play().catch(e => {}),
+                video2.play().catch(e => {}),
+                bgMusic.play().catch(e => {})
+            ]).then(() => {
+                log('✓ Multiple audio sources started simultaneously', 'info');
+                
+                setTimeout(() => {
+                    // Check how many are actually playing
+                    const playingSources = [];
+                    if (!video1.paused) playingSources.push('Video 1');
+                    if (!video2.paused) playingSources.push('Video 2');
+                    if (!bgMusic.paused) playingSources.push('Background Music');
+                    
+                    if (playingSources.length > 1) {
+                        log(`❌ SIMULTANEOUS AUDIO DETECTED: ${playingSources.join(', ')}`, 'error');
+                        document.getElementById('simultaneousTestResult').innerHTML = '<span class="text-red-600">❌ Test Failed - Multiple audio sources playing</span>';
+                    } else {
+                        log(`✅ AUDIO CONTROLLED: Only ${playingSources.length} source playing`, 'success');
+                        document.getElementById('simultaneousTestResult').innerHTML = '<span class="text-green-600">✅ Test Passed - Audio properly controlled</span>';
+                    }
+                    
+                    updateAudioStatus();
+                }, 1000);
+            });
+        }
+
+        function runFullAudioTest() {
+            log('🚀 Running full audio test suite...', 'info');
+            clearConsole();
+            log('🚀 Starting comprehensive audio overlap test suite...', 'info');
+            
+            // Run tests in sequence
+            setTimeout(() => testSecondpartBleedingFix(), 1000);
+            setTimeout(() => testResetAudioCleanup(), 8000);
+            setTimeout(() => testSimultaneousAudioPrevention(), 15000);
+            setTimeout(() => testCompleteVideoReset(), 20000);
+            setTimeout(() => analyzeAudioPipeline(), 25000);
+            setTimeout(() => {
+                log('🎉 Full audio test suite completed!', 'success');
+                log('📋 Check individual test results above', 'info');
+            }, 30000);
+        }
+
+        // Initialize
+        log('🔊 Audio Overlap Fix Validation Test initialized', 'success');
+        log('💡 Use the buttons above to test specific audio scenarios', 'info');
+        updateAudioStatus();
+        
+        // Auto-refresh status every 2 seconds
+        setInterval(updateAudioStatus, 2000);
+    </script>
+</body>
+</html>

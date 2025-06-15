@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplified Audio Test - Lavender Only on Vote/Results Pages</title>
+    <style>
+        body {
+            font-family: 'Space Mono', monospace;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .button {
+            background: #9A7A78;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Space Mono', monospace;
+        }
+        .button:hover {
+            background: #7a5a58;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .page-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .page-link {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            border: 2px solid #555;
+            transition: all 0.3s ease;
+        }
+        .page-link:hover {
+            background: #444;
+            border-color: #9A7A78;
+        }
+        .console {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Simplified Audio Test - Lavender Only on Vote/Results</h1>
+    
+    <div class="test-section">
+        <h2>📋 Updated Audio Configuration</h2>
+        <div class="status success">
+            <strong>✅ SIMPLIFIED:</strong> Vote and Results pages now only play lavender soundtrack
+        </div>
+        <div class="status info">
+            <strong>🎵 Main App:</strong> Dual audio system (lavender + political) remains intact
+        </div>
+        <div class="status warning">
+            <strong>🗑️ REMOVED:</strong> Political music elements from vote.html, vote2.html, results.html, results2.html
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎮 New Audio Behavior</h2>
+        <div class="status info">
+            <strong>Main App Widget 1-5:</strong> Lavender soundtrack (50% on Widget 1, 8% on Widgets 2-5)
+        </div>
+        <div class="status info">
+            <strong>Main App Widget 6+:</strong> Political party music (8% volume)
+        </div>
+        <div class="status success">
+            <strong>Vote/Results Pages:</strong> ALWAYS lavender soundtrack at 8% volume (regardless of source)
+        </div>
+        <div class="status success">
+            <strong>Return to Main App:</strong> Restores appropriate track based on current widget
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Audio State Testing</h2>
+        <div class="button" onclick="simulateLavenderState()">Simulate Lavender State</div>
+        <div class="button" onclick="simulatePoliticalState()">Simulate Political State (Main App)</div>
+        <div class="button" onclick="clearAudioState()">Clear Audio State</div>
+        <div class="button" onclick="testVotePageBehavior()">Test Vote Page Behavior</div>
+        
+        <div id="testResults" class="console">
+            Simplified audio testing console...\n
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 Test Page Navigation</h2>
+        <p><strong>Expected Behavior:</strong> All vote/results pages will play lavender soundtrack regardless of what was playing in main app</p>
+        <div class="page-links">
+            <a href="/vote.html" class="page-link" target="_blank">
+                <strong>Vote Page 1</strong><br>
+                Should always play lavender
+            </a>
+            <a href="/vote2.html" class="page-link" target="_blank">
+                <strong>Vote Page 2</strong><br>
+                Should always play lavender
+            </a>
+            <a href="/results.html" class="page-link" target="_blank">
+                <strong>Results Page 1</strong><br>
+                Should always play lavender
+            </a>
+            <a href="/results2.html" class="page-link" target="_blank">
+                <strong>Results Page 2</strong><br>
+                Should always play lavender
+            </a>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎵 Simplified Audio Flow</h2>
+        <div class="status info">
+            <strong>Scenario 1:</strong> Widget 1-5 → Vote/Results → Lavender continues seamlessly
+        </div>
+        <div class="status info">
+            <strong>Scenario 2:</strong> Widget 6+ (Political playing) → Vote/Results → Switches to lavender
+        </div>
+        <div class="status info">
+            <strong>Scenario 3:</strong> Vote/Results → Return to Widget 6+ → Should restore political music
+        </div>
+        <div class="status success">
+            <strong>Benefit:</strong> Cleaner, consistent audio experience on voting pages
+        </div>
+    </div>
+
+    <script>
+        const testResults = document.getElementById('testResults');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#0f0',
+                success: '#0f0',
+                error: '#f00',
+                warning: '#ff0'
+            };
+            testResults.innerHTML += `<span style="color: ${colors[type] || '#0f0'}">[${timestamp}] ${message}</span>\n`;
+            testResults.scrollTop = testResults.scrollHeight;
+        }
+
+        function simulateLavenderState() {
+            const audioState = {
+                currentTrack: 'lavender',
+                lavenderIsPlaying: true,
+                lavenderCurrentTime: 45.5,
+                politicalIsPlaying: false,
+                politicalCurrentTime: 0
+            };
+            
+            localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
+            log('✅ Simulated lavender audio state (typical for vote/results pages)', 'success');
+            log(`   Lavender time: ${audioState.lavenderCurrentTime}s`, 'info');
+        }
+
+        function simulatePoliticalState() {
+            const audioState = {
+                currentTrack: 'political',
+                lavenderIsPlaying: false,
+                lavenderCurrentTime: 0,
+                politicalIsPlaying: true,
+                politicalCurrentTime: 123.7
+            };
+            
+            localStorage.setItem('nostalgiaAudioState', JSON.stringify(audioState));
+            log('✅ Simulated political audio state (from main app Widget 6+)', 'success');
+            log(`   Political time: ${audioState.politicalCurrentTime}s`, 'info');
+            log('⚠️  Vote/Results pages will ignore this and play lavender instead', 'warning');
+        }
+
+        function clearAudioState() {
+            localStorage.removeItem('nostalgiaAudioState');
+            log('🗑️ Cleared audio state from localStorage', 'info');
+        }
+
+        function testVotePageBehavior() {
+            log('🧪 Testing simplified vote page behavior:', 'info');
+            log('1. Vote/Results pages ALWAYS play lavender soundtrack', 'info');
+            log('2. Volume is ALWAYS set to 8%', 'info');
+            log('3. Political music elements have been removed', 'info');
+            log('4. Simplified cross-page audio management', 'success');
+        }
+
+        function demonstrateSimplifiedFlow() {
+            log('🎵 Simplified audio flow:', 'info');
+            log('Main App: Widget 1 → Lavender at 50%', 'info');
+            log('Main App: Widget 2-5 → Lavender at 8%', 'info');
+            log('Main App: Widget 6+ → Political at 8%', 'info');
+            log('Vote/Results: ALWAYS lavender at 8% (simplified!)', 'success');
+            log('Return to Main App: Restores appropriate track', 'info');
+        }
+
+        // Initialize
+        log('🎵 Simplified Audio Test initialized', 'success');
+        log('✅ Political music removed from vote/results pages', 'success');
+        log('🔧 All vote/results pages now use lavender soundtrack only', 'info');
+        
+        // Demonstrate simplified flow
+        setTimeout(demonstrateSimplifiedFlow, 1000);
+    </script>
+</body>
+</html>
